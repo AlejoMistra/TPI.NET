@@ -8,7 +8,7 @@ namespace Model.Domain
 {
     internal class Usuario
     {
-        private enum Rol
+        public enum Roles
         {
             Admin,
             Administrativo,
@@ -16,7 +16,7 @@ namespace Model.Domain
             Profesional
         }
 
-        private enum Estado
+        public enum Estados
         {
             Activo,
             Inactivo
@@ -26,10 +26,10 @@ namespace Model.Domain
 
         public string Nombre { get; private set; }
 
-        public string contraseña { get; private set; }
+        public string Contraseña { get; private set; }
 
-        public Rol Rol { get; private set; }
+        public Roles Rol { get; private set; }
 
-        public Estado Estado { get; private set; }
+        public Estados Estado { get; private set; }
     }
 }
