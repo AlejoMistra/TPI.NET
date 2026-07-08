@@ -9,7 +9,9 @@
 - Marco Bernaus (52172)
 
 **Asignatura:** Tecnologías de Desarrollo de Software IDE
+
 **Comisión:** 3EK01
+
 **Docentes:** Ezequiel Porta y Severino Guimpel
 
 ## Descripción
