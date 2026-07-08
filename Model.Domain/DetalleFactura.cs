@@ -13,6 +13,8 @@ namespace Model.Domain
 
         public int cantidad { get; private set; }
 
-        public 
+        public float precioUnitario { get; private set; }
+
+        public float subtotal { get; private set; }
     }
 }
