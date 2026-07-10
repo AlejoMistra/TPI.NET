@@ -20,8 +20,9 @@ namespace Model.Domain
 
         public int id_historia_c {  get; private set; }
 
-        public Paciente()
+        public Paciente(string nombre, string apellido, string nroDocumento)  : base (nombre, apellido, nroDocumento)
         {
+            
             Turnos = new List<Turno>();
             historia_clinica = new HistoriaClinica();
         }
