@@ -12,6 +12,6 @@ namespace Model.Domain
 
         public DateTime FechaNacimiento { get; private set; }
 
-        public string ObraSocial { get; private set; }
+        public string ObraSocial { get; private set; } = string.Empty;
     }
 }
