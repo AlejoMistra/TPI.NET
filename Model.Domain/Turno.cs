@@ -28,13 +28,22 @@ namespace Model.Domain
 
         public Factura? factura_turno { get; private set; } 
 
+        public int id_factura { get; private set; }
+
         public ConsultaMedica? consulta_medica { get; private set; }
+
+        public int id_consulta_m {  get; private set; }
 
         public Profesional? profesional_turno { get; private set; }
 
+        public int id_profesional_ {  get; private set; }
         public Paciente? paciente_turno { get; private set; }
 
+        public int id_paciente {  get; private set; }
+
         public Administrativo? administrativo_turno { get; private set; }
+
+        public int id_administrativo {  get; private set; }
 
 
     }
