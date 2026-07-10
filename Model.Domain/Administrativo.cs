@@ -10,8 +10,13 @@ namespace Model.Domain
     {
         public int Id { get; private set; }
 
-        public string Legajo { get; private set; } = string.Empty;
+        public string? Legajo { get; private set; }
 
-        public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
+
+        public Administrativo(string nombre, string apellido, string nroDocumento, string legajo) : base(nombre, apellido, nroDocumento)
+        {
+            
+            
+        }
     }
 }
