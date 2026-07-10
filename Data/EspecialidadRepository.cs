@@ -19,6 +19,6 @@ public class EspecialidadRepository : IEspecialidadRepository
     //Metodo interno sincrono para obtener todas las especialidades
     internal IEnumerable<Especialidad> GetAllSync()
     {
-               return _especialidades.OrderBy(e => e.Nombre).ToList();
+        return _especialidades.OrderBy(e => e.Nombre).ToList();
     }
 }
