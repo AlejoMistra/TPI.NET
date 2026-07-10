@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Model.Domain
 {
-    internal class Especialidad
+    public class Especialidad
     {
         public int Id { get; private set; }
         public string Nombre { get; private set; }

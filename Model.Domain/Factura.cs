@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Model.Domain
 {
-    internal class Factura
+    public class Factura
     {
         public enum MetodosPago
         {
@@ -16,11 +16,22 @@ namespace Model.Domain
             TransferenciaBancaria
         }
 
+        public enum EstadosFactura
+        {
+            Pendiente,
+            Pagada,
+            Cancelada
+        }
+
         public int Id { get; private set; }
         public DateTime FechaEmision { get; private set; }
 
         public float MontoTotal { get; private set; }
 
         public MetodosPago MetodoPago { get; set; }
+
+        public EstadosFactura EstadoFactura { get; set; }
+
+        public ICollection<DetalleFactura> DetallesFactura { get; set; } = new List<DetalleFactura>();
     }
 }

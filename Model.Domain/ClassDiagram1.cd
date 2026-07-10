@@ -29,9 +29,14 @@
           <NewMemberFileName>Factura.cs</NewMemberFileName>
         </TypeIdentifier>
       </Enum>
+      <Enum Name="Model.Domain.Factura.EstadosFactura" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>Factura.cs</NewMemberFileName>
+        </TypeIdentifier>
+      </Enum>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AAACAAAAAAAAABAAAAAAAAAAAAAAQAIAAAAAAAAAAAA=</HashCode>
+      <HashCode>AAACAAACAAAAABAAAAABAAAAAAAAQAIAAAAAAAAAAAA=</HashCode>
       <FileName>Factura.cs</FileName>
     </TypeIdentifier>
   </Class>
@@ -85,7 +90,7 @@
       </Enum>
     </NestedTypes>
     <TypeIdentifier>
-      <HashCode>AAACAAAAAAAAAAIAAAAAgAAAAAAAAgAAAAAAAAAAAAg=</HashCode>
+      <HashCode>AAACAAAAAAAAAAIAAAAAgAAAAAAAAgAAAAAEACAAAAg=</HashCode>
       <FileName>Usuario.cs</FileName>
     </TypeIdentifier>
   </Class>
