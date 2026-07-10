@@ -10,4 +10,15 @@ public class EspecialidadRepository : IEspecialidadRepository
         new Especialidad(2, "Dermatología"),
         new Especialidad(3, "Neurología")
     };
+
+    public Task<IEnumerable<Especialidad>> GetAllAsync()
+    {
+        return Task.FromResult<IEnumerable<Especialidad>>(_especialidades.OrderBy(e => e.Nombre).ToList());
+    }
+
+    //Metodo interno sincrono para obtener todas las especialidades
+    internal IEnumerable<Especialidad> GetAllSync()
+    {
+        return _especialidades.OrderBy(e => e.Nombre).ToList();
+    }
 }

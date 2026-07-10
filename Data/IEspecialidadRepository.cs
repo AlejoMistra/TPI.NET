@@ -10,9 +10,4 @@ namespace Data
         Task<Especialidad?> UpdateAsync(Especialidad especialidad);
         Task<bool> DeleteAsync(int id);
     }
-
-    public Task<IEnumerable<Especialidad>> GetAllAsync()
-    {
-        return Task.FromResult<IEnumerable<Especialidad>>(paises.OrderBy(p => p.Nombre).ToList());
-        }
-    }
+}

@@ -17,5 +17,20 @@
             Apellido = apellido;
             NroDocumento = nroDocumento;
         }
+
+        public void SetNombre(string nombre)
+        {
+            Nombre = nombre;
+        }
+
+        public void SetApellido(string apellido)
+        {
+            Apellido = apellido;
+        }
+
+        public void SetNroDocumento(string nroDocumento)
+        {
+            NroDocumento = nroDocumento;
+        }
     }
 }
