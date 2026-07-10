@@ -16,6 +16,14 @@ namespace Model.Domain
         public Especialidad? EspecialidadProfesional { get; private set; }
 
         public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
+
+        public Profesional(int id, string nombre, string apellido, string dni, string matricula, int especialidadId)
+            : base(nombre, apellido, dni)
+        {
+            Id = id;
+            Matricula = matricula;
+            EspecialidadId = especialidadId;
+        }
     }
 }
 
