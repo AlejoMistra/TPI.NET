@@ -13,7 +13,7 @@ namespace Model.Domain
 
         public int EspecialidadId { get; private set; }
 
-        public Especialidad Especialidad { get; private set; } = null!;
+        public Especialidad? EspecialidadProfesional { get; private set; }
 
         public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
 
@@ -26,3 +26,5 @@ namespace Model.Domain
         }
     }
 }
+
+
