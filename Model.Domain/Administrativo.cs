@@ -10,6 +10,8 @@ namespace Model.Domain
     {
         public int Id { get; private set; }
 
-        public string Legajo { get; private set; }
+        public string Legajo { get; private set; } = string.Empty;
+
+        public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
     }
 }

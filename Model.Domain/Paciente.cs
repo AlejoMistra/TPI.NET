@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Model.Domain
 {
-    internal class Paciente : Persona
+    public class Paciente : Persona
     {
         public int Id { get; private set; }
 
@@ -17,6 +17,8 @@ namespace Model.Domain
         public ICollection<Turno> Turnos { get; set; }
 
         public HistoriaClinica historia_clinica { get; private set; }
+
+        public int id_historia_c {  get; private set; }
 
         public Paciente()
         {
