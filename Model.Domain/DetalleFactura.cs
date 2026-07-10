@@ -24,8 +24,16 @@ using System.Threading.Tasks;
 
 namespace Model.Domain
 {
-    internal class DetalleFactura
+    public class DetalleFactura
     {
+        public int IdDetalle { get; set; }
+        public string Concepto { get; set; } = string.Empty;
+        public int Cantidad { get; set; }
+        public float PrecioUnitario { get; set; }
+        public float Subtotal => Cantidad * PrecioUnitario; 
+
+        public int FacturaId { get; set; }
+        public Factura Factura { get; set; } = null!;
     }
 }
 >>>>>>> 05db86fee04b42228f930689ebfc7a8c4756b331

@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Model.Domain
 {
-    internal class Profesional : Persona
+    public class Profesional : Persona
     {
         public int Id { get; private set; }
         public string Matricula { get; private set; } = string.Empty;
