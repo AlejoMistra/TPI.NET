@@ -19,7 +19,7 @@ namespace Data
 
             // Asignar navigation property de la Especialidad
             var EspecialidadRepo = new EspecialidadRepository();
-            var especialidad = EspecialidadRepo.GetAllSync().FirstOrDefault(e => e.Id == profesional.EspecialidadId);
+            var especialidad = EspecialidadRepo.GetAllSync().FirstOrDefault(e => e.Id == profesional._especialidadId);
             if (especialidad != null) { 
                 profesional.SetEspecialidad(especialidad);
             }
@@ -48,11 +48,11 @@ namespace Data
                 existingProfesional.SetNombre(profesional.Nombre);
                 existingProfesional.SetApellido(profesional.Apellido);
                 existingProfesional.SetMatricula(profesional.Matricula);
-                existingProfesional.SetEspecialidadId(profesional.EspecialidadId);
+                existingProfesional.SetEspecialidadId(profesional._especialidadId);
 
                 // Actualizar navigation property de la Especialidad
                 var EspecialidadRepo = new EspecialidadRepository();
-                var especialidad = EspecialidadRepo.GetAllSync().FirstOrDefault(e => e.Id == profesional.EspecialidadId);
+                var especialidad = EspecialidadRepo.GetAllSync().FirstOrDefault(e => e.Id == profesional._especialidadId);
                 if (especialidad != null) { 
                     existingProfesional.SetEspecialidad(especialidad);
                 }
