@@ -6,11 +6,15 @@ using System.Threading.Tasks;
 
 namespace Model.Domain
 {
-    internal class Profesional
+    internal class Profesional : Persona
     {
         public int Id { get; private set; }
-        public string Matricula { get; private set; }
-        
-        public Especialidad Especialidad { get; private set; }
+        public string Matricula { get; private set; } = string.Empty;
+
+        public int EspecialidadId { get; private set; }
+
+        public Especialidad Especialidad { get; private set; } = null!;
+
+        public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
     }
 }

@@ -1,15 +1,14 @@
 ﻿namespace Model.Domain
 {
-    internal abstract class Persona
+    public abstract class Persona
     {
-        public string Nombre { get; private set; }
+        public string Nombre { get; private set; } = string.Empty;
 
-        public string Apellido { get; private set; }
-        
-        public string NroDocumento { get; private set; }
+        public string Apellido { get; private set; } = string.Empty;
 
-        public string Email { get; private set; }
+        public string NroDocumento { get; private set; } = string.Empty;
+        public string Email { get; private set; } = string.Empty;
 
-        public string Telefono { get; private set; 
+        public string Telefono { get; private set; } = string.Empty;
     }
 }
