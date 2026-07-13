@@ -9,7 +9,7 @@ namespace Model.Domain
     public class Profesional : Persona
     {
         public int Id { get; private set; }
-        public string Matricula { get; private set; } = string.Empty;
+        public string Matricula { get; private set; }
 
         public int _especialidadId { get; private set; }
 
