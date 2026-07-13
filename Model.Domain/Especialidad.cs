@@ -17,5 +17,14 @@ namespace Model.Domain
             Nombre = nombre;
         }
 
+        public void SetId(int id)
+        {
+            Id = id;
+        }
+
+        public void SetNombre(string nombre)
+        {
+            Nombre = nombre;
+        }
     }
 }

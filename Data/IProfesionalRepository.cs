@@ -12,7 +12,7 @@ namespace Data
         Task<IEnumerable<Profesional>> GetAllAsync();
         Task<Profesional?> GetByIdAsync(int id);
         Task AddAsync(Profesional profesional);
-        Task<Profesional?> UpdateAsync(Profesional profesional);
+        Task<bool> UpdateAsync(Profesional profesional);
         Task<bool> DeleteAsync(int id);
     }
 }

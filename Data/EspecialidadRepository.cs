@@ -10,6 +10,7 @@ public class EspecialidadRepository : IEspecialidadRepository
         new Especialidad(2, "Dermatología"),
         new Especialidad(3, "Neurología")
     };
+    private static int _nextId = 1;
 
     public Task<IEnumerable<Especialidad>> GetAllAsync()
     {
@@ -20,5 +21,43 @@ public class EspecialidadRepository : IEspecialidadRepository
     internal IEnumerable<Especialidad> GetAllSync()
     {
         return _especialidades.OrderBy(e => e.Nombre).ToList();
+    }
+
+    public Task<Especialidad?> GetByIdAsync(int id)
+    {
+        var especialidad = _especialidades.FirstOrDefault(e => e.Id == id);
+        return Task.FromResult(especialidad);
+    }
+
+    public Task AddAsync(Especialidad especialidad)
+    {
+        // Simula auto-incremento de ID
+        especialidad.SetId(_nextId++);
+
+        _especialidades.Add(especialidad);
+        return Task.CompletedTask;
+    }
+
+    public Task<Especialidad?> UpdateAsync(Especialidad especialidad)
+    {
+        var existingEspecialidad = _especialidades.FirstOrDefault(e => e.Id == especialidad.Id);
+        if (existingEspecialidad != null)
+        {
+            // Actualizar propiedades
+            existingEspecialidad.SetNombre(especialidad.Nombre);
+            return Task.FromResult<Especialidad?>(existingEspecialidad);
+        }
+        return Task.FromResult<Especialidad?>(null);
+    }
+
+    public Task<bool> DeleteAsync(int id)
+    {
+        var especialidad = _especialidades.FirstOrDefault(e => e.Id == id);
+        if (especialidad != null)
+        {
+            _especialidades.Remove(especialidad);
+            return Task.FromResult(true);
+        }
+        return Task.FromResult(false);
     }
 }
