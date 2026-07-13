@@ -39,7 +39,7 @@ namespace Data
             return Task.FromResult<IEnumerable<Profesional>>(_profesionales.ToList());
         }
 
-        public Task<bool> UpdateAsync(Profesional profesional)
+        public Task<Profesional?> UpdateAsync(Profesional profesional)
         {
             var existingProfesional = _profesionales.FirstOrDefault(p => p.Id == profesional.Id);
             if (existingProfesional != null)
@@ -56,9 +56,9 @@ namespace Data
                 if (especialidad != null) { 
                     existingProfesional.SetEspecialidad(especialidad);
                 }
-                return Task.FromResult(true);
+                return Task.FromResult<Profesional?>(existingProfesional);
             }
-            return Task.FromResult(false);
+            return Task.FromResult<Profesional?>(null);
         }
 
         public Task<bool> DeleteAsync(int id)
