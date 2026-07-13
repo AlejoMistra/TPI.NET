@@ -10,7 +10,7 @@ public class EspecialidadRepository : IEspecialidadRepository
         new Especialidad(2, "Dermatología"),
         new Especialidad(3, "Neurología")
     };
-    private static int _nextId = 1;
+    private static int _nextId = _especialidades.Max(e => e.Id) + 1;
 
     public Task<IEnumerable<Especialidad>> GetAllAsync()
     {
