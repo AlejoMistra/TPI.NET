@@ -7,15 +7,93 @@ namespace WebAPI
     {
         public static void MapEspecialidadEndpoints(this WebApplication app)
         {
-            app.MapGet("/especialidades", async () =>
+            // POST: /especialidades
+            app.MapPost("/especialidades", async (EspecialidadDTO especialidadDto, IEspecialidadService especialidadService) =>
             {
-                EspecialidadService paisService = new EspecialidadService();
+                try
+                {
+                    var createdDto = await especialidadService.AddAsync(especialidadDto);
+                    return Results.Created($"/especialidades/{createdDto.Id}", createdDto);
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
+            })
+            .WithName("CreateEspecialidad")
+            .Produces<EspecialidadDTO>(StatusCodes.Status201Created)
+            .Produces(StatusCodes.Status400BadRequest)
+            .WithOpenApi();
+            {
+
+            // GET: /especialidades
+            app.MapGet("/especialidades", async (IEspecialidadService especialidadService) =>
+            {
                 var dtos = await especialidadService.GetAllAsync();
                 return Results.Ok(dtos);
             })
             .WithName("GetAllEspecialidades")
             .Produces<List<EspecialidadDTO>>(StatusCodes.Status200OK)
             .WithOpenApi();
+
+            // GET : /especialidades/{id}
+            app.MapGet("/especialidades/{id:int}", async (int id, IEspecialidadService especialidadService) =>
+            {
+                if (id <= 0)
+                {
+                    return Results.BadRequest(new { error = "El ID debe ser un número positivo." });
+                }
+
+                var dto = await especialidadService.GetByIdAsync(id);
+                return dto is not null ? Results.Ok(dto) : Results.NotFound();
+            })
+            .WithName("GetEspecialidadById")
+            .Produces<EspecialidadDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound)
+            .WithOpenApi();
+
+            // UPDATE: /especialidades/{id}
+            app.MapPut("/especialidades/{id:int}", async (int id, EspecialidadDTO especialidadDto, IEspecialidadService especialidadService) =>
+            {
+                if (id != especialidadDto.Id)
+                {
+                    return Results.BadRequest();
+                }
+
+                try
+                {
+                    var updatedDto = await especialidadService.UpdateAsync(especialidadDto);
+                    return updatedDto is not null ? Results.Ok(updatedDto) : Results.NotFound();
+                }
+                catch (ArgumentException ex)
+                {
+                    return Results.BadRequest(new { error = ex.Message });
+                }
+                })
+                .WithName("UpdateEspecialidad")
+                .Produces<EspecialidadDTO>(StatusCodes.Status200OK)
+                .Produces(StatusCodes.Status400BadRequest)
+                .Produces(StatusCodes.Status404NotFound)
+                .WithOpenApi();
+
+            // DELETE: /especialidades/{id}
+            app.MapDelete("/especialidades/{id:int}", async (int id, IEspecialidadService especialidadService) =>
+            {
+                if (id <= 0)
+                {
+                    return Results.BadRequest(new { error = "El ID debe ser un número positivo." });
+                }
+
+                var deleted = await especialidadService.DeleteAsync(id);
+                return deleted ? Results.NoContent() : Results.NotFound();
+            })
+            .WithName("DeleteEspecialidad")
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status204NoContent)
+            .Produces(StatusCodes.Status404NotFound)
+            .WithOpenApi();
+            }
         }
     }
 }
