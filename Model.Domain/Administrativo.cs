@@ -10,17 +10,13 @@ namespace Model.Domain
     {
         public int Id { get; private set; }
 
-<<<<<<< HEAD
-        public string? Legajo { get; private set; }
-=======
         public string Legajo { get; private set; };
->>>>>>> 179740643451a3894a187559ec63247f100cf54e
 
+        public string Legajo { get; private set; };
 
-        public Administrativo(string nombre, string apellido, string nroDocumento, string legajo) : base(nombre, apellido, nroDocumento)
-        {
-            
-            
-        }
+      
+    public Administrativo(string nombre, string apellido, string nroDocumento, string legajo) : base(nombre, apellido, nroDocumento)
+      {  
+      }
     }
 }

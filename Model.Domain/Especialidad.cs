@@ -9,7 +9,7 @@ namespace Model.Domain
     public class Especialidad
     {
         public int Id { get; private set; }
-        public string Nombre { get; private set; } = string.Empty;
+        public string Nombre { get; private set; }
 
         public Especialidad(int id, string nombre)
         {
@@ -17,5 +17,14 @@ namespace Model.Domain
             Nombre = nombre;
         }
 
+        public void SetId(int id)
+        {
+            Id = id;
+        }
+
+        public void SetNombre(string nombre)
+        {
+            Nombre = nombre;
+        }
     }
 }
