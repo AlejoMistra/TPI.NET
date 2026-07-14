@@ -11,13 +11,6 @@
 
         public string Telefono { get; private set; } = string.Empty;
 
-        public Persona(string nombre, string apellido, string nroDocumento)
-        {
-            Nombre = nombre;
-            Apellido = apellido;
-            NroDocumento = nroDocumento;
-        }
-
         public void SetNombre(string nombre)
         {
             Nombre = nombre;
