@@ -12,6 +12,15 @@ public class EspecialidadRepository : IEspecialidadRepository
     };
     private static int _nextId = _especialidades.Max(e => e.Id) + 1;
 
+    public Task AddAsync(Especialidad especialidad)
+    {
+        // Simula auto-incremento de ID
+        especialidad.SetId(_nextId++);
+
+        _especialidades.Add(especialidad);
+        return Task.CompletedTask;
+    }
+
     public Task<IEnumerable<Especialidad>> GetAllAsync()
     {
         return Task.FromResult<IEnumerable<Especialidad>>(_especialidades.OrderBy(e => e.Nombre).ToList());
@@ -29,14 +38,6 @@ public class EspecialidadRepository : IEspecialidadRepository
         return Task.FromResult(especialidad);
     }
 
-    public Task AddAsync(Especialidad especialidad)
-    {
-        // Simula auto-incremento de ID
-        especialidad.SetId(_nextId++);
-
-        _especialidades.Add(especialidad);
-        return Task.CompletedTask;
-    }
 
     public Task<Especialidad?> UpdateAsync(Especialidad especialidad)
     {
