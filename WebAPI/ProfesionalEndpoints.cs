@@ -7,9 +7,8 @@ namespace WebAPI
     {
         public static void MapProfesionalEndpoints(this WebApplication app)
         {
-            app.MapGet("/profesionales", async () =>
+            app.MapGet("/profesionales", async (IProfesionalService profesionalService) =>
             {
-                ProfesionalService profesionalService = new ProfesionalService();
                 var dtos = await profesionalService.GetAllAsync();
                 return Results.Ok(dtos);
             })

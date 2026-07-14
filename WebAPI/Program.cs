@@ -11,6 +11,8 @@ builder.Services.AddSwaggerGen();
 // Add Dependency Injection
 builder.Services.AddScoped<IProfesionalRepository, ProfesionalRepository>();
 builder.Services.AddScoped<IProfesionalService, ProfesionalService>();
+builder.Services.AddScoped<IEspecialidadRepository, EspecialidadRepository>();
+builder.Services.AddScoped<IEspecialidadService, EspecialidadService>();
 
 var app = builder.Build();
 
