@@ -12,6 +12,11 @@ namespace Model.Domain
 
         public string Legajo { get; private set; };
 
-        public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
+        public string Legajo { get; private set; };
+
+      
+    public Administrativo(string nombre, string apellido, string nroDocumento, string legajo) : base(nombre, apellido, nroDocumento)
+      {  
+      }
     }
 }

@@ -33,7 +33,6 @@ namespace Model.Domain
             alergias = new List<string>();
             antecedentes = new List<string>();
             fechaCreacion = DateTime.Now;
-            grupo_sang = grupo_sang;
 
         }
         
