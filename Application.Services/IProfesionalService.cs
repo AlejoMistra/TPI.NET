@@ -7,12 +7,12 @@ using DTOs;
 
 namespace Application.Services
 {
-    internal interface IProfesionalService
+    public interface IProfesionalService
     {
         Task<ProfesionalDTO> AddAsync(ProfesionalDTO profesional);
         Task<IEnumerable<ProfesionalDTO>> GetAllAsync();
-        Task<ProfesionalDTO> GetByIdAsync(int id);
-        Task<ProfesionalDTO> UpdateAsync(ProfesionalDTO profesional);
+        Task<ProfesionalDTO?> GetByIdAsync(int id);
+        Task<ProfesionalDTO?> UpdateAsync(ProfesionalDTO profesional);
         Task<bool> DeleteAsync(int id);
     }
 }
