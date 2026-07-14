@@ -12,7 +12,7 @@ namespace Application.Services
         {
             _especialidadRepository = especialidadRepository;
         }
-        
+
         public async Task<EspecialidadDTO> AddAsync(EspecialidadDTO especialidadDto)
         {
             if (string.IsNullOrWhiteSpace(especialidadDto.Nombre))
