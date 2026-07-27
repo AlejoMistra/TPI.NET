@@ -5,7 +5,6 @@
 **Integrantes:**
 
 - Alejo Mistraletti (52665)
-- Lucas Alonso (52904)
 - Marco Bernaus (52172)
 
 **Asignatura:** Tecnologías de Desarrollo de Software IDE
