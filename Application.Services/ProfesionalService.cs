@@ -5,7 +5,7 @@ using System.Text;
 using System.Threading.Tasks;
 using Data;
 using DTOs;
-using Model.Domain;
+using Domain.Model;
 
 namespace Application.Services
 {

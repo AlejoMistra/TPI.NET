@@ -1,4 +1,4 @@
-﻿namespace Model.Domain
+﻿namespace Domain.Model
 {
     public abstract class Persona (string nombre, string apellido, string nroDocumento)
     {

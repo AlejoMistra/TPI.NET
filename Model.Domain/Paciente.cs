@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace Model.Domain
+namespace Domain.Model
 {
     public class Paciente : Persona
     {
@@ -18,11 +12,11 @@ namespace Model.Domain
 
         public HistoriaClinica historia_clinica { get; private set; }
 
-        public int id_historia_c {  get; private set; }
+        public int id_historia_c { get; private set; }
 
-        public Paciente(string nombre, string apellido, string nroDocumento)  : base (nombre, apellido, nroDocumento)
+        public Paciente(string nombre, string apellido, string nroDocumento) : base(nombre, apellido, nroDocumento)
         {
-            
+
             Turnos = new List<Turno>();
             historia_clinica = new HistoriaClinica();
         }
