@@ -1,6 +1,6 @@
 ﻿namespace Domain.Model
 {
-    public abstract class Persona (string nombre, string apellido, string nroDocumento)
+    public abstract class Persona(string nombre, string apellido, string nroDocumento)
     {
         public string Nombre { get; private set; } = nombre;
 
