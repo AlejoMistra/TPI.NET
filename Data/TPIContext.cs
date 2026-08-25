@@ -6,19 +6,20 @@ namespace Data
 {
     public class TPIContext : DbContext
     {
-        public DbSet<Paciente> Pacientes { get; set; }
+        public DbSet<Persona> Personas { get; set; }
         public DbSet<Profesional> Profesionales { get; set; }
+        public DbSet<Paciente> Pacientes { get; set; }
         public DbSet<Especialidad> Especialidades { get; set; }
 
         public TPIContext(DbContextOptions<TPIContext> options) : base(options)
         {
-            this.Database.EnsureCreated();
+            //this.Database.EnsureCreated();
             //SeedInitialData();
         }
 
         internal TPIContext()
         {
-            this.Database.EnsureCreated();
+            //this.Database.EnsureCreated();
             //SeedInitialData();
         }
 
@@ -40,18 +41,66 @@ namespace Data
         {
             base.OnModelCreating(modelBuilder);
 
+            // Evita que EF Core mapee estas clases arrastradas por navegación
+            modelBuilder.Ignore<Turno>();
+            modelBuilder.Ignore<ConsultaMedica>();
+            modelBuilder.Ignore<Factura>();
+            modelBuilder.Ignore<HistoriaClinica>();
+            modelBuilder.Ignore<Administrativo>();
+
+            modelBuilder.Entity<Persona>(entity =>
+                {
+                    entity.HasKey(p => p.Id);
+                    entity.Property(p => p.Nombre)
+                        .IsRequired()
+                        .HasMaxLength(100);
+                    entity.Property(p => p.Apellido)
+                        .IsRequired()
+                        .HasMaxLength(100);
+                    entity.Property(p => p.TipoDocumento)
+                        .IsRequired()
+                        .HasMaxLength(20);
+                    entity.Property(p => p.NroDocumento)
+                        .IsRequired()
+                        .HasMaxLength(20);
+                    entity.Property(p => p.Email)
+                        .IsRequired()
+                        .HasMaxLength(100);
+                    entity.Property(p => p.Telefono)
+                        .IsRequired(false)
+                        .HasMaxLength(20);
+                });
+
             modelBuilder.Entity<Profesional>(entity =>
             {
-                entity.HasKey(p => p.Id);
-                entity.Property(p => p.Nombre).IsRequired();
-                entity.Property(p => p.Apellido).IsRequired();
-                entity.Property(p => p.Matricula).IsRequired();
-                //entity.HasMany(p => p.Especialidades)
-                //      .WithMany(e => e.Profesionales)
-                //      .UsingEntity(j => j.ToTable("ProfesionalEspecialidad"));
+                entity.ToTable("Profesionales");
+                entity.Property(p => p.Matricula)
+                    .IsRequired()
+                    .HasMaxLength(50);
+                entity.HasOne(p => p._especialidad)
+                    .WithMany()
+                    .HasForeignKey(p => p._especialidadId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
-        }
+            modelBuilder.Entity<Paciente>(entity =>
+            {
+                entity.ToTable("Pacientes");
+                entity.Property(p => p.FechaNacimiento)
+                    .IsRequired()
+                    .HasColumnType("date");
+                entity.Property(p => p.ObraSocial)
+                    .IsRequired(false)
+                    .HasMaxLength(100);
+            });
 
+            modelBuilder.Entity<Especialidad>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Nombre)
+                    .IsRequired()
+                    .HasMaxLength(100);
+            });
+        }
     }
 }

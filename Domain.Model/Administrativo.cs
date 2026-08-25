@@ -8,11 +8,9 @@ namespace Domain.Model
 {
     public class Administrativo : Persona
     {
-        public int Id { get; private set; }
-
         public string Legajo { get; private set; }
-  
-        public Administrativo(string nombre, string apellido, string nroDocumento, string legajo) : base(nombre, apellido, nroDocumento)
+
+        public Administrativo(string nombre, string apellido, string tipoDocumento, string nroDocumento, string legajo) : base(nombre, apellido, tipoDocumento, nroDocumento)
         {
             Legajo = legajo;
         }

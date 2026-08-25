@@ -8,7 +8,6 @@ namespace Domain.Model
 {
     public class Profesional : Persona
     {
-        public int Id { get; private set; }
         public string Matricula { get; private set; }
 
         public int _especialidadId { get; private set; }
@@ -17,24 +16,18 @@ namespace Domain.Model
 
         public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
 
-        public Profesional(int id, string nombre, string apellido, string dni, string matricula, int especialidadId)
-            : base(nombre, apellido, dni)
+        public Profesional(string nombre, string apellido, string tipoDocumento, string nroDocumento, string matricula, int especialidadId)
+            : base(nombre, apellido, tipoDocumento, nroDocumento)
         {
-            Id = id;
             Matricula = matricula;
             _especialidadId = especialidadId;
-        }
-
-        public void SetId(int id)
-        {
-            Id = id;
         }
 
         public void SetMatricula(string matricula)
         {
             Matricula = matricula;
         }
-        
+
         public void SetEspecialidadId(int especialidadId)
         {
             _especialidadId = especialidadId;

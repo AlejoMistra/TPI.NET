@@ -49,9 +49,9 @@ namespace Application.Services
             }
 
             var profesional = new Profesional(
-                0,
                 profesionalDto.Nombre,
                 profesionalDto.Apellido,
+                profesionalDto.TipoDocumento,
                 profesionalDto.NroDocumento,
                 profesionalDto.Matricula,
                 profesionalDto.EspecialidadId
@@ -73,7 +73,7 @@ namespace Application.Services
         public async Task<IEnumerable<ProfesionalDTO>> GetAllAsync()
         {
             var profesionales = await _profesionalRepository.GetAllAsync();
-            
+
             return profesionales.Select(p => new ProfesionalDTO
             {
                 Id = p.Id,
@@ -144,12 +144,11 @@ namespace Application.Services
             }
 
             var profesional = new Profesional(
-                profesionalDto.Id,
                 profesionalDto.Nombre,
                 profesionalDto.Apellido,
+                profesionalDto.TipoDocumento,
                 profesionalDto.NroDocumento,
-                profesionalDto.Matricula,
-                profesionalDto.EspecialidadId
+                profesionalDto.Matricula, profesionalDto.EspecialidadId
             );
 
             var updatedProfesional = await _profesionalRepository.UpdateAsync(profesional);
@@ -164,6 +163,7 @@ namespace Application.Services
                 Id = updatedProfesional.Id,
                 Nombre = updatedProfesional.Nombre,
                 Apellido = updatedProfesional.Apellido,
+                TipoDocumento = updatedProfesional.TipoDocumento,
                 NroDocumento = updatedProfesional.NroDocumento,
                 Matricula = updatedProfesional.Matricula,
                 EspecialidadId = updatedProfesional._especialidadId
