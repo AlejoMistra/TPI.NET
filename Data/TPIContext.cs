@@ -46,7 +46,6 @@ namespace Data
             // Evita que EF Core mapee estas clases arrastradas por navegación
             modelBuilder.Ignore<Turno>();
             modelBuilder.Ignore<Factura>();
-            modelBuilder.Ignore<Administrativo>();
 
             modelBuilder.Entity<Persona>(entity =>
             {
