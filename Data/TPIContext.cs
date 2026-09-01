@@ -70,18 +70,6 @@ namespace Data
                     .HasMaxLength(20);
             });
 
-            modelBuilder.Entity<Profesional>(entity =>
-            {
-                entity.ToTable("Profesionales");
-                entity.Property(p => p.Matricula)
-                    .IsRequired()
-                    .HasMaxLength(50);
-                entity.HasOne(p => p._especialidad)
-                    .WithMany()
-                    .HasForeignKey(p => p._especialidadId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
-
             modelBuilder.Entity<Paciente>(entity =>
             {
                 entity.ToTable("Pacientes");
@@ -93,12 +81,16 @@ namespace Data
                     .HasMaxLength(100);
             });
 
-            modelBuilder.Entity<Especialidad>(entity =>
+            modelBuilder.Entity<Profesional>(entity =>
             {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Nombre)
+                entity.ToTable("Profesionales");
+                entity.Property(p => p.Matricula)
                     .IsRequired()
-                    .HasMaxLength(100);
+                    .HasMaxLength(50);
+                entity.HasOne(p => p._especialidad)
+                    .WithMany()
+                    .HasForeignKey(p => p._especialidadId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<HistoriaClinica>(entity =>
@@ -145,6 +137,14 @@ namespace Data
                 // TurnoId: sin FK real mientras Turno esté en Ignore()
                 // Cuando se implemente Turno, agregar la FK a Turno.Id
                 entity.Property(r => r.TurnoId).IsRequired(false);
+            });
+
+            modelBuilder.Entity<Especialidad>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Nombre)
+                    .IsRequired()
+                    .HasMaxLength(100);
             });
         }
     }

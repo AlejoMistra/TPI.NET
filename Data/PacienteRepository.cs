@@ -13,7 +13,7 @@ namespace Data
 
         public async Task AddAsync(Paciente paciente)
         {
-
+            throw new NotImplementedException();
         }
 
         public Task<bool> UpdateAsync(Paciente paciente)
