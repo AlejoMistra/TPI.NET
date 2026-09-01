@@ -28,11 +28,11 @@ namespace Domain.Model
 
     public enum TipoRegistroClinico
     {
+        NotaClinica,
         Alergia,
         Antecedente,
+        Diagnostico,
         Tratamiento,
         Evolucion,
-        Diagnostico,
-        NotaClinica,
     }
 }
