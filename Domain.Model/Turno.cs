@@ -1,50 +1,49 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-
 namespace Domain.Model
 {
     public class Turno
     {
-
-        public enum EstadosTurno{
-
+        public enum EstadosTurno
+        {
             Pendiente, Confirmado, Atendido, Ausente, Cancelado, Reprogramado
-
         }
 
-        public int idTurno { get; private set; }
+        public int Id { get; private set; }
+        public DateTime FechaHoraInicio { get; private set; }
+        public DateTime FechaHoraFin { get; private set; }
+        public string Motivo { get; private set; } = string.Empty;
+        public EstadosTurno EstadoTurno { get; private set; }
+        public string Observacion { get; private set; } = string.Empty;
 
-        public DateTime fechaHoraInicio { get; private set; }
+        // Factura — ignorada en EF Core hasta implementar facturación
+        public Factura? Factura { get; private set; }
+        public int FacturaId { get; private set; }
 
-        public DateTime fechaHoraFin { get; private set; }
+        // Participantes del turno
+        public Profesional? Profesional { get; private set; }
+        public int ProfesionalId { get; private set; }
 
-        public string motivo { get; private set; } = string.Empty;
+        public Paciente? Paciente { get; private set; }
+        public int PacienteId { get; private set; }
 
-        public EstadosTurno estadoTurno { get; private set; }
+        public Administrativo? Administrativo { get; private set; }
+        public int AdministrativoId { get; private set; }
 
-        public string observacion { get; private set; } = string.Empty;
+        // Registros clínicos originados en este turno (navegación inversa de solo lectura)
+        private readonly List<RegistroClinico> _registros = new();
+        public IReadOnlyCollection<RegistroClinico> Registros => _registros.AsReadOnly();
 
-        public Factura? factura_turno { get; private set; } 
+       
+        /// Registra un RegistroClinico en la historia del paciente a partir de este turno.
+        /// Valida que el turno está en estado Atendido, sino InvalidOperationExeption
+        public RegistroClinico Registrar(TipoRegistroClinico tipo, string descripcion,
+            Profesional profesional, HistoriaClinica historiaClinica)
+        {
+            if (EstadoTurno != EstadosTurno.Atendido)
+                throw new InvalidOperationException(
+                    $"Solo se pueden registrar datos clínicos en turnos con estado Atendido. " +
+                    $"Estado actual: {EstadoTurno}.");
 
-        public int id_factura { get; private set; }
-
-        public ConsultaMedica? consulta_medica { get; private set; }
-
-        public int id_consulta_m {  get; private set; }
-
-        public Profesional? profesional_turno { get; private set; }
-
-        public int id_profesional_ {  get; private set; }
-        public Paciente? paciente_turno { get; private set; }
-
-        public int id_paciente {  get; private set; }
-
-        public Administrativo? administrativo_turno { get; private set; }
-
-        public int id_administrativo {  get; private set; }
-
-
+            return historiaClinica.AgregarRegistro(tipo, descripcion, profesional, this);
+        }
     }
 }
