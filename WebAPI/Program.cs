@@ -21,6 +21,14 @@ builder.Services.AddScoped<IEspecialidadService, EspecialidadService>();
 
 var app = builder.Build();
 
+// Aplicar migraciones pendientes y ejecutar seed de datos iniciales
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
+    db.Database.Migrate();
+}
+await SeedData.SeedAsync(app.Services);
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -36,4 +44,4 @@ if (!app.Environment.IsDevelopment())
 app.MapProfesionalEndpoints();
 app.MapEspecialidadEndpoints();
 
-app.Run();
+await app.RunAsync();
