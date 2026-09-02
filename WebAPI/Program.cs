@@ -21,7 +21,7 @@ builder.Services.AddScoped<IEspecialidadService, EspecialidadService>();
 
 var app = builder.Build();
 
-// Aplicar migraciones pendientes y ejecutar seed de datos iniciales
+// Add pending migrations and seed the database
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
