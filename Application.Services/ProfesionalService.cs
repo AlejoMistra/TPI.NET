@@ -1,7 +1,6 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Data;
 using DTOs;
@@ -23,30 +22,20 @@ namespace Application.Services
         public async Task<ProfesionalDTO> AddAsync(ProfesionalDTO profesionalDto)
         {
             if (string.IsNullOrWhiteSpace(profesionalDto.Nombre))
-            {
                 throw new ArgumentException("El nombre es requerido", nameof(profesionalDto.Nombre));
-            }
 
             if (string.IsNullOrWhiteSpace(profesionalDto.Apellido))
-            {
                 throw new ArgumentException("El apellido es requerido", nameof(profesionalDto.Apellido));
-            }
 
             if (string.IsNullOrWhiteSpace(profesionalDto.Matricula))
-            {
                 throw new ArgumentException("La matrícula es requerida", nameof(profesionalDto.Matricula));
-            }
 
             if (profesionalDto.EspecialidadId <= 0)
-            {
                 throw new ArgumentException("Debe seleccionar una especialidad válida", nameof(profesionalDto.EspecialidadId));
-            }
 
             var especialidadExists = await _especialidadRepository.GetByIdAsync(profesionalDto.EspecialidadId);
             if (especialidadExists == null)
-            {
                 throw new ArgumentException($"La especialidad con ID {profesionalDto.EspecialidadId} no existe", nameof(profesionalDto.EspecialidadId));
-            }
 
             var profesional = new Profesional(
                 profesionalDto.Nombre,
@@ -64,9 +53,10 @@ namespace Application.Services
                 Id = profesional.Id,
                 Nombre = profesional.Nombre,
                 Apellido = profesional.Apellido,
+                TipoDocumento = profesional.TipoDocumento,
                 NroDocumento = profesional.NroDocumento,
                 Matricula = profesional.Matricula,
-                EspecialidadId = profesional._especialidadId
+                EspecialidadId = profesional.EspecialidadId
             };
         }
 
@@ -79,84 +69,71 @@ namespace Application.Services
                 Id = p.Id,
                 Nombre = p.Nombre,
                 Apellido = p.Apellido,
+                TipoDocumento = p.TipoDocumento,
                 NroDocumento = p.NroDocumento,
                 Matricula = p.Matricula,
-                EspecialidadId = p._especialidadId
+                EspecialidadId = p.EspecialidadId
             }).ToList();
         }
 
         public async Task<ProfesionalDTO?> GetByIdAsync(int id)
         {
             if (id <= 0)
-            {
                 throw new ArgumentException("El ID debe ser mayor a 0", nameof(id));
-            }
 
             var profesional = await _profesionalRepository.GetByIdAsync(id);
 
             if (profesional == null)
-            {
                 return null;
-            }
 
             return new ProfesionalDTO
             {
                 Id = profesional.Id,
                 Nombre = profesional.Nombre,
                 Apellido = profesional.Apellido,
+                TipoDocumento = profesional.TipoDocumento,
                 NroDocumento = profesional.NroDocumento,
                 Matricula = profesional.Matricula,
-                EspecialidadId = profesional._especialidadId
+                EspecialidadId = profesional.EspecialidadId
             };
         }
 
         public async Task<ProfesionalDTO?> UpdateAsync(ProfesionalDTO profesionalDto)
         {
             if (profesionalDto.Id <= 0)
-            {
                 throw new ArgumentException("El ID debe ser mayor a 0", nameof(profesionalDto.Id));
-            }
 
             if (string.IsNullOrWhiteSpace(profesionalDto.Nombre))
-            {
                 throw new ArgumentException("El nombre es requerido", nameof(profesionalDto.Nombre));
-            }
 
             if (string.IsNullOrWhiteSpace(profesionalDto.Apellido))
-            {
                 throw new ArgumentException("El apellido es requerido", nameof(profesionalDto.Apellido));
-            }
 
             if (string.IsNullOrWhiteSpace(profesionalDto.Matricula))
-            {
                 throw new ArgumentException("La matrícula es requerida", nameof(profesionalDto.Matricula));
-            }
 
             if (profesionalDto.EspecialidadId <= 0)
-            {
                 throw new ArgumentException("Debe seleccionar una especialidad válida", nameof(profesionalDto.EspecialidadId));
-            }
 
             var especialidadExists = await _especialidadRepository.GetByIdAsync(profesionalDto.EspecialidadId);
             if (especialidadExists == null)
-            {
                 throw new ArgumentException($"La especialidad con ID {profesionalDto.EspecialidadId} no existe", nameof(profesionalDto.EspecialidadId));
-            }
 
+            // Construir un objeto portador con el Id correcto para que el repositorio lo encuentre
             var profesional = new Profesional(
                 profesionalDto.Nombre,
                 profesionalDto.Apellido,
                 profesionalDto.TipoDocumento,
                 profesionalDto.NroDocumento,
-                profesionalDto.Matricula, profesionalDto.EspecialidadId
+                profesionalDto.Matricula,
+                profesionalDto.EspecialidadId
             );
+            profesional.SetId(profesionalDto.Id); // FIX: asignar Id antes de llamar al repositorio
 
             var updatedProfesional = await _profesionalRepository.UpdateAsync(profesional);
 
             if (updatedProfesional == null)
-            {
                 return null;
-            }
 
             return new ProfesionalDTO
             {
@@ -166,16 +143,14 @@ namespace Application.Services
                 TipoDocumento = updatedProfesional.TipoDocumento,
                 NroDocumento = updatedProfesional.NroDocumento,
                 Matricula = updatedProfesional.Matricula,
-                EspecialidadId = updatedProfesional._especialidadId
+                EspecialidadId = updatedProfesional.EspecialidadId
             };
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
             if (id <= 0)
-            {
                 throw new ArgumentException("El ID debe ser mayor a 0", nameof(id));
-            }
 
             return await _profesionalRepository.DeleteAsync(id);
         }

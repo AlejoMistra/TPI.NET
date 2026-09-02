@@ -87,9 +87,9 @@ namespace Data
                 entity.Property(p => p.Matricula)
                     .IsRequired()
                     .HasMaxLength(50);
-                entity.HasOne(p => p._especialidad)
+                entity.HasOne(p => p.Especialidad)
                     .WithMany()
-                    .HasForeignKey(p => p._especialidadId)
+                    .HasForeignKey(p => p.EspecialidadId)
                     .OnDelete(DeleteBehavior.Restrict);
             });
 
