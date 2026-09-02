@@ -47,7 +47,47 @@ namespace Data
             modelBuilder.Ignore<Turno>();
             modelBuilder.Ignore<Factura>();
 
-            modelBuilder.Entity<Persona>(entity =>
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Username)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Email)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.PasswordHash)
+                    .IsRequired()
+                    .HasMaxLength(255);
+
+                entity.Property(e => e.Rol)
+                    .IsRequired()
+                    .HasMaxLength(30);
+
+                entity.Property(e => e.FechaCreacion)
+                    .IsRequired();
+
+                entity.Property(e => e.Estado)
+                .IsRequired();
+                
+
+
+                // Restricciones únicas
+                entity.HasIndex(e => e.Username)
+                    .IsUnique();
+
+                entity.HasIndex(e => e.Email)
+                    .IsUnique();
+
+
+
+                modelBuilder.Entity<Persona>(entity =>
             {
                 entity.HasKey(p => p.Id);
                 entity.Property(p => p.Nombre)

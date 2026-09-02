@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Domain.Model
 {
-    internal class Usuario
+    public class Usuario
     {
         public enum Roles
         {
@@ -23,9 +23,13 @@ namespace Domain.Model
 
         public int Id { get; private set; }
 
-        public string Nombre { get; private set; } = string.Empty;
+        public string Username { get; private set; } = string.Empty;
+
+        public string Email { get; private set; } = string.Empty;
 
         public string PasswordHash { get; private set; } = string.Empty;
+
+        public DateTime FechaCreacion {  get; private set; }= DateTime.Now;
 
         public Roles Rol { get; private set; } 
 
