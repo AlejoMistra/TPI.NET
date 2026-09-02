@@ -1,64 +1,63 @@
-﻿using Domain.Model;
+using Domain.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data;
 
 public class EspecialidadRepository : IEspecialidadRepository
 {
-    private static readonly List<Especialidad> _especialidades = new List<Especialidad>
-    {
-        new Especialidad(1, "Cardiología"),
-        new Especialidad(2, "Dermatología"),
-        new Especialidad(3, "Neurología")
-    };
-    private static int _nextId = _especialidades.Max(e => e.Id) + 1;
+    private readonly TPIContext _context;
 
-    public Task AddAsync(Especialidad especialidad)
+    public EspecialidadRepository(TPIContext context)
     {
-        // Simula auto-incremento de ID
-        especialidad.SetId(_nextId++);
-
-        _especialidades.Add(especialidad);
-        return Task.CompletedTask;
+        _context = context;
     }
 
-    public Task<IEnumerable<Especialidad>> GetAllAsync()
+    public async Task AddAsync(Especialidad especialidad)
     {
-        return Task.FromResult<IEnumerable<Especialidad>>(_especialidades.OrderBy(e => e.Nombre).ToList());
+        _context.Especialidades.Add(especialidad);
+        await _context.SaveChangesAsync();
     }
 
-    //Metodo interno sincrono para obtener todas las especialidades
-    internal IEnumerable<Especialidad> GetAllSync()
+    public async Task<IEnumerable<Especialidad>> GetAllAsync()
     {
-        return _especialidades.OrderBy(e => e.Nombre).ToList();
+        return await _context.Especialidades
+            .OrderBy(e => e.Nombre)
+            .ToListAsync();
     }
 
-    public Task<Especialidad?> GetByIdAsync(int id)
+    public async Task<Especialidad?> GetByIdAsync(int id)
     {
-        var especialidad = _especialidades.FirstOrDefault(e => e.Id == id);
-        return Task.FromResult(especialidad);
+        return await _context.Especialidades.FindAsync(id);
     }
 
-
-    public Task<Especialidad?> UpdateAsync(Especialidad especialidad)
+    public async Task<Especialidad?> UpdateAsync(Especialidad especialidad)
     {
-        var existingEspecialidad = _especialidades.FirstOrDefault(e => e.Id == especialidad.Id);
-        if (existingEspecialidad != null)
+        var existing = await _context.Especialidades.FindAsync(especialidad.Id);
+        if (existing == null)
+            return null;
+
+        existing.SetNombre(especialidad.Nombre);
+        await _context.SaveChangesAsync();
+        return existing;
+    }
+
+    public async Task<bool> DeleteAsync(int id)
+    {
+        var especialidad = await _context.Especialidades.FindAsync(id);
+        if (especialidad == null)
+            return false;
+
+        _context.Especialidades.Remove(especialidad);
+
+        try
         {
-            // Actualizar propiedades
-            existingEspecialidad.SetNombre(especialidad.Nombre);
-            return Task.FromResult<Especialidad?>(existingEspecialidad);
+            await _context.SaveChangesAsync();
+            return true;
         }
-        return Task.FromResult<Especialidad?>(null);
-    }
-
-    public Task<bool> DeleteAsync(int id)
-    {
-        var especialidad = _especialidades.FirstOrDefault(e => e.Id == id);
-        if (especialidad != null)
+        catch (DbUpdateException)
         {
-            _especialidades.Remove(especialidad);
-            return Task.FromResult(true);
+            // FK Restrict: hay Profesionales que referencian esta Especialidad
+            return false;
         }
-        return Task.FromResult(false);
     }
 }

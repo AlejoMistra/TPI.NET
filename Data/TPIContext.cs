@@ -75,7 +75,7 @@ namespace Data
 
                 entity.Property(e => e.Estado)
                 .IsRequired();
-                
+
 
 
                 // Restricciones únicas
@@ -110,82 +110,85 @@ namespace Data
                     .HasMaxLength(20);
             });
 
-            modelBuilder.Entity<Paciente>(entity =>
-            {
-                entity.ToTable("Pacientes");
-                entity.Property(p => p.FechaNacimiento)
-                    .IsRequired()
-                    .HasColumnType("date");
-                entity.Property(p => p.ObraSocial)
-                    .IsRequired(false)
-                    .HasMaxLength(100);
-            });
+                modelBuilder.Entity<Paciente>(entity =>
+                {
+                    entity.ToTable("Pacientes");
+                    entity.Property(p => p.FechaNacimiento)
+                        .IsRequired()
+                        .HasColumnType("date");
+                    entity.Property(p => p.ObraSocial)
+                        .IsRequired(false)
+                        .HasMaxLength(100);
+                });
 
-            modelBuilder.Entity<Profesional>(entity =>
-            {
-                entity.ToTable("Profesionales");
-                entity.Property(p => p.Matricula)
-                    .IsRequired()
-                    .HasMaxLength(50);
-                entity.HasOne(p => p._especialidad)
-                    .WithMany()
-                    .HasForeignKey(p => p._especialidadId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
+                modelBuilder.Entity<Profesional>(entity =>
+                {
+                    entity.ToTable("Profesionales");
+                    entity.Property(p => p.Matricula)
+                        .IsRequired()
+                        .HasMaxLength(50);
+                    entity.HasOne(p => p._especialidad)
+                        .WithMany()
+                        .HasForeignKey(p => p._especialidadId)
+                        .OnDelete(DeleteBehavior.Restrict);
+                });
 
-            modelBuilder.Entity<HistoriaClinica>(entity =>
-            {
-                entity.HasKey(h => h.Id);
-                entity.Property(h => h.GrupoSanguineo)
-                    .IsRequired()
-                    .HasConversion<string>()
-                    .HasMaxLength(20);
-                entity.Property(h => h.FechaCreacion).IsRequired();
+                modelBuilder.Entity<HistoriaClinica>(entity =>
+                {
+                    entity.HasKey(h => h.Id);
+                    entity.Property(h => h.GrupoSanguineo)
+                        .IsRequired()
+                        .HasConversion<string>()
+                        .HasMaxLength(20);
+                    entity.Property(h => h.FechaCreacion).IsRequired();
 
-                entity.HasOne<Paciente>()
-                    .WithOne(p => p.HistoriaClinica)
-                    .HasForeignKey<HistoriaClinica>(h => h.PacienteId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    entity.HasOne<Paciente>()
+                        .WithOne(p => p.HistoriaClinica)
+                        .HasForeignKey<HistoriaClinica>(h => h.PacienteId)
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                entity.HasMany(h => h.RegistrosClinicos)
-                    .WithOne()
-                    .HasForeignKey(r => r.HistoriaClinicaId)
-                    .OnDelete(DeleteBehavior.Cascade);
+                    entity.HasMany(h => h.RegistrosClinicos)
+                        .WithOne()
+                        .HasForeignKey(r => r.HistoriaClinicaId)
+                        .OnDelete(DeleteBehavior.Cascade);
 
-                // EF debe usar el campo backing _registrosClinicos para la colección readonly
-                entity.Navigation(h => h.RegistrosClinicos)
-                    .UsePropertyAccessMode(PropertyAccessMode.Field);
-            });
+                    // EF debe usar el campo backing _registrosClinicos para la colección readonly
+                    entity.Navigation(h => h.RegistrosClinicos)
+                        .UsePropertyAccessMode(PropertyAccessMode.Field);
+                });
 
-            modelBuilder.Entity<RegistroClinico>(entity =>
-            {
-                entity.HasKey(r => r.Id);
-                entity.Property(r => r.Tipo)
-                    .IsRequired()
-                    .HasConversion<string>()
-                    .HasMaxLength(30);
-                entity.Property(r => r.Descripcion)
-                    .IsRequired()
-                    .HasMaxLength(500);
-                entity.Property(r => r.Fecha).IsRequired();
+                modelBuilder.Entity<RegistroClinico>(entity =>
+                {
+                    entity.HasKey(r => r.Id);
+                    entity.Property(r => r.Tipo)
+                        .IsRequired()
+                        .HasConversion<string>()
+                        .HasMaxLength(30);
+                    entity.Property(r => r.Descripcion)
+                        .IsRequired()
+                        .HasMaxLength(500);
+                    entity.Property(r => r.Fecha).IsRequired();
 
-                entity.HasOne<Profesional>()
-                    .WithMany()
-                    .HasForeignKey(r => r.ProfesionalId)
-                    .OnDelete(DeleteBehavior.Restrict);
+                    entity.HasOne<Profesional>()
+                        .WithMany()
+                        .HasForeignKey(r => r.ProfesionalId)
+                        .OnDelete(DeleteBehavior.Restrict);
 
-                // TurnoId: sin FK real mientras Turno esté en Ignore()
-                // Cuando se implemente Turno, agregar la FK a Turno.Id
-                entity.Property(r => r.TurnoId).IsRequired(false);
-            });
+                    // TurnoId: sin FK real mientras Turno esté en Ignore()
+                    // Cuando se implemente Turno, agregar la FK a Turno.Id
+                    entity.Property(r => r.TurnoId).IsRequired(false);
+                });
 
-            modelBuilder.Entity<Especialidad>(entity =>
-            {
-                entity.HasKey(e => e.Id);
-                entity.Property(e => e.Nombre)
-                    .IsRequired()
-                    .HasMaxLength(100);
-            });
+                modelBuilder.Entity<Especialidad>(entity =>
+                {
+                    entity.HasKey(e => e.Id);
+                    entity.Property(e => e.Nombre)
+                        .IsRequired()
+                        .HasMaxLength(100);
+                });
+
+            }
         }
-    }
-}
+
+        
+    

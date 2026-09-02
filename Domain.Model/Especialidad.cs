@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,6 +10,12 @@ namespace Domain.Model
     {
         public int Id { get; private set; }
         public string Nombre { get; private set; }
+
+        // Constructor privado para EF
+        private Especialidad()
+        {
+            Nombre = string.Empty;
+        }
 
         public Especialidad(int id, string nombre)
         {
