@@ -1,4 +1,4 @@
-﻿using Application.Services;
+using Application.Services;
 using DTOs;
 
 namespace WebAPI
@@ -24,7 +24,6 @@ namespace WebAPI
             .Produces<EspecialidadDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .WithOpenApi();
-            {
 
             // GET: /especialidades
             app.MapGet("/especialidades", async (IEspecialidadService especialidadService) =>
@@ -36,13 +35,11 @@ namespace WebAPI
             .Produces<List<EspecialidadDTO>>(StatusCodes.Status200OK)
             .WithOpenApi();
 
-            // GET : /especialidades/{id}
+            // GET: /especialidades/{id}
             app.MapGet("/especialidades/{id:int}", async (int id, IEspecialidadService especialidadService) =>
             {
                 if (id <= 0)
-                {
                     return Results.BadRequest(new { error = "El ID debe ser un número positivo." });
-                }
 
                 var dto = await especialidadService.GetByIdAsync(id);
                 return dto is not null ? Results.Ok(dto) : Results.NotFound();
@@ -53,13 +50,11 @@ namespace WebAPI
             .Produces(StatusCodes.Status404NotFound)
             .WithOpenApi();
 
-            // UPDATE: /especialidades/{id}
+            // PUT: /especialidades/{id}
             app.MapPut("/especialidades/{id:int}", async (int id, EspecialidadDTO especialidadDto, IEspecialidadService especialidadService) =>
             {
                 if (id != especialidadDto.Id)
-                {
-                    return Results.BadRequest();
-                }
+                    return Results.BadRequest(new { error = "El ID en la URL no coincide con el ID en el cuerpo." });
 
                 try
                 {
@@ -70,20 +65,18 @@ namespace WebAPI
                 {
                     return Results.BadRequest(new { error = ex.Message });
                 }
-                })
-                .WithName("UpdateEspecialidad")
-                .Produces<EspecialidadDTO>(StatusCodes.Status200OK)
-                .Produces(StatusCodes.Status400BadRequest)
-                .Produces(StatusCodes.Status404NotFound)
-                .WithOpenApi();
+            })
+            .WithName("UpdateEspecialidad")
+            .Produces<EspecialidadDTO>(StatusCodes.Status200OK)
+            .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status404NotFound)
+            .WithOpenApi();
 
             // DELETE: /especialidades/{id}
             app.MapDelete("/especialidades/{id:int}", async (int id, IEspecialidadService especialidadService) =>
             {
                 if (id <= 0)
-                {
                     return Results.BadRequest(new { error = "El ID debe ser un número positivo." });
-                }
 
                 var deleted = await especialidadService.DeleteAsync(id);
                 return deleted ? Results.NoContent() : Results.NotFound();
@@ -93,7 +86,6 @@ namespace WebAPI
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .WithOpenApi();
-            }
         }
     }
 }

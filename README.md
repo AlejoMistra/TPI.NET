@@ -5,7 +5,6 @@
 **Integrantes:**
 
 - Alejo Mistraletti (52665)
-- Lucas Alonso (52904)
 - Marco Bernaus (52172)
 
 **Asignatura:** Tecnologías de Desarrollo de Software IDE
@@ -23,85 +22,94 @@ Sistema de gestión para consultorios médicos que permite administrar pacientes
 ```mermaid
 classDiagram
     direction LR
+    
     class Usuario {
-        +IdUsuario
-        +NombreUsuario
-        +Contraseña
-        +TipoUsuario
-        +Estado
+        +int IdUsuario
+        +string NombreUsuario
+        +string PasswordHash
+        +RolUsuario Rol
+        +bool Activo
     }
+
     class Persona {
-        +Nombre
-        +Apellido
-        +NroDocumento
-        +Email
-        +Telefono
+        <<abstract>>
+        +int IdPersona
+        +string Nombre
+        +string Apellido
+        +string NroDocumento
+        +string Email
+        +string Telefono
     }
+
     class Paciente {
-        +IdPaciente
-        +FechaNacimiento
-        +ObraSocial
+        +DateTime FechaNacimiento
+        +string ObraSocial
     }
-    class Turno {
-        +IdTurno
-        +FechaHoraInicio
-        +FechaHoraFin
-        +Motivo
-        +EstadoTurno
-        +Observacion
-    }
-    class Administrativo {
-        +IdAdministrativo
-        +Legajo
-    }
-    class HistoriaClinica {
-        +IdHistoria
-        +GrupoSanguineo
-        +Alergias
-        +Antecedentes
-        +FechaCreacion
-    }
-    class Factura {
-        +IdFactura
-        +FechaEmision
-        +MontoTotal
-        +MetodoPago
-        +EstadoFactura
-    }
-    class DetalleFactura {
-        +IdDetalle
-        +Concepto
-        +Cantidad
-        +PrecioUnitario
-        +Subtotal
-    }
-    class ConsultaMedica {
-        +IdConsultaMedica
-        +Sintomas
-        +NotasClinicas
-        +Diagnostico
-    }
+
     class Profesional {
-        +IdProfesional
-        +Matricula
+        +string Matricula
     }
+
+    class HistoriaClinica {
+        +int IdHistoria
+        +string GrupoSanguineo
+        +string Alergias
+        +string Antecedentes
+        +DateTime FechaCreacion
+    }
+
+    class Turno {
+        +int IdTurno
+        +DateTime FechaHoraInicio
+        +DateTime FechaHoraFin
+        +string Motivo
+        +EstadoTurno Estado
+        +string Observacion
+    }
+
+    class RegistroClinico{
+        +int Id
+        +enum Tipo
+        +string Descripcion
+        +DateTime Fecha
+    }
+
+    class Factura {
+        +int IdFactura
+        +DateTime FechaEmision
+        +decimal MontoTotal
+        +MetodoPago Metodo
+        +EstadoFactura Estado
+    }
+
+    class DetalleFactura {
+        +int Id
+        +enum TipoRegistroClinico
+        +string Descripcion
+        +DateTime Fecha
+    }
+
     class Especialidad {
-        +IdEspecialidad
-        +Nombre
+        +int IdEspecialidad
+        +string Nombre
     }
-    <<abstract>> Persona
-    Persona <|-- Administrativo
+
     Persona <|-- Paciente
     Persona <|-- Profesional
-    Usuario "1" -- "0..1" Persona : credenciales de
-    Administrativo "1" -- "*" Turno : gestiona
+    
+    %% Relaciones actualizadas
+    Usuario "0..1" -- "1" Persona : credenciales de
+    
     Paciente "1" -- "*" Turno : solicita
-    Profesional "*" -- "1" Especialidad : tiene
     Profesional "1" -- "*" Turno : atiende
+    Profesional "*" -- "1" Especialidad : tiene
+    
     Paciente "1" *-- "1" HistoriaClinica : posee
-    Turno "1" -- "0..1" ConsultaMedica : genera
-    HistoriaClinica "1" -- "*" ConsultaMedica : contiene
+    HistoriaClinica "1" -- "*" RegistroClinico : registra
+    
+    Turno "1" -- "0..1" RegistroClinico : genera
     Turno "1" -- "0..1" Factura : origina
+    
     Factura "1" *-- "*" DetalleFactura : contiene
 ```
 
@@ -123,6 +131,6 @@ classDiagram
 
 4. **CRUD Turnos** (Incluye búsqueda con filtros, por ejemplo: búsqueda por rango de fechas, profesional o estado del turno).
 
-5. **CRUD Consultas Médicas** (Registro realizado por el médico sobre la atención de un Turno para vincularlo a la Historia Clínica).
+5. **CRUD Registros Clínicos** (Registro realizado por el médico sobre la atención de un Turno para vincularlo a la Historia Clínica).
 
 6. **CRUD Facturación** (Implementación del patrón Maestro/Detalle mediante las entidades Factura y DetalleFactura).

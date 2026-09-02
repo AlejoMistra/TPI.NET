@@ -1,48 +1,45 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Model.Domain
+namespace Domain.Model
 {
     public class Profesional : Persona
     {
-        public int Id { get; private set; }
         public string Matricula { get; private set; }
 
-        public int _especialidadId { get; private set; }
+        public int EspecialidadId { get; private set; }
 
-        public Especialidad? _especialidad { get; private set; }
+        public Especialidad? Especialidad { get; private set; }
 
-        public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
-
-        public Profesional(int id, string nombre, string apellido, string dni, string matricula, int especialidadId)
-            : base(nombre, apellido, dni)
+        // Constructor para EF
+        private Profesional() : base(string.Empty, string.Empty, string.Empty, string.Empty)
         {
-            Id = id;
-            Matricula = matricula;
-            _especialidadId = especialidadId;
+            Matricula = string.Empty;
         }
 
-        public void SetId(int id)
+        public Profesional(string nombre, string apellido, string tipoDocumento, string nroDocumento, string matricula, int especialidadId)
+            : base(nombre, apellido, tipoDocumento, nroDocumento)
         {
-            Id = id;
+            Matricula = matricula;
+            EspecialidadId = especialidadId;
         }
 
         public void SetMatricula(string matricula)
         {
             Matricula = matricula;
         }
-        
+
         public void SetEspecialidadId(int especialidadId)
         {
-            _especialidadId = especialidadId;
+            EspecialidadId = especialidadId;
 
-            // Solo invalidar si hay inconcistencia
-            if (_especialidad != null && _especialidad.Id != _especialidadId)
+            // Solo invalidar si hay inconsistencia
+            if (Especialidad != null && Especialidad.Id != EspecialidadId)
             {
-                _especialidad = null; // Invalidar navigation property
+                Especialidad = null; // Invalidar navigation property
             }
         }
 
@@ -51,12 +48,8 @@ namespace Model.Domain
             if (especialidad == null)
                 throw new ArgumentNullException(nameof(especialidad));
 
-            _especialidad = especialidad;
-            _especialidadId = especialidad.Id; // Asegurar consistencia
+            Especialidad = especialidad;
+            EspecialidadId = especialidad.Id; // Asegurar consistencia
         }
-
-
     }
 }
-
-
