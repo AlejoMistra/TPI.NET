@@ -43,4 +43,4 @@ if (!app.Environment.IsDevelopment())
 app.MapProfesionalEndpoints();
 app.MapEspecialidadEndpoints();
 
-app.Run();
+await app.RunAsync();

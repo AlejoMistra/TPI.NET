@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -10,17 +10,21 @@ namespace Domain.Model
     {
         public string Matricula { get; private set; }
 
-        public int _especialidadId { get; private set; }
+        public int EspecialidadId { get; private set; }
 
-        public Especialidad? _especialidad { get; private set; }
+        public Especialidad? Especialidad { get; private set; }
 
-        public ICollection<Turno> Turnos { get; set; } = new List<Turno>();
+        // Constructor para EF
+        private Profesional() : base(string.Empty, string.Empty, string.Empty, string.Empty)
+        {
+            Matricula = string.Empty;
+        }
 
         public Profesional(string nombre, string apellido, string tipoDocumento, string nroDocumento, string matricula, int especialidadId)
             : base(nombre, apellido, tipoDocumento, nroDocumento)
         {
             Matricula = matricula;
-            _especialidadId = especialidadId;
+            EspecialidadId = especialidadId;
         }
 
         public void SetMatricula(string matricula)
@@ -30,12 +34,12 @@ namespace Domain.Model
 
         public void SetEspecialidadId(int especialidadId)
         {
-            _especialidadId = especialidadId;
+            EspecialidadId = especialidadId;
 
-            // Solo invalidar si hay inconcistencia
-            if (_especialidad != null && _especialidad.Id != _especialidadId)
+            // Solo invalidar si hay inconsistencia
+            if (Especialidad != null && Especialidad.Id != EspecialidadId)
             {
-                _especialidad = null; // Invalidar navigation property
+                Especialidad = null; // Invalidar navigation property
             }
         }
 
@@ -44,12 +48,8 @@ namespace Domain.Model
             if (especialidad == null)
                 throw new ArgumentNullException(nameof(especialidad));
 
-            _especialidad = especialidad;
-            _especialidadId = especialidad.Id; // Asegurar consistencia
+            Especialidad = especialidad;
+            EspecialidadId = especialidad.Id; // Asegurar consistencia
         }
-
-
     }
 }
-
-
