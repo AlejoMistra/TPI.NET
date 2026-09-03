@@ -1,12 +1,18 @@
-using WebAPI;
 using Application.Services;
 using Data;
+using Microsoft.EntityFrameworkCore;
+using WebAPI;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+// Add Entity Framework Context
+builder.Services.AddDbContext<TPIContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection" +
+    "")));
 
 // Add Dependency Injection
 builder.Services.AddScoped<IProfesionalRepository, ProfesionalRepository>();
@@ -15,6 +21,19 @@ builder.Services.AddScoped<IEspecialidadRepository, EspecialidadRepository>();
 builder.Services.AddScoped<IEspecialidadService, EspecialidadService>();
 
 var app = builder.Build();
+
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
+    db.Database.Migrate();   // crea la BD si no existe y aplica migraciones pendientes
+}
+// Aplicar migraciones pendientes y ejecutar seed de datos iniciales
+using (var scope = app.Services.CreateScope())
+{
+    var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
+    db.Database.Migrate();
+}
+await SeedData.SeedAsync(app.Services);
 
 if (app.Environment.IsDevelopment())
 {
@@ -31,4 +50,4 @@ if (!app.Environment.IsDevelopment())
 app.MapProfesionalEndpoints();
 app.MapEspecialidadEndpoints();
 
-app.Run();
+await app.RunAsync();

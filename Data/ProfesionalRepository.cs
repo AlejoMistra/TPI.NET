@@ -1,77 +1,69 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Model.Domain;
+ using Domain.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data
 {
     public class ProfesionalRepository : IProfesionalRepository
     {
-        private static readonly List<Profesional> _profesionales = new List<Profesional>(); 
-        private static int _nextId = 1;
+        private readonly TPIContext _context;
 
-        public Task AddAsync(Profesional profesional)
+        public ProfesionalRepository(TPIContext context)
         {
-            // Simula auto-incremento de ID
-            profesional.SetId(_nextId++);
-
-            // Asignar navigation property de la Especialidad
-            var EspecialidadRepo = new EspecialidadRepository();
-            var especialidad = EspecialidadRepo.GetAllSync().FirstOrDefault(e => e.Id == profesional._especialidadId);
-            if (especialidad != null) { 
-                profesional.SetEspecialidad(especialidad);
-            }
-
-            _profesionales.Add(profesional);
-            return Task.CompletedTask;
+            _context = context;
         }
 
-        public Task<Profesional?> GetByIdAsync(int id)
+        public async Task AddAsync(Profesional profesional)
         {
-            var profesional = _profesionales.FirstOrDefault(p => p.Id == id);
-            return Task.FromResult(profesional);
+            _context.Profesionales.Add(profesional);
+            await _context.SaveChangesAsync();
         }
 
-        public Task<IEnumerable<Profesional>> GetAllAsync()
+        public async Task<Profesional?> GetByIdAsync(int id)
         {
-            return Task.FromResult<IEnumerable<Profesional>>(_profesionales.ToList());
+            return await _context.Profesionales
+                .Include(p => p.Especialidad)
+                .FirstOrDefaultAsync(p => p.Id == id);
         }
 
-        public Task<Profesional?> UpdateAsync(Profesional profesional)
+        public async Task<IEnumerable<Profesional>> GetAllAsync()
         {
-            var existingProfesional = _profesionales.FirstOrDefault(p => p.Id == profesional.Id);
-            if (existingProfesional != null)
-            {
-                // Actualizar propiedades
-                existingProfesional.SetNombre(profesional.Nombre);
-                existingProfesional.SetApellido(profesional.Apellido);
-                existingProfesional.SetMatricula(profesional.Matricula);
-                existingProfesional.SetEspecialidadId(profesional._especialidadId);
-
-                // Actualizar navigation property de la Especialidad
-                var EspecialidadRepo = new EspecialidadRepository();
-                var especialidad = EspecialidadRepo.GetAllSync().FirstOrDefault(e => e.Id == profesional._especialidadId);
-                if (especialidad != null) { 
-                    existingProfesional.SetEspecialidad(especialidad);
-                }
-                return Task.FromResult<Profesional?>(existingProfesional);
-            }
-            return Task.FromResult<Profesional?>(null);
+            return await _context.Profesionales
+                .Include(p => p.Especialidad)
+                .ToListAsync();
         }
 
-        public Task<bool> DeleteAsync(int id)
+        public async Task<Profesional?> UpdateAsync(Profesional profesional)
         {
-            var profesional = _profesionales.FirstOrDefault(p => p.Id == id);
-            if (profesional != null)
-            {
-                _profesionales.Remove(profesional);
-                return Task.FromResult(true);
-            }
-            return Task.FromResult(false);
+            var existing = await _context.Profesionales
+                .FirstOrDefaultAsync(p => p.Id == profesional.Id);
+
+            if (existing == null)
+                return null;
+
+            existing.SetNombre(profesional.Nombre);
+            existing.SetApellido(profesional.Apellido);
+            existing.SetMatricula(profesional.Matricula);
+            existing.SetEspecialidadId(profesional.EspecialidadId);
+
+            await _context.SaveChangesAsync();
+
+            // Recargar la navegación para devolver el objeto completo
+            await _context.Entry(existing)
+                .Reference(p => p.Especialidad)
+                .LoadAsync();
+
+            return existing;
         }
 
+        public async Task<bool> DeleteAsync(int id)
+        {
+            var profesional = await _context.Profesionales.FindAsync(id);
+            if (profesional == null)
+                return false;
 
+            _context.Profesionales.Remove(profesional);
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }
