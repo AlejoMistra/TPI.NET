@@ -11,7 +11,31 @@ namespace WindowsForms
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new LoginForm());
+
+            // Por ahora sin login 
+            Application.Run(new Home());
+
+            // Handler para exepciones de UI no manejadas
+            Application.ThreadException += Application_ThreadException;
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+        }
+        private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
+        {
+            if (e.Exception is UnauthorizedAccessException)
+            {
+                // Sesión expirada
+                MessageBox.Show("Su sesión ha expirado. Debe volver a autenticarse.", "Sesión Expirada",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+
+                // Reiniciar la aplicación para volver al login
+                Application.Restart();
+            }
+            else
+            {
+                // Otras excepciones, mostrar error genérico
+                MessageBox.Show($"Error inesperado: {e.Exception.Message}", "Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
     }
 }
