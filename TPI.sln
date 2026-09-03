@@ -15,6 +15,10 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Domain.Model", "Domain.Mode
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "WindowsForms", "WindowsForms\WindowsForms.csproj", "{7E53D187-8FD5-6602-2910-6A3490F98A1C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Clients", "API.Clients\API.Clients.csproj", "{0E91D011-F1C3-437E-8CD1-8B24489F8E70}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Auth.WindowsForms", "API.Auth.WindowsForms\API.Auth.WindowsForms.csproj", "{4C1BFF9A-5A3F-4911-9514-9ED19600CF98}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,14 @@ Global
 		{7E53D187-8FD5-6602-2910-6A3490F98A1C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{7E53D187-8FD5-6602-2910-6A3490F98A1C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{7E53D187-8FD5-6602-2910-6A3490F98A1C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0E91D011-F1C3-437E-8CD1-8B24489F8E70}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0E91D011-F1C3-437E-8CD1-8B24489F8E70}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0E91D011-F1C3-437E-8CD1-8B24489F8E70}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0E91D011-F1C3-437E-8CD1-8B24489F8E70}.Release|Any CPU.Build.0 = Release|Any CPU
+		{4C1BFF9A-5A3F-4911-9514-9ED19600CF98}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{4C1BFF9A-5A3F-4911-9514-9ED19600CF98}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{4C1BFF9A-5A3F-4911-9514-9ED19600CF98}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{4C1BFF9A-5A3F-4911-9514-9ED19600CF98}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
