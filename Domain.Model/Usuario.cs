@@ -10,7 +10,6 @@ namespace Domain.Model
     {
         public enum Roles
         {
-            Admin,
             Administrativo,
             Paciente,
             Profesional
@@ -26,7 +25,7 @@ namespace Domain.Model
 
         public string Nombre { get; private set; } = string.Empty;
 
-        public string Contraseña { get; private set; } = string.Empty;
+        public string PasswordHash { get; private set; } = string.Empty;
 
         public Roles Rol { get; private set; } 
 

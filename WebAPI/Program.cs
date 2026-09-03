@@ -11,7 +11,8 @@ builder.Services.AddSwaggerGen();
 
 // Add Entity Framework Context
 builder.Services.AddDbContext<TPIContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection" +
+    "")));
 
 // Add Dependency Injection
 builder.Services.AddScoped<IProfesionalRepository, ProfesionalRepository>();
@@ -21,13 +22,11 @@ builder.Services.AddScoped<IEspecialidadService, EspecialidadService>();
 
 var app = builder.Build();
 
-// Aplicar migraciones pendientes y ejecutar seed de datos iniciales
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
-    db.Database.Migrate();
+    db.Database.Migrate();   // crea la BD si no existe y aplica migraciones pendientes
 }
-await SeedData.SeedAsync(app.Services);
 
 if (app.Environment.IsDevelopment())
 {
