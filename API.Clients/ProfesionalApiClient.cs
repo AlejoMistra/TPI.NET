@@ -129,5 +129,28 @@ namespace API.Clients
         throw new Exception($"La solicitud para obtener profesionales por especialidad fue cancelada o excedió el tiempo de espera: {ex.Message}", ex);
       }
     }
+
+    public static async Task UpdateAsync(ProfesionalDTO profesional)
+    {
+      try
+      {
+        using var client = await CreateHttpClientAsync();
+        HttpResponseMessage response = await client.PutAsJsonAsync($"profesionales/{profesional.Id}", profesional);
+
+        if (!response.IsSuccessStatusCode)
+        {
+          string errorContent = await response.Content.ReadAsStringAsync();
+          throw new Exception($"Error al actualizar profesional con id {profesional.Id}. Status: {response.StatusCode}, Detalle: {errorContent}");
+        }
+      }
+      catch (HttpRequestException ex)
+      {
+        throw new Exception($"Error de conexión al actualizar profesional con id {profesional.Id}: {ex.Message}", ex);
+      }
+      catch (TaskCanceledException ex)
+      {
+        throw new Exception($"La solicitud para actualizar profesional con id {profesional.Id} fue cancelada o excedió el tiempo de espera: {ex.Message}", ex);
+      }
+    }
   }
 }

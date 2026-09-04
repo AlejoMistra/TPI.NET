@@ -1,6 +1,6 @@
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=TPI;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=true"
+    "DefaultConnection": "Server=localhost\\SQLEXPRESS;Database=TPI;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=true"
   },
   "Logging": {
     "LogLevel": {
@@ -10,7 +10,7 @@
   },
   "AllowedHosts": "*",
   "JwtSettings": {
-    "SecretKey": "MarcoBernaus123AlejoMistraletti1",
+    "SecretKey": "YOUR_SECRET_KEY_HERE_MINIMUM_32_CHARACTERS",
     "Issuer": "TPI.WebAPI",
     "Audience": "TPI.Clients",
     "ExpirationMinutes": "60"

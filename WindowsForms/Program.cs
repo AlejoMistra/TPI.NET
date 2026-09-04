@@ -1,3 +1,5 @@
+using API.Clients;
+
 namespace WindowsForms
 {
     internal static class Program
@@ -11,6 +13,11 @@ namespace WindowsForms
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
+
+            // TEMPORAL (desarrollo): registra un auth service falso para bypassear
+            // la capa de autenticación hasta que el login real esté implementado.
+            // Eliminar esta línea y DevAuthService.cs al integrar el login real.
+            AuthServiceProvider.Register(new DevAuthService());
 
             // Por ahora sin login 
             Application.Run(new Home());
