@@ -1,3 +1,6 @@
+using API.Auth.WindowsForms;
+using API.Clients;
+
 namespace WindowsForms
 {
     internal static class Program
@@ -11,13 +14,20 @@ namespace WindowsForms
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-
-            // Por ahora sin login 
-            Application.Run(new Home());
-
-            // Handler para exepciones de UI no manejadas
-            Application.ThreadException += Application_ThreadException;
             Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += Application_ThreadException;
+            AuthServiceProvider.Register(new WindowsFormsAuthService());
+
+            // Login primero: si el usuario cancela o cierra el dialogo, la app no arranca.
+            using (var login = new LoginForm())
+            {
+                if (login.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
+            }
+
+            Application.Run(new Home());
         }
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {

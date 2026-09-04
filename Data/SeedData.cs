@@ -16,6 +16,8 @@ namespace Data
             await SeedEspecialidadesAsync(context, logger);
             await SeedProfesionalesAsync(context, logger);
             await SeedPacientesAsync(context, logger);
+            await SeedUsuariosAsync(context, logger);
+
         }
 
         // Especialidades
@@ -51,9 +53,9 @@ namespace Data
             }
 
             // Cargar IDs reales de especialidades por nombre
-            var cardio   = await context.Especialidades.FirstAsync(e => e.Nombre == "Cardiología");
-            var dermato  = await context.Especialidades.FirstAsync(e => e.Nombre == "Dermatología");
-            var neuro    = await context.Especialidades.FirstAsync(e => e.Nombre == "Neurología");
+            var cardio = await context.Especialidades.FirstAsync(e => e.Nombre == "Cardiología");
+            var dermato = await context.Especialidades.FirstAsync(e => e.Nombre == "Dermatología");
+            var neuro = await context.Especialidades.FirstAsync(e => e.Nombre == "Neurología");
             var pediatria = await context.Especialidades.FirstAsync(e => e.Nombre == "Pediatría");
 
             var profesionales = new List<Profesional>
@@ -106,5 +108,25 @@ namespace Data
                 logger.LogInformation("HistoriasClinicas: {Count} registros insertados.", historias.Count);
             }
         }
+
+        private static async Task SeedUsuariosAsync(TPIContext context, ILogger logger)
+        {
+            if (await context.Usuarios.AnyAsync())
+            {
+                logger.LogInformation("Usuarios: ya existen registros, se omite el seed.");
+                return;
+            }
+            var usuarios = new List<Usuario>()
+                {
+                    new Usuario(0, "admin1", "admin@tpi.com", "admin123", DateTime.Now, Usuario.Roles.Administrativo, true)
+                };
+            context.Usuarios.AddRange(usuarios);
+            await context.SaveChangesAsync();
+            logger.LogInformation("Usuarios: {Count} registros insertados.", usuarios.Count);
+
+
+
+        }
     }
 }
+

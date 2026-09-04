@@ -3,6 +3,7 @@ using Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
+using Microsoft.OpenApi.Models;
 using System.Text;
 using WebAPI;
 
@@ -10,7 +11,33 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
+builder.Services.AddSwaggerGen(options =>
+     {
+         options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+         {
+             Name = "Authorization",
+             Type = SecuritySchemeType.Http,
+             Scheme = "bearer",
+             BearerFormat = "JWT",
+             In = ParameterLocation.Header,
+             Description = "Pegá acá el token JWT, sin el prefijo Bearer."
+         });
+
+         options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type = ReferenceType.SecurityScheme,
+                    Id = "Bearer"
+                }
+            },
+            Array.Empty<string>()
+        }
+    });
+     });
 
 // Add Entity Framework Context
 builder.Services.AddDbContext<TPIContext>(options =>
