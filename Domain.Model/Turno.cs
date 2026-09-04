@@ -26,6 +26,8 @@ namespace Domain.Model
         public int PacienteId { get; private set; }
 
         public int AdministrativoId { get; private set; }
+        public Usuario? Usuario { get; private set; }
+        public int UsuarioId { get; private set; }
 
         // Registros clínicos originados en este turno (navegación inversa de solo lectura)
         private readonly List<RegistroClinico> _registros = new();

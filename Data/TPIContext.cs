@@ -6,6 +6,7 @@ namespace Data
 {
     public class TPIContext : DbContext
     {
+        public DbSet<Usuario> Usuarios {  get; set; }
         public DbSet<Persona> Personas { get; set; }
         public DbSet<Profesional> Profesionales { get; set; }
         public DbSet<Paciente> Pacientes { get; set; }
@@ -46,6 +47,56 @@ namespace Data
             // Evita que EF Core mapee estas clases arrastradas por navegación
             modelBuilder.Ignore<Turno>();
             modelBuilder.Ignore<Factura>();
+
+            modelBuilder.Entity<Usuario>(entity =>
+            {
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Username)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Email)
+                    .IsRequired()
+                    .HasMaxLength(100);
+
+                entity.Property(e => e.PasswordHash)
+                    .IsRequired()
+                    .HasMaxLength(44);
+
+                entity.Property(e => e.Salt)
+                    .IsRequired()
+                    .HasMaxLength(44);
+
+                entity.Property(e => e.Rol)
+                    .IsRequired()
+                    .HasConversion<string>()
+                    .HasMaxLength(30);
+
+                entity.Property(e => e.FechaCreacion)
+                    .IsRequired();
+
+                entity.Property(e => e.Activo)
+                    .IsRequired();
+
+                entity.HasOne(e => e.Persona)
+                    .WithMany()
+                    .HasForeignKey(e => e.PersonaId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasIndex(e => e.PersonaId)
+                .IsUnique()
+                .HasFilter("[PersonaId] IS NOT NULL");
+                // Restricciones únicas
+                entity.HasIndex(e => e.Username)
+                    .IsUnique();
+
+                entity.HasIndex(e => e.Email)
+                    .IsUnique();
+
+            });
 
             modelBuilder.Entity<Persona>(entity =>
             {
