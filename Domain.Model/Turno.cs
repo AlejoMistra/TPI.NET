@@ -33,7 +33,7 @@ namespace Domain.Model
         private readonly List<RegistroClinico> _registros = new();
         public IReadOnlyCollection<RegistroClinico> Registros => _registros.AsReadOnly();
 
-       
+
         /// Registra un RegistroClinico en la historia del paciente a partir de este turno.
         /// Valida que el turno está en estado Atendido, sino InvalidOperationExeption
         public RegistroClinico Registrar(TipoRegistroClinico tipo, string descripcion,

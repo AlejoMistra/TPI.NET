@@ -11,7 +11,7 @@ namespace Domain.Model
         // Navegación inversa hacia HistoriaClinica (FK está en HistoriaClinica.PacienteId)
         public HistoriaClinica? HistoriaClinica { get; private set; }
 
-        protected Paciente(string nombre, string apellido, string tipoDocumento, string nroDocumento)
+        public Paciente(string nombre, string apellido, string tipoDocumento, string nroDocumento)
             : base(nombre, apellido, tipoDocumento, nroDocumento)
         {
             Turnos = new List<Turno>();

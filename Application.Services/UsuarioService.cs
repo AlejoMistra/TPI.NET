@@ -1,5 +1,5 @@
 ﻿using Data;
-using Data.Data;
+using Data;
 using Domain.Model;
 using DTOs;
 
@@ -45,7 +45,8 @@ namespace Application.Services
             var usuarioRepository = new UsuarioRepository();
 
             var fechaCreacion = DateTime.Now;
-            Usuario usuario = new Usuario(0, createDto.Username, createDto.Email, createDto.Password, fechaCreacion, true);
+            Usuario usuario = new Usuario(0, createDto.Username, createDto.Email, createDto.Password, fechaCreacion, 
+                Usuario.Roles.Administrativo, true);
 
             await usuarioRepository.AddAsync(usuario);
 

@@ -17,11 +17,7 @@ namespace Domain.Model
             Profesional
         }
 
-        public enum Estados //ver de usar Activo, y tome como valor un booleano
-        {
-            Activo,
-            Inactivo
-        }
+        
 
         public int Id { get; private set; }
 
@@ -31,7 +27,7 @@ namespace Domain.Model
 
         public string PasswordHash { get; private set; } = string.Empty;
 
-        public string Salt { get; private set; }
+        public string Salt { get; private set; } = string.Empty; 
 
 
         public DateTime FechaCreacion {  get; private set; }= DateTime.Now;
@@ -40,18 +36,18 @@ namespace Domain.Model
 
         public bool Activo { get; private set; }
 
-        public int PersonaId { get; private set; }
-        public Persona Persona { get; private set; } = null!;
+        public int? PersonaId { get; private set; }
+        public Persona? Persona { get; private set; } 
 
-        public Usuario(int Id, string username, string email, string password, DateTime fechaCreacion, Roles rol, Estados estado)
+        public Usuario(int id, string username, string email, string password, DateTime fechaCreacion, Roles rol, bool activo)
         {
-            SetId(Id);
+            SetId(id);
             SetUsername(username);
-            SetEmail(Email);
+            SetEmail(email);
             SetPassword(password);
             SetFechaCreacion(fechaCreacion);
-            SetRol(Rol);
-            SetActivo(Activo);
+            SetRol(rol);
+            SetActivo(activo);
         }
 
         private Usuario() { }
@@ -100,9 +96,9 @@ namespace Domain.Model
             FechaCreacion = fechaCreacion;
         }
 
-        public void SetRol (Roles Rol)
+        public void SetRol (Roles rol)
         {
-            this.Rol = Rol;
+            this.Rol = rol;
         }
 
         public void SetActivo(bool activo)
