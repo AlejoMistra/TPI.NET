@@ -1,4 +1,4 @@
-﻿using System.Net;
+using System.Net;
 using System.Net.Http.Headers;
 
 namespace API.Clients
@@ -47,7 +47,7 @@ namespace API.Clients
                 if (runtimeInfo.StartsWith("android"))
                 {
                     System.Diagnostics.Debug.WriteLine($"[DEBUG] Detectado Android - usando IP de emulador");
-                    return "http://10.0.2.2:5183/";
+                    return "http://10.0.2.2:5054/";
                 }
             }
             catch (Exception ex)
@@ -56,7 +56,7 @@ namespace API.Clients
             }
 
             // URL por defecto para Windows/otras plataformas
-            string defaultUrl = "http://localhost:5183/";
+            string defaultUrl = "http://localhost:5054/";
             System.Diagnostics.Debug.WriteLine($"[DEBUG] Usando URL por defecto: {defaultUrl}");
             return defaultUrl;
         }
