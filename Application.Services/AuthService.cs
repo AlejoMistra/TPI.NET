@@ -56,22 +56,10 @@ namespace Application.Services
                 new Claim(ClaimTypes.NameIdentifier, usuario.Id.ToString()),
                 new Claim(ClaimTypes.Name, usuario.Username),
                 new Claim(ClaimTypes.Email, usuario.Email),
-                new Claim("jti", Guid.NewGuid().ToString())
+                new Claim("jti", Guid.NewGuid().ToString()),
+                new Claim(ClaimTypes.Role, usuario.Rol.ToString())
             };
 
-            // Agregar permisos como claims para UI
-            var permisos = usuario.ObtenerTodosLosPermisos();
-            foreach (var permiso in permisos)
-            {
-                claims.Add(new Claim("permission", permiso));
-            }
-
-            // Agregar grupo como claim (para info/debugging)
-            var grupo = usuario.ObtenerNombreGrupo();
-            if (!string.IsNullOrEmpty(grupo))
-            {
-                claims.Add(new Claim("group", grupo));
-            }
 
             var token = new JwtSecurityToken(
                 issuer: issuer,

@@ -3,33 +3,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data
 {
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-    namespace Data
-{
-    public class UsuarioRepository
+       public class UsuarioRepository
     {
         private TPIContext CreateContext()
         {
@@ -60,8 +34,6 @@ namespace Data
         {
             using var context = CreateContext();
             return await context.Usuarios
-                .Include(u => u.Grupo)
-                    .ThenInclude(g => g.Permisos.Where(p => p.Activo))
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 
@@ -69,8 +41,6 @@ namespace Data
         {
             using var context = CreateContext();
             return await context.Usuarios
-                .Include(u => u.Grupo)
-                    .ThenInclude(g => g.Permisos.Where(p => p.Activo))
                 .FirstOrDefaultAsync(u => u.Username == username && u.Activo);
         }
 
@@ -87,5 +57,5 @@ namespace Data
             await context.SaveChangesAsync();
             return true;
         }
+        }
     }
-}
