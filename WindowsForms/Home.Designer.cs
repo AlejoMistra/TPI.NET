@@ -38,12 +38,10 @@ namespace WindowsForms
             // 
             // menuStrip1
             // 
-            menuStrip1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            menuStrip1.Dock = DockStyle.None;
             menuStrip1.Items.AddRange(new ToolStripItem[] { agendaDeTurnosToolStripMenuItem, facturaciónToolStripMenuItem, datosMaestrosToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(305, 24);
+            menuStrip1.Size = new Size(994, 24);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -72,16 +70,17 @@ namespace WindowsForms
             ContentPanel.AutoSize = true;
             ContentPanel.Location = new Point(0, 27);
             ContentPanel.Name = "ContentPanel";
-            ContentPanel.Size = new Size(987, 572);
+            ContentPanel.Size = new Size(994, 598);
             ContentPanel.TabIndex = 1;
             ContentPanel.Paint += ContentPanel_Paint;
             // 
             // Home
             // 
-            ClientSize = new Size(987, 600);
+            ClientSize = new Size(994, 626);
             Controls.Add(menuStrip1);
             Controls.Add(ContentPanel);
             MainMenuStrip = menuStrip1;
+            MinimumSize = new Size(920, 660);
             Name = "Home";
             Text = "Home";
             menuStrip1.ResumeLayout(false);
