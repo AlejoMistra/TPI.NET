@@ -28,6 +28,7 @@ namespace WindowsForms
         private void datosMaestrosToolStripMenuItem_Click(object sender, EventArgs e)
         {
             ShowControl(new DatosMaestrosUC());
+            datosMaestrosToolStripMenuItem.BackColor = SystemColors.ControlLight;
         }
     }
 }
