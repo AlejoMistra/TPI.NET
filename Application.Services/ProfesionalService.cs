@@ -37,43 +37,29 @@ namespace Application.Services
             if (especialidadExists == null)
                 throw new ArgumentException($"La especialidad con ID {profesionalDto.EspecialidadId} no existe", nameof(profesionalDto.EspecialidadId));
 
+            var estado = ParseEstado(profesionalDto.Estado);
+
             var profesional = new Profesional(
                 profesionalDto.Nombre,
                 profesionalDto.Apellido,
                 profesionalDto.TipoDocumento,
                 profesionalDto.NroDocumento,
                 profesionalDto.Matricula,
-                profesionalDto.EspecialidadId
+                profesionalDto.EspecialidadId,
+                profesionalDto.Telefono,
+                profesionalDto.Email,
+                estado
             );
 
             await _profesionalRepository.AddAsync(profesional);
 
-            return new ProfesionalDTO
-            {
-                Id = profesional.Id,
-                Nombre = profesional.Nombre,
-                Apellido = profesional.Apellido,
-                TipoDocumento = profesional.TipoDocumento,
-                NroDocumento = profesional.NroDocumento,
-                Matricula = profesional.Matricula,
-                EspecialidadId = profesional.EspecialidadId
-            };
+            return MapToDTO(profesional);
         }
 
         public async Task<IEnumerable<ProfesionalDTO>> GetAllAsync()
         {
             var profesionales = await _profesionalRepository.GetAllAsync();
-
-            return profesionales.Select(p => new ProfesionalDTO
-            {
-                Id = p.Id,
-                Nombre = p.Nombre,
-                Apellido = p.Apellido,
-                TipoDocumento = p.TipoDocumento,
-                NroDocumento = p.NroDocumento,
-                Matricula = p.Matricula,
-                EspecialidadId = p.EspecialidadId
-            }).ToList();
+            return profesionales.Select(MapToDTO).ToList();
         }
 
         public async Task<ProfesionalDTO?> GetByIdAsync(int id)
@@ -86,16 +72,7 @@ namespace Application.Services
             if (profesional == null)
                 return null;
 
-            return new ProfesionalDTO
-            {
-                Id = profesional.Id,
-                Nombre = profesional.Nombre,
-                Apellido = profesional.Apellido,
-                TipoDocumento = profesional.TipoDocumento,
-                NroDocumento = profesional.NroDocumento,
-                Matricula = profesional.Matricula,
-                EspecialidadId = profesional.EspecialidadId
-            };
+            return MapToDTO(profesional);
         }
 
         public async Task<ProfesionalDTO?> UpdateAsync(ProfesionalDTO profesionalDto)
@@ -119,6 +96,8 @@ namespace Application.Services
             if (especialidadExists == null)
                 throw new ArgumentException($"La especialidad con ID {profesionalDto.EspecialidadId} no existe", nameof(profesionalDto.EspecialidadId));
 
+            var estado = ParseEstado(profesionalDto.Estado);
+
             // Construir un objeto portador con el Id correcto para que el repositorio lo encuentre
             var profesional = new Profesional(
                 profesionalDto.Nombre,
@@ -126,7 +105,10 @@ namespace Application.Services
                 profesionalDto.TipoDocumento,
                 profesionalDto.NroDocumento,
                 profesionalDto.Matricula,
-                profesionalDto.EspecialidadId
+                profesionalDto.EspecialidadId,
+                profesionalDto.Telefono,
+                profesionalDto.Email,
+                estado
             );
             profesional.SetId(profesionalDto.Id); // FIX: asignar Id antes de llamar al repositorio
 
@@ -135,16 +117,7 @@ namespace Application.Services
             if (updatedProfesional == null)
                 return null;
 
-            return new ProfesionalDTO
-            {
-                Id = updatedProfesional.Id,
-                Nombre = updatedProfesional.Nombre,
-                Apellido = updatedProfesional.Apellido,
-                TipoDocumento = updatedProfesional.TipoDocumento,
-                NroDocumento = updatedProfesional.NroDocumento,
-                Matricula = updatedProfesional.Matricula,
-                EspecialidadId = updatedProfesional.EspecialidadId
-            };
+            return MapToDTO(updatedProfesional);
         }
 
         public async Task<bool> DeleteAsync(int id)
@@ -153,6 +126,28 @@ namespace Application.Services
                 throw new ArgumentException("El ID debe ser mayor a 0", nameof(id));
 
             return await _profesionalRepository.DeleteAsync(id);
+        }
+
+        private static ProfesionalDTO MapToDTO(Profesional p) => new ProfesionalDTO
+        {
+            Id = p.Id,
+            Nombre = p.Nombre,
+            Apellido = p.Apellido,
+            TipoDocumento = p.TipoDocumento,
+            NroDocumento = p.NroDocumento,
+            Matricula = p.Matricula,
+            EspecialidadId = p.EspecialidadId,
+            Telefono = p.Telefono,
+            Email = p.Email,
+            Estado = p.Estado.ToString()
+        };
+
+        private static Profesional.EstadoProfesional ParseEstado(string? estado)
+        {
+            if (Enum.TryParse<Profesional.EstadoProfesional>(estado, ignoreCase: true, out var result))
+                return result;
+
+            return Profesional.EstadoProfesional.Activo; // Default seguro
         }
     }
 }

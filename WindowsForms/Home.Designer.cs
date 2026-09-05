@@ -72,7 +72,6 @@ namespace WindowsForms
             ContentPanel.Name = "ContentPanel";
             ContentPanel.Size = new Size(994, 598);
             ContentPanel.TabIndex = 1;
-            ContentPanel.Paint += ContentPanel_Paint;
             // 
             // Home
             // 
@@ -82,7 +81,7 @@ namespace WindowsForms
             MainMenuStrip = menuStrip1;
             MinimumSize = new Size(920, 660);
             Name = "Home";
-            Text = "Home";
+            Text = "Sistema de Gestión Médico";
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ResumeLayout(false);

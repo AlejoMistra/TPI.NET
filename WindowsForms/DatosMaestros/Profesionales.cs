@@ -1,3 +1,5 @@
+using API.Clients;
+using DTOs;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -7,22 +9,19 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using DTOs;
-using API.Clients;
 
-namespace WindowsForms
+namespace WindowsForms.DatosMaestros
 {
-    public partial class DatosMaestros : UserControl
+    public partial class Profesionales : UserControl
     {
         private List<EspecialidadDTO> _especialidades = new();
         private List<ProfesionalGridRow> _allProfesionales = new();
         private int? _selectedProfesionalId = null;
 
-        public DatosMaestros()
+        public Profesionales()
         {
             InitializeComponent();
             ConfigurarColumnas();
-            RegistrarEventos();
         }
 
         private void ConfigurarColumnas()
@@ -117,17 +116,6 @@ namespace WindowsForms
             });
         }
 
-        private void RegistrarEventos()
-        {
-            filtrarButton.Click += FiltrarButton_Click;
-            limpiarFiltrosLinkLabel.LinkClicked += LimpiarFiltrosLinkLabel_LinkClicked;
-            guardarProfesionalButton.Click += GuardarProfesionalButton_Click;
-            cancelarButton.Click += CancelarButton_Click;
-            profesionalesDataGridView.CellContentClick += ProfesionalesDataGridView_CellContentClick;
-            profesionalesDataGridView.DataBindingComplete += ProfesionalesDataGridView_DataBindingComplete;
-            AgregarProfesionalButton.Click += AgregarProfesionalButton_Click;
-        }
-
         private void CancelarButton_Click(object? sender, EventArgs e)
         {
             LimpiarFormulario();
@@ -142,13 +130,24 @@ namespace WindowsForms
         private void AgregarProfesionalButton_Click(object? sender, EventArgs e)
         {
             LimpiarFormulario();
+            habilitadoCheckBox.Checked = true;
             nombreTextBox.Focus();
         }
 
-        private async void Profesionales_Load(object sender, EventArgs e)
+        private async void Profesionales_Load(object? sender, EventArgs e)
         {
             await CargarEspecialidadesAsync();
+            InicializarFiltroEstado();
             await CargarProfesionalesAsync();
+        }
+
+        private void InicializarFiltroEstado()
+        {
+            busquedaEstadoComboBox.Items.Clear();
+            busquedaEstadoComboBox.Items.Add("Todos");
+            busquedaEstadoComboBox.Items.Add("Activo");
+            busquedaEstadoComboBox.Items.Add("Inactivo");
+            busquedaEstadoComboBox.SelectedIndex = 0;
         }
 
         private async Task CargarEspecialidadesAsync()
@@ -189,7 +188,7 @@ namespace WindowsForms
             try
             {
                 var profesionales = await ProfesionalApiClient.GetAllAsync();
-                
+
                 _allProfesionales = profesionales.Select(p =>
                 {
                     var esp = _especialidades.FirstOrDefault(e => e.Id == p.EspecialidadId);
@@ -203,9 +202,9 @@ namespace WindowsForms
                         NroDocumento = p.NroDocumento,
                         EspecialidadId = p.EspecialidadId,
                         EspecialidadNombre = esp?.Nombre ?? $"ID {p.EspecialidadId}",
-                        Telefono = string.Empty,
-                        Email = string.Empty,
-                        Estado = "Activo"
+                        Telefono = p.Telefono ?? string.Empty,
+                        Email = p.Email ?? string.Empty,
+                        Estado = p.Estado
                     };
                 }).ToList();
 
@@ -221,6 +220,7 @@ namespace WindowsForms
         {
             var textoBusqueda = busquedaProfesionalTextBox.Text.Trim().ToLowerInvariant();
             var especialidadId = (busquedaEspecialidadComboBox.SelectedValue as int?) ?? 0;
+            var estadoFiltro = busquedaEstadoComboBox.SelectedItem?.ToString() ?? "Todos";
 
             var filtrados = _allProfesionales.AsEnumerable();
 
@@ -236,6 +236,11 @@ namespace WindowsForms
             if (especialidadId > 0)
             {
                 filtrados = filtrados.Where(p => p.EspecialidadId == especialidadId);
+            }
+
+            if (estadoFiltro != "Todos")
+            {
+                filtrados = filtrados.Where(p => p.Estado == estadoFiltro);
             }
 
             profesionalesDataGridView.DataSource = filtrados.ToList();
@@ -301,6 +306,10 @@ namespace WindowsForms
             {
                 guardarProfesionalButton.Enabled = false;
 
+                string telefono = telefonoTextBox.Text.Trim();
+                string email = emailTextBox.Text.Trim();
+                string estado = habilitadoCheckBox.Checked ? "Activo" : "Inactivo";
+
                 if (_selectedProfesionalId == null)
                 {
                     // Alta
@@ -311,7 +320,10 @@ namespace WindowsForms
                         Matricula = matricula,
                         TipoDocumento = "DNI",
                         NroDocumento = documento,
-                        EspecialidadId = especialidadId
+                        EspecialidadId = especialidadId,
+                        Telefono = string.IsNullOrWhiteSpace(telefono) ? null : telefono,
+                        Email = string.IsNullOrWhiteSpace(email) ? null : email,
+                        Estado = estado
                     };
 
                     await ProfesionalApiClient.AddAsync(nuevoProfesional);
@@ -328,7 +340,10 @@ namespace WindowsForms
                         Matricula = matricula,
                         TipoDocumento = "DNI",
                         NroDocumento = documento,
-                        EspecialidadId = especialidadId
+                        EspecialidadId = especialidadId,
+                        Telefono = string.IsNullOrWhiteSpace(telefono) ? null : telefono,
+                        Email = string.IsNullOrWhiteSpace(email) ? null : email,
+                        Estado = estado
                     };
 
                     await ProfesionalApiClient.UpdateAsync(profesionalEditado);
@@ -399,7 +414,10 @@ namespace WindowsForms
             apellidoTextBox.Text = profesional.Apellido;
             matriculaTextBox.Text = profesional.Matricula;
             documentoTextBox.Text = profesional.NroDocumento;
+            telefonoTextBox.Text = profesional.Telefono;
+            emailTextBox.Text = profesional.Email;
             especialidadComboBox.SelectedValue = profesional.EspecialidadId;
+            habilitadoCheckBox.Checked = profesional.Estado == "Activo";
 
             guardarProfesionalButton.Text = "Actualizar Profesional";
         }

@@ -37,7 +37,7 @@ classDiagram
         +string Nombre
         +string Apellido
         +string NroDocumento
-        +string Email
+        +string CorreoElectronico
         +string Telefono
     }
 

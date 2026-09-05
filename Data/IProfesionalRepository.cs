@@ -1,4 +1,4 @@
-﻿using Domain.Model;
+using Domain.Model;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -14,5 +14,7 @@ namespace Data
         Task AddAsync(Profesional profesional);
         Task<Profesional?> UpdateAsync(Profesional profesional);
         Task<bool> DeleteAsync(int id);
+        
+        Task<bool> ExistsWithEspecialidadAsync(int especialidadId);
     }
 }
