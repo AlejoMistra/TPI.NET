@@ -127,21 +127,18 @@ namespace Data
 
         private static async Task SeedUsuariosAsync(TPIContext context, ILogger logger)
         {
-            if (await context.Usuarios.AnyAsync())
+            const string adminUsername = "admin";
+
+            if (await context.Usuarios.AnyAsync(u => u.Username == adminUsername))
             {
-                logger.LogInformation("Usuarios: ya existen registros, se omite el seed.");
+                logger.LogInformation("Usuarios: el usuario '{Username}' ya existe, se omite el seed.", adminUsername);
                 return;
             }
-            var usuarios = new List<Usuario>()
-                {
-                    new Usuario(0, "admin1", "admin@tpi.com", "admin123", DateTime.Now, Usuario.Roles.Administrativo, true)
-                };
-            context.Usuarios.AddRange(usuarios);
+
+            var admin = new Usuario(0, adminUsername, "admin@tpi.com", "admin123", DateTime.Now, Usuario.Roles.Administrativo, true);
+            context.Usuarios.Add(admin);
             await context.SaveChangesAsync();
-            logger.LogInformation("Usuarios: {Count} registros insertados.", usuarios.Count);
-
-
-
+            logger.LogInformation("Usuarios: usuario '{Username}' insertado.", adminUsername);
         }
     }
 }

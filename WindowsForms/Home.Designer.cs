@@ -59,6 +59,7 @@ namespace WindowsForms
             // 
             // datosMaestrosToolStripMenuItem
             // 
+            datosMaestrosToolStripMenuItem.CheckOnClick = true;
             datosMaestrosToolStripMenuItem.Name = "datosMaestrosToolStripMenuItem";
             datosMaestrosToolStripMenuItem.Size = new Size(100, 20);
             datosMaestrosToolStripMenuItem.Text = "Datos Maestros";
