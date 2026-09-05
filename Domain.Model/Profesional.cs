@@ -8,23 +8,42 @@ namespace Domain.Model
 {
     public class Profesional : Persona
     {
+        public enum EstadoProfesional
+        {
+            Activo,
+            Inactivo
+        }
+
         public string Matricula { get; private set; }
 
         public int EspecialidadId { get; private set; }
 
         public Especialidad? Especialidad { get; private set; }
 
+        public EstadoProfesional Estado { get; private set; }
+
         // Constructor para EF
         private Profesional() : base(string.Empty, string.Empty, string.Empty, string.Empty)
         {
             Matricula = string.Empty;
+            Estado = EstadoProfesional.Activo;
         }
 
-        public Profesional(string nombre, string apellido, string tipoDocumento, string nroDocumento, string matricula, int especialidadId)
-            : base(nombre, apellido, tipoDocumento, nroDocumento)
+        public Profesional(
+            string nombre,
+            string apellido,
+            string tipoDocumento,
+            string nroDocumento,
+            string matricula,
+            int especialidadId,
+            string? telefono = null,
+            string? email = null,
+            EstadoProfesional estado = EstadoProfesional.Activo)
+            : base(nombre, apellido, tipoDocumento, nroDocumento, telefono, email)
         {
             Matricula = matricula;
             EspecialidadId = especialidadId;
+            Estado = estado;
         }
 
         public void SetMatricula(string matricula)
@@ -50,6 +69,11 @@ namespace Domain.Model
 
             Especialidad = especialidad;
             EspecialidadId = especialidad.Id; // Asegurar consistencia
+        }
+
+        public void SetEstado(EstadoProfesional estado)
+        {
+            Estado = estado;
         }
     }
 }

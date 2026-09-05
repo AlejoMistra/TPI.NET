@@ -1,4 +1,4 @@
-﻿using Data;
+using Data;
 using DTOs;
 using Domain.Model;
 
@@ -7,10 +7,14 @@ namespace Application.Services
     public class EspecialidadService : IEspecialidadService
     {
         private readonly IEspecialidadRepository _especialidadRepository;
+        private readonly IProfesionalRepository _profesionalRepository;
 
-        public EspecialidadService(IEspecialidadRepository especialidadRepository)
+        public EspecialidadService(
+            IEspecialidadRepository especialidadRepository,
+            IProfesionalRepository profesionalRepository)
         {
             _especialidadRepository = especialidadRepository;
+            _profesionalRepository = profesionalRepository;
         }
 
         public async Task<EspecialidadDTO> AddAsync(EspecialidadDTO especialidadDto)
@@ -95,6 +99,15 @@ namespace Application.Services
             {
                 throw new ArgumentException("El ID debe ser un número positivo.", nameof(id));
             }
+
+            // Business rule: cannot delete an especialidad that has associated profesionales.
+            bool tieneProfesionales = await _profesionalRepository.ExistsWithEspecialidadAsync(id);
+            if (tieneProfesionales)
+            {
+                throw new InvalidOperationException(
+                    "No se puede eliminar la especialidad porque tiene profesionales asociados.");
+            }
+
             return await _especialidadRepository.DeleteAsync(id);
         }
     }

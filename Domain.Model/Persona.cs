@@ -1,6 +1,6 @@
-﻿namespace Domain.Model
+namespace Domain.Model
 {
-    public abstract class Persona(string nombre, string apellido, string tipoDocumento, string nroDocumento)
+    public abstract class Persona(string nombre, string apellido, string tipoDocumento, string nroDocumento, string? telefono = null, string? email = null)
     {
         public enum TipoDocumentoEnum
         {
@@ -15,9 +15,12 @@
 
         public string TipoDocumento { get; private set; } = tipoDocumento;
         public string NroDocumento { get; private set; } = nroDocumento;
-        public string Email { get; private set; } = string.Empty;
 
-        public string Telefono { get; private set; } = string.Empty;
+        /// <summary>Correo electrónico de contacto (institucional o personal).</summary>
+        public string? Email { get; private set; } = email;
+
+        /// <summary>Teléfono de contacto.</summary>
+        public string? Telefono { get; private set; } = telefono;
 
         public void SetId(int id)
         {
@@ -37,6 +40,16 @@
         public void SetNroDocumento(string nroDocumento)
         {
             NroDocumento = nroDocumento;
+        }
+
+        public void SetEmail(string? email)
+        {
+            Email = email;
+        }
+
+        public void SetTelefono(string? telefono)
+        {
+            Telefono = telefono;
         }
     }
 }

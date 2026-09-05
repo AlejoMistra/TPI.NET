@@ -58,14 +58,30 @@ namespace Data
 
             var profesionales = new List<Profesional>
             {
-                new Profesional("María",   "Fernández", "DNI", "20111222", "MP-1001", cardio.Id),
-                new Profesional("Juan",    "Rodríguez", "DNI", "20222333", "MP-1002", dermato.Id),
-                new Profesional("Luciana", "Torres",    "DNI", "20333444", "MP-1003", neuro.Id),
-                new Profesional("Martín",  "Suárez",    "DNI", "20444555", "MP-1004", pediatria.Id),
-            };
+                new Profesional(
+                    "María", "Fernández", "DNI", "20111222", "MP-1001", cardio.Id,
+                    telefono: "011-4523-1100",
+                    email: "m.fernandez@clinica.med.ar",
+                    estado: Profesional.EstadoProfesional.Activo),
 
-            // Asignar Email y Teléfono opcionales a través de la API pública de Persona
-            // (Solo si Persona expone setters; si no, los dejamos vacíos)
+                new Profesional(
+                    "Juan", "Rodríguez", "DNI", "20222333", "MP-1002", dermato.Id,
+                    telefono: "011-4523-1101",
+                    email: "j.rodriguez@clinica.med.ar",
+                    estado: Profesional.EstadoProfesional.Activo),
+
+                new Profesional(
+                    "Luciana", "Torres", "DNI", "20333444", "MP-1003", neuro.Id,
+                    telefono: "011-4523-1102",
+                    email: "l.torres@clinica.med.ar",
+                    estado: Profesional.EstadoProfesional.Inactivo), // de baja temporaria
+
+                new Profesional(
+                    "Martín", "Suárez", "DNI", "20444555", "MP-1004", pediatria.Id,
+                    telefono: "011-4523-1103",
+                    email: "m.suarez@clinica.med.ar",
+                    estado: Profesional.EstadoProfesional.Activo),
+            };
 
             context.Profesionales.AddRange(profesionales);
             await context.SaveChangesAsync();

@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using DatosMaestrosUC = WindowsForms.DatosMaestros.DatosMaestros;
 
 namespace WindowsForms
 {
@@ -26,12 +27,7 @@ namespace WindowsForms
 
         private void datosMaestrosToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ShowControl(new DatosMaestros());
-        }
-
-        private void ContentPanel_Paint(object sender, PaintEventArgs e)
-        {
-
+            ShowControl(new DatosMaestrosUC());
         }
     }
 }
