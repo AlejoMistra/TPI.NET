@@ -1,3 +1,4 @@
+using API.Auth.WindowsForms;
 using API.Clients;
 
 namespace WindowsForms
@@ -13,18 +14,25 @@ namespace WindowsForms
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-
+            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
+            Application.ThreadException += Application_ThreadException;
+            AuthServiceProvider.Register(new WindowsFormsAuthService());
+            
             // TEMPORAL (desarrollo): registra un auth service falso para bypassear
             // la capa de autenticación hasta que el login real esté implementado.
             // Eliminar esta línea y DevAuthService.cs al integrar el login real.
-            AuthServiceProvider.Register(new DevAuthService());
+            //AuthServiceProvider.Register(new DevAuthService());
+          
+            // Login primero: si el usuario cancela o cierra el dialogo, la app no arranca.
+            using (var login = new LoginForm())
+            {
+                if (login.ShowDialog() != DialogResult.OK)
+                {
+                    return;
+                }
+            }
 
-            // Por ahora sin login 
             Application.Run(new Home());
-
-            // Handler para exepciones de UI no manejadas
-            Application.ThreadException += Application_ThreadException;
-            Application.SetUnhandledExceptionMode(UnhandledExceptionMode.CatchException);
         }
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
         {
