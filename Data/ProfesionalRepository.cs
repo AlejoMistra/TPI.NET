@@ -44,6 +44,9 @@ namespace Data
             existing.SetApellido(profesional.Apellido);
             existing.SetMatricula(profesional.Matricula);
             existing.SetEspecialidadId(profesional.EspecialidadId);
+            existing.SetTelefono(profesional.Telefono);
+            existing.SetEmail(profesional.Email);
+            existing.SetEstado(profesional.Estado);
 
             await _context.SaveChangesAsync();
 
@@ -64,6 +67,11 @@ namespace Data
             _context.Profesionales.Remove(profesional);
             await _context.SaveChangesAsync();
             return true;
+        }
+        public async Task<bool> ExistsWithEspecialidadAsync(int especialidadId)
+        {
+            return await _context.Profesionales
+                .AnyAsync(p => p.EspecialidadId == especialidadId);
         }
     }
 }

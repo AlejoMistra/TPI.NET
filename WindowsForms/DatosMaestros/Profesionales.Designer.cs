@@ -1,6 +1,6 @@
-namespace WindowsForms
+﻿namespace WindowsForms.DatosMaestros
 {
-    partial class DatosMaestros
+    partial class Profesionales
     {
         /// <summary> 
         /// Required designer variable.
@@ -28,20 +28,19 @@ namespace WindowsForms
         /// </summary>
         private void InitializeComponent()
         {
-            profesionalesTabControl = new TabControl();
-            profesionalesTabPage = new TabPage();
+            panel1 = new Panel();
             busquedaGroupBox = new GroupBox();
             tableLayoutPanel1 = new TableLayoutPanel();
+            busquedaEspecialidadComboBox = new ComboBox();
             label1 = new Label();
             label2 = new Label();
             label3 = new Label();
             busquedaProfesionalTextBox = new TextBox();
             filtrarButton = new Button();
             limpiarFiltrosLinkLabel = new LinkLabel();
-            busquedaEspecialidadComboBox = new ComboBox();
             busquedaEstadoComboBox = new ComboBox();
             AgregarProfesionalButton = new Button();
-            groupBox1 = new GroupBox();
+            formGroupBox = new GroupBox();
             tableLayoutPanel2 = new TableLayoutPanel();
             label4 = new Label();
             nombreTextBox = new TextBox();
@@ -63,51 +62,35 @@ namespace WindowsForms
             cancelarButton = new Button();
             guardarProfesionalButton = new Button();
             profesionalesDataGridView = new DataGridView();
-            especialidadesTabPage = new TabPage();
-            profesionalesTabControl.SuspendLayout();
-            profesionalesTabPage.SuspendLayout();
+            panel1.SuspendLayout();
             busquedaGroupBox.SuspendLayout();
             tableLayoutPanel1.SuspendLayout();
-            groupBox1.SuspendLayout();
+            formGroupBox.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
             buttonsFlowLayoutPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)profesionalesDataGridView).BeginInit();
             SuspendLayout();
             // 
-            // profesionalesTabControl
+            // panel1
             // 
-            profesionalesTabControl.Controls.Add(profesionalesTabPage);
-            profesionalesTabControl.Controls.Add(especialidadesTabPage);
-            profesionalesTabControl.Dock = DockStyle.Fill;
-            profesionalesTabControl.Location = new Point(0, 0);
-            profesionalesTabControl.Name = "profesionalesTabControl";
-            profesionalesTabControl.SelectedIndex = 0;
-            profesionalesTabControl.Size = new Size(1090, 700);
-            profesionalesTabControl.TabIndex = 0;
-            // 
-            // profesionalesTabPage
-            // 
-            profesionalesTabPage.Controls.Add(busquedaGroupBox);
-            profesionalesTabPage.Controls.Add(groupBox1);
-            profesionalesTabPage.Controls.Add(profesionalesDataGridView);
-            profesionalesTabPage.Location = new Point(4, 24);
-            profesionalesTabPage.Margin = new Padding(10);
-            profesionalesTabPage.Name = "profesionalesTabPage";
-            profesionalesTabPage.Padding = new Padding(3);
-            profesionalesTabPage.Size = new Size(1082, 672);
-            profesionalesTabPage.TabIndex = 0;
-            profesionalesTabPage.Text = "Profesionales";
-            profesionalesTabPage.UseVisualStyleBackColor = true;
+            panel1.Controls.Add(busquedaGroupBox);
+            panel1.Controls.Add(formGroupBox);
+            panel1.Controls.Add(profesionalesDataGridView);
+            panel1.Dock = DockStyle.Fill;
+            panel1.Location = new Point(0, 0);
+            panel1.Name = "panel1";
+            panel1.Size = new Size(1082, 672);
+            panel1.TabIndex = 0;
             // 
             // busquedaGroupBox
             // 
             busquedaGroupBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             busquedaGroupBox.AutoSize = true;
             busquedaGroupBox.Controls.Add(tableLayoutPanel1);
-            busquedaGroupBox.Location = new Point(3, 7);
+            busquedaGroupBox.Location = new Point(3, 3);
             busquedaGroupBox.Name = "busquedaGroupBox";
             busquedaGroupBox.Size = new Size(1079, 67);
-            busquedaGroupBox.TabIndex = 1;
+            busquedaGroupBox.TabIndex = 7;
             busquedaGroupBox.TabStop = false;
             // 
             // tableLayoutPanel1
@@ -119,13 +102,13 @@ namespace WindowsForms
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel1.Controls.Add(busquedaEspecialidadComboBox, 1, 1);
             tableLayoutPanel1.Controls.Add(label1, 0, 0);
             tableLayoutPanel1.Controls.Add(label2, 1, 0);
             tableLayoutPanel1.Controls.Add(label3, 2, 0);
             tableLayoutPanel1.Controls.Add(busquedaProfesionalTextBox, 0, 1);
             tableLayoutPanel1.Controls.Add(filtrarButton, 3, 1);
             tableLayoutPanel1.Controls.Add(limpiarFiltrosLinkLabel, 4, 1);
-            tableLayoutPanel1.Controls.Add(busquedaEspecialidadComboBox, 1, 1);
             tableLayoutPanel1.Controls.Add(busquedaEstadoComboBox, 2, 1);
             tableLayoutPanel1.Controls.Add(AgregarProfesionalButton, 5, 1);
             tableLayoutPanel1.Dock = DockStyle.Fill;
@@ -134,8 +117,19 @@ namespace WindowsForms
             tableLayoutPanel1.RowCount = 2;
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tableLayoutPanel1.Size = new Size(1073, 45);
             tableLayoutPanel1.TabIndex = 0;
+            // 
+            // busquedaEspecialidadComboBox
+            // 
+            busquedaEspecialidadComboBox.AutoCompleteMode = AutoCompleteMode.Append;
+            busquedaEspecialidadComboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
+            busquedaEspecialidadComboBox.FormattingEnabled = true;
+            busquedaEspecialidadComboBox.Location = new Point(182, 18);
+            busquedaEspecialidadComboBox.Name = "busquedaEspecialidadComboBox";
+            busquedaEspecialidadComboBox.Size = new Size(152, 23);
+            busquedaEspecialidadComboBox.TabIndex = 4;
             // 
             // label1
             // 
@@ -149,7 +143,7 @@ namespace WindowsForms
             // label2
             // 
             label2.AutoSize = true;
-            label2.Location = new Point(151, 0);
+            label2.Location = new Point(182, 0);
             label2.Name = "label2";
             label2.Size = new Size(114, 15);
             label2.TabIndex = 1;
@@ -158,7 +152,7 @@ namespace WindowsForms
             // label3
             // 
             label3.AutoSize = true;
-            label3.Location = new Point(299, 0);
+            label3.Location = new Point(340, 0);
             label3.Name = "label3";
             label3.Size = new Size(42, 15);
             label3.TabIndex = 2;
@@ -166,47 +160,43 @@ namespace WindowsForms
             // 
             // busquedaProfesionalTextBox
             // 
+            busquedaProfesionalTextBox.Dock = DockStyle.Fill;
             busquedaProfesionalTextBox.Location = new Point(3, 18);
             busquedaProfesionalTextBox.Name = "busquedaProfesionalTextBox";
-            busquedaProfesionalTextBox.Size = new Size(142, 23);
+            busquedaProfesionalTextBox.PlaceholderText = "DNI, Apellido o Matrícula...";
+            busquedaProfesionalTextBox.Size = new Size(173, 23);
             busquedaProfesionalTextBox.TabIndex = 3;
             // 
             // filtrarButton
             // 
-            filtrarButton.Anchor = AnchorStyles.None;
-            filtrarButton.AutoSize = true;
-            filtrarButton.Location = new Point(426, 18);
+            filtrarButton.Location = new Point(471, 18);
             filtrarButton.Name = "filtrarButton";
-            filtrarButton.Size = new Size(75, 25);
+            filtrarButton.Size = new Size(125, 23);
             filtrarButton.TabIndex = 6;
             filtrarButton.Text = "Filtrar";
             filtrarButton.UseVisualStyleBackColor = true;
+            filtrarButton.Click += FiltrarButton_Click;
             // 
             // limpiarFiltrosLinkLabel
             // 
             limpiarFiltrosLinkLabel.Anchor = AnchorStyles.None;
             limpiarFiltrosLinkLabel.AutoSize = true;
-            limpiarFiltrosLinkLabel.Location = new Point(507, 23);
+            limpiarFiltrosLinkLabel.Location = new Point(602, 23);
             limpiarFiltrosLinkLabel.Name = "limpiarFiltrosLinkLabel";
             limpiarFiltrosLinkLabel.Size = new Size(80, 15);
             limpiarFiltrosLinkLabel.TabIndex = 7;
             limpiarFiltrosLinkLabel.TabStop = true;
             limpiarFiltrosLinkLabel.Text = "Limpiar filtros";
-            // 
-            // busquedaEspecialidadComboBox
-            // 
-            busquedaEspecialidadComboBox.FormattingEnabled = true;
-            busquedaEspecialidadComboBox.Location = new Point(151, 18);
-            busquedaEspecialidadComboBox.Name = "busquedaEspecialidadComboBox";
-            busquedaEspecialidadComboBox.Size = new Size(142, 23);
-            busquedaEspecialidadComboBox.TabIndex = 4;
+            limpiarFiltrosLinkLabel.LinkClicked += LimpiarFiltrosLinkLabel_LinkClicked;
             // 
             // busquedaEstadoComboBox
             // 
+            busquedaEstadoComboBox.AutoCompleteMode = AutoCompleteMode.Append;
+            busquedaEstadoComboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
             busquedaEstadoComboBox.FormattingEnabled = true;
-            busquedaEstadoComboBox.Location = new Point(299, 18);
+            busquedaEstadoComboBox.Location = new Point(340, 18);
             busquedaEstadoComboBox.Name = "busquedaEstadoComboBox";
-            busquedaEstadoComboBox.Size = new Size(121, 23);
+            busquedaEstadoComboBox.Size = new Size(125, 23);
             busquedaEstadoComboBox.TabIndex = 5;
             // 
             // AgregarProfesionalButton
@@ -219,18 +209,19 @@ namespace WindowsForms
             AgregarProfesionalButton.TabIndex = 8;
             AgregarProfesionalButton.Text = "Nuevo Profesional";
             AgregarProfesionalButton.UseVisualStyleBackColor = true;
+            AgregarProfesionalButton.Click += AgregarProfesionalButton_Click;
             // 
-            // groupBox1
+            // formGroupBox
             // 
-            groupBox1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            groupBox1.AutoSize = true;
-            groupBox1.Controls.Add(tableLayoutPanel2);
-            groupBox1.Location = new Point(3, 346);
-            groupBox1.Name = "groupBox1";
-            groupBox1.Size = new Size(1076, 217);
-            groupBox1.TabIndex = 3;
-            groupBox1.TabStop = false;
-            groupBox1.Text = "Formulario de Alta / Edición de Profesional";
+            formGroupBox.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            formGroupBox.AutoSize = true;
+            formGroupBox.Controls.Add(tableLayoutPanel2);
+            formGroupBox.Location = new Point(3, 342);
+            formGroupBox.Name = "formGroupBox";
+            formGroupBox.Size = new Size(1076, 217);
+            formGroupBox.TabIndex = 9;
+            formGroupBox.TabStop = false;
+            formGroupBox.Text = "Formulario de Alta / Edición de Profesional";
             // 
             // tableLayoutPanel2
             // 
@@ -255,7 +246,7 @@ namespace WindowsForms
             tableLayoutPanel2.Controls.Add(label9, 2, 3);
             tableLayoutPanel2.Controls.Add(telefonoTextBox, 2, 4);
             tableLayoutPanel2.Controls.Add(label11, 2, 7);
-            tableLayoutPanel2.Controls.Add(buttonsFlowLayoutPanel, 2, 8);
+            tableLayoutPanel2.Controls.Add(buttonsFlowLayoutPanel, 3, 7);
             tableLayoutPanel2.Dock = DockStyle.Fill;
             tableLayoutPanel2.Location = new Point(3, 19);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -267,7 +258,7 @@ namespace WindowsForms
             tableLayoutPanel2.RowStyles.Add(new RowStyle());
             tableLayoutPanel2.RowStyles.Add(new RowStyle());
             tableLayoutPanel2.RowStyles.Add(new RowStyle());
-            tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
+            tableLayoutPanel2.RowStyles.Add(new RowStyle());
             tableLayoutPanel2.RowStyles.Add(new RowStyle(SizeType.Absolute, 20F));
             tableLayoutPanel2.Size = new Size(1070, 195);
             tableLayoutPanel2.TabIndex = 4;
@@ -351,6 +342,8 @@ namespace WindowsForms
             // 
             // especialidadComboBox
             // 
+            especialidadComboBox.AutoCompleteMode = AutoCompleteMode.Append;
+            especialidadComboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
             especialidadComboBox.Dock = DockStyle.Fill;
             especialidadComboBox.FormattingEnabled = true;
             especialidadComboBox.Location = new Point(359, 62);
@@ -407,7 +400,7 @@ namespace WindowsForms
             label11.Anchor = AnchorStyles.Left;
             label11.AutoSize = true;
             tableLayoutPanel2.SetColumnSpan(label11, 2);
-            label11.Location = new Point(3, 166);
+            label11.Location = new Point(3, 156);
             label11.Name = "label11";
             label11.Size = new Size(401, 15);
             label11.TabIndex = 20;
@@ -419,7 +412,7 @@ namespace WindowsForms
             buttonsFlowLayoutPanel.AutoSize = true;
             buttonsFlowLayoutPanel.Controls.Add(cancelarButton);
             buttonsFlowLayoutPanel.Controls.Add(guardarProfesionalButton);
-            buttonsFlowLayoutPanel.Location = new Point(775, 158);
+            buttonsFlowLayoutPanel.Location = new Point(775, 148);
             buttonsFlowLayoutPanel.Name = "buttonsFlowLayoutPanel";
             buttonsFlowLayoutPanel.Size = new Size(292, 31);
             buttonsFlowLayoutPanel.TabIndex = 21;
@@ -435,6 +428,7 @@ namespace WindowsForms
             cancelarButton.TabIndex = 23;
             cancelarButton.Text = "Cancelar / Limpiar campos";
             cancelarButton.UseVisualStyleBackColor = true;
+            cancelarButton.Click += CancelarButton_Click;
             // 
             // guardarProfesionalButton
             // 
@@ -446,42 +440,34 @@ namespace WindowsForms
             guardarProfesionalButton.TabIndex = 22;
             guardarProfesionalButton.Text = "Guardar Profesional";
             guardarProfesionalButton.UseVisualStyleBackColor = true;
+            guardarProfesionalButton.Click += GuardarProfesionalButton_Click;
             // 
             // profesionalesDataGridView
             // 
             profesionalesDataGridView.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
             profesionalesDataGridView.AutoSizeColumnsMode = DataGridViewAutoSizeColumnsMode.Fill;
             profesionalesDataGridView.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
-            profesionalesDataGridView.Location = new Point(3, 80);
+            profesionalesDataGridView.Location = new Point(3, 76);
             profesionalesDataGridView.Name = "profesionalesDataGridView";
             profesionalesDataGridView.Size = new Size(1076, 260);
-            profesionalesDataGridView.TabIndex = 2;
+            profesionalesDataGridView.TabIndex = 8;
+            profesionalesDataGridView.CellClick += ProfesionalesDataGridView_CellContentClick;
+            profesionalesDataGridView.DataBindingComplete += ProfesionalesDataGridView_DataBindingComplete;
             // 
-            // especialidadesTabPage
-            // 
-            especialidadesTabPage.Location = new Point(4, 24);
-            especialidadesTabPage.Name = "especialidadesTabPage";
-            especialidadesTabPage.Padding = new Padding(3);
-            especialidadesTabPage.Size = new Size(1082, 672);
-            especialidadesTabPage.TabIndex = 1;
-            especialidadesTabPage.Text = "Especialidades";
-            especialidadesTabPage.UseVisualStyleBackColor = true;
-            // 
-            // DatosMaestros
+            // Profesionales
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
-            Controls.Add(profesionalesTabControl);
-            Name = "DatosMaestros";
-            Size = new Size(1090, 700);
+            Controls.Add(panel1);
+            Name = "Profesionales";
+            Size = new Size(1082, 672);
             Load += Profesionales_Load;
-            profesionalesTabControl.ResumeLayout(false);
-            profesionalesTabPage.ResumeLayout(false);
-            profesionalesTabPage.PerformLayout();
+            panel1.ResumeLayout(false);
+            panel1.PerformLayout();
             busquedaGroupBox.ResumeLayout(false);
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel1.PerformLayout();
-            groupBox1.ResumeLayout(false);
+            formGroupBox.ResumeLayout(false);
             tableLayoutPanel2.ResumeLayout(false);
             tableLayoutPanel2.PerformLayout();
             buttonsFlowLayoutPanel.ResumeLayout(false);
@@ -492,41 +478,39 @@ namespace WindowsForms
 
         #endregion
 
-        private TabControl profesionalesTabControl;
-        private TabPage profesionalesTabPage;
-        private TabPage especialidadesTabPage;
-        private GroupBox groupBox1;
-        private TableLayoutPanel tableLayoutPanel2;
-        private Label label4;
-        private TextBox nombreTextBox;
-        private Label label7;
-        private TextBox matriculaTextBox;
-        private TextBox apellidoTextBox;
-        private TextBox documentoTextBox;
-        private Label label5;
-        private TextBox telefonoTextBox;
-        private Label label8;
-        private ComboBox especialidadComboBox;
-        private Label label6;
-        private Label label9;
+        private Panel panel1;
         private GroupBox busquedaGroupBox;
         private TableLayoutPanel tableLayoutPanel1;
+        private ComboBox busquedaEspecialidadComboBox;
         private Label label1;
         private Label label2;
         private Label label3;
         private TextBox busquedaProfesionalTextBox;
         private Button filtrarButton;
         private LinkLabel limpiarFiltrosLinkLabel;
-        private ComboBox busquedaEspecialidadComboBox;
         private ComboBox busquedaEstadoComboBox;
+        private Button AgregarProfesionalButton;
+        private GroupBox formGroupBox;
+        private TableLayoutPanel tableLayoutPanel2;
+        private Label label4;
+        private TextBox nombreTextBox;
+        private Label label7;
+        private TextBox matriculaTextBox;
         private Label label10;
         private TextBox emailTextBox;
+        private Label label5;
+        private TextBox apellidoTextBox;
+        private Label label8;
+        private ComboBox especialidadComboBox;
         private CheckBox habilitadoCheckBox;
-        private DataGridView profesionalesDataGridView;
-        private Button AgregarProfesionalButton;
+        private Label label6;
+        private TextBox documentoTextBox;
+        private Label label9;
+        private TextBox telefonoTextBox;
         private Label label11;
         private FlowLayoutPanel buttonsFlowLayoutPanel;
         private Button cancelarButton;
         private Button guardarProfesionalButton;
+        private DataGridView profesionalesDataGridView;
     }
 }

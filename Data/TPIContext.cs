@@ -114,7 +114,7 @@ namespace Data
                     .IsRequired()
                     .HasMaxLength(20);
                 entity.Property(p => p.Email)
-                    .IsRequired()
+                    .IsRequired(false)
                     .HasMaxLength(100);
                 entity.Property(p => p.Telefono)
                     .IsRequired(false)
@@ -138,6 +138,10 @@ namespace Data
                 entity.Property(p => p.Matricula)
                     .IsRequired()
                     .HasMaxLength(50);
+                entity.Property(p => p.Estado)
+                    .IsRequired()
+                    .HasConversion<string>()
+                    .HasMaxLength(20);
                 entity.HasOne(p => p.Especialidad)
                     .WithMany()
                     .HasForeignKey(p => p.EspecialidadId)
