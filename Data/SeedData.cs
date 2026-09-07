@@ -128,14 +128,17 @@ namespace Data
         private static async Task SeedUsuariosAsync(TPIContext context, ILogger logger)
         {
             const string adminUsername = "admin";
+            const string adminEmail = "admin@tpi.com";
 
-            if (await context.Usuarios.AnyAsync(u => u.Username == adminUsername))
+            // Username y Email tienen indice unico: si cualquiera de los dos ya esta
+            // tomado el insert falla, asi que el guard mira los dos.
+            if (await context.Usuarios.AnyAsync(u => u.Username == adminUsername || u.Email == adminEmail))
             {
-                logger.LogInformation("Usuarios: el usuario '{Username}' ya existe, se omite el seed.", adminUsername);
+                logger.LogInformation("Usuarios: ya existe un usuario con username '{Username}' o email '{Email}', se omite el seed.", adminUsername, adminEmail);
                 return;
             }
 
-            var admin = new Usuario(0, adminUsername, "admin@tpi.com", "admin123", DateTime.Now, Usuario.Roles.Administrativo, true);
+            var admin = new Usuario(0, adminUsername, adminEmail, "admin123", DateTime.Now, Usuario.Roles.Administrativo, true);
             context.Usuarios.Add(admin);
             await context.SaveChangesAsync();
             logger.LogInformation("Usuarios: usuario '{Username}' insertado.", adminUsername);
