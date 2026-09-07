@@ -43,9 +43,9 @@ namespace WindowsForms
                 txtPassword.Clear();
                 txtPassword.Focus();
             }
-            catch (HttpRequestException)
+            catch (HttpRequestException ex)
             {
-                lblError.Text = "No se pudo conectar con el servidor. \u00bfEsta levantada la API?";
+                lblError.Text = ex.Message; // No se pudo conectar con el servidor. \u00bfEsta levantada la API? 
             }
             catch (Exception ex)
             {

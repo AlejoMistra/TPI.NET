@@ -5,25 +5,30 @@ namespace API.Clients
 {
     public abstract class BaseApiClient
     {
-        protected static async Task<HttpClient> CreateHttpClientAsync()
-        {
-            // Implement the logic to create and configure the HttpClient instance
-            var client = new HttpClient();
-            await ConfigureHttpClientAsync(client);
-            return client;
-        }
+        // Un solo HttpClient para toda la vida de la app: crear uno por request agota los
+        // sockets TCP disponibles (quedan en TIME_WAIT) y termina colgando las siguientes llamadas.
+        private static readonly Lazy<HttpClient> _sharedClient = new(CreateSharedClient);
 
-        protected static async Task ConfigureHttpClientAsync(HttpClient client)
+        private static HttpClient CreateSharedClient()
         {
-            // Leer URL base de configuración, si no existe usar localhost por defecto
-            string baseUrl = GetBaseUrlFromConfig();
-            client.BaseAddress = new Uri(baseUrl);
+            var client = new HttpClient
+            {
+                BaseAddress = new Uri(GetBaseUrlFromConfig()),
+                Timeout = TimeSpan.FromSeconds(30)
+            };
             client.DefaultRequestHeaders.Accept.Clear();
             client.DefaultRequestHeaders.Accept.Add(
                 new MediaTypeWithQualityHeaderValue("application/json"));
+            return client;
+        }
 
-            // Agregar Bearer token automáticamente si está autenticado
+        protected static async Task<HttpClient> CreateHttpClientAsync()
+        {
+            var client = _sharedClient.Value;
+
+            // Refrescar el Bearer token en cada uso porque el cliente es compartido/de larga vida
             await AddAuthorizationHeaderAsync(client);
+            return client;
         }
 
         private static string GetBaseUrlFromConfig()

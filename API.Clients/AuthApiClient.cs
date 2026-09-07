@@ -8,7 +8,7 @@ namespace API.Clients
     {
         public async Task<LoginResponse?> LoginAsync(LoginRequest request)
         {
-            using var httpClient = await CreateHttpClientAsync();
+            var httpClient = await CreateHttpClientAsync();
 
             var json = JsonSerializer.Serialize(request);
             var content = new StringContent(json, Encoding.UTF8, "application/json");

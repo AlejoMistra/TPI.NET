@@ -7,9 +7,8 @@ namespace WebAPI
     {
         public static void MapAuthEndpoints(this WebApplication app)
         {
-            app.MapPost("/auth/login", async (LoginRequest request, IConfiguration configuration) =>
+            app.MapPost("/auth/login", async (LoginRequest request, AuthService authService) =>
             {
-                var authService = new AuthService(configuration);
                 var response = await authService.LoginAsync(request);
 
                 if (response == null)
