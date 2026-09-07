@@ -1,6 +1,11 @@
 {
+  "_instrucciones": {
+    "uso": "Copiar este archivo como 'appsettings.json' (misma carpeta) y completar los valores. appsettings.json esta en .gitignore: cada uno tiene el suyo.",
+    "DefaultConnection": "Ajustar 'Server=' segun la instancia de SQL Server instalada. Instancia por defecto: 'localhost' (o '.'). SQL Server Express: 'localhost\\SQLEXPRESS'. LocalDB: '(localdb)\\MSSQLLocalDB'. Para ver cual tenes: Get-Service MSSQL* en PowerShell.",
+    "SecretKey": "Cualquier cadena propia de 32 caracteres o mas; si es mas corta la API no arranca."
+  },
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost\\SQLEXPRESS;Database=TPI;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=true"
+    "DefaultConnection": "Server=localhost;Database=TPI;Trusted_Connection=True;MultipleActiveResultSets=true;TrustServerCertificate=true"
   },
   "Logging": {
     "LogLevel": {
