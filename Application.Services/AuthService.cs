@@ -11,12 +11,12 @@ namespace Application.Services
 {
     public class AuthService
     {
-        private readonly UsuarioRepository usuarioRepository;
+        private readonly IUsuarioRepository usuarioRepository;
         private readonly IConfiguration configuration;
 
-        public AuthService(IConfiguration configuration)
+        public AuthService(IUsuarioRepository usuarioRepository, IConfiguration configuration)
         {
-            usuarioRepository = new UsuarioRepository();
+            this.usuarioRepository = usuarioRepository;
             this.configuration = configuration;
         }
 

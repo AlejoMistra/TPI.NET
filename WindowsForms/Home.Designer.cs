@@ -38,10 +38,11 @@ namespace WindowsForms
             // 
             // menuStrip1
             // 
+            menuStrip1.ImageScalingSize = new Size(20, 20);
             menuStrip1.Items.AddRange(new ToolStripItem[] { agendaDeTurnosToolStripMenuItem, facturaciónToolStripMenuItem, datosMaestrosToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
-            menuStrip1.Size = new Size(994, 24);
+            menuStrip1.Size = new Size(904, 24);
             menuStrip1.TabIndex = 0;
             menuStrip1.Text = "menuStrip1";
             // 
@@ -67,21 +68,22 @@ namespace WindowsForms
             // 
             // ContentPanel
             // 
-            ContentPanel.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
-            ContentPanel.AutoSize = true;
-            ContentPanel.Location = new Point(0, 27);
+            ContentPanel.Dock = DockStyle.Fill;
+            ContentPanel.Location = new Point(0, 24);
             ContentPanel.Name = "ContentPanel";
-            ContentPanel.Size = new Size(994, 598);
+            ContentPanel.Size = new Size(904, 597);
             ContentPanel.TabIndex = 1;
             // 
             // Home
             // 
-            ClientSize = new Size(994, 626);
-            Controls.Add(menuStrip1);
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(904, 621);
             Controls.Add(ContentPanel);
+            Controls.Add(menuStrip1);
             MainMenuStrip = menuStrip1;
-            MinimumSize = new Size(920, 660);
             Name = "Home";
+            StartPosition = FormStartPosition.WindowsDefaultBounds;
             Text = "Sistema de Gestión Médico";
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();

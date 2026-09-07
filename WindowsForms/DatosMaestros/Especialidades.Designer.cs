@@ -72,8 +72,8 @@ namespace WindowsForms.DatosMaestros
             // 
             // listPanel
             // 
-            listPanel.Controls.Add(tableLayoutPanel1);
             listPanel.Controls.Add(especialidadesDataGridView);
+            listPanel.Controls.Add(tableLayoutPanel1);
             listPanel.Controls.Add(agregarEspecialidadButton);
             listPanel.Dock = DockStyle.Fill;
             listPanel.Location = new Point(0, 0);
@@ -84,8 +84,7 @@ namespace WindowsForms.DatosMaestros
             // 
             // tableLayoutPanel1
             // 
-            tableLayoutPanel1.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            tableLayoutPanel1.AutoSize = true;
+            tableLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
             tableLayoutPanel1.ColumnCount = 4;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
@@ -95,11 +94,12 @@ namespace WindowsForms.DatosMaestros
             tableLayoutPanel1.Controls.Add(filtrarButton, 2, 0);
             tableLayoutPanel1.Controls.Add(busquedaEspecialidadTextBox, 1, 0);
             tableLayoutPanel1.Controls.Add(busquedaLabel, 0, 0);
-            tableLayoutPanel1.Location = new Point(11, 11);
+            tableLayoutPanel1.Dock = DockStyle.Top;
+            tableLayoutPanel1.Location = new Point(8, 8);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
             tableLayoutPanel1.RowCount = 1;
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
-            tableLayoutPanel1.Size = new Size(552, 34);
+            tableLayoutPanel1.Size = new Size(558, 34);
             tableLayoutPanel1.TabIndex = 3;
             // 
             // limpiarFiltrosLinkLabel
@@ -108,7 +108,7 @@ namespace WindowsForms.DatosMaestros
             limpiarFiltrosLinkLabel.Dock = DockStyle.Fill;
             limpiarFiltrosLinkLabel.Location = new Point(374, 0);
             limpiarFiltrosLinkLabel.Name = "limpiarFiltrosLinkLabel";
-            limpiarFiltrosLinkLabel.Size = new Size(175, 34);
+            limpiarFiltrosLinkLabel.Size = new Size(181, 34);
             limpiarFiltrosLinkLabel.TabIndex = 2;
             limpiarFiltrosLinkLabel.TabStop = true;
             limpiarFiltrosLinkLabel.Text = "Limpiar filtros";
@@ -147,10 +147,15 @@ namespace WindowsForms.DatosMaestros
             // 
             // especialidadesDataGridView
             // 
-            especialidadesDataGridView.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            especialidadesDataGridView.Location = new Point(8, 51);
+            especialidadesDataGridView.AllowUserToAddRows = false;
+            especialidadesDataGridView.AllowUserToDeleteRows = false;
+            especialidadesDataGridView.AllowUserToOrderColumns = true;
+            especialidadesDataGridView.AllowUserToResizeRows = false;
+            especialidadesDataGridView.AutoSizeRowsMode = DataGridViewAutoSizeRowsMode.DisplayedCells;
+            especialidadesDataGridView.Dock = DockStyle.Fill;
+            especialidadesDataGridView.Location = new Point(8, 42);
             especialidadesDataGridView.Name = "especialidadesDataGridView";
-            especialidadesDataGridView.Size = new Size(555, 472);
+            especialidadesDataGridView.Size = new Size(558, 622);
             especialidadesDataGridView.TabIndex = 2;
             especialidadesDataGridView.CellContentClick += EspecialidadesDataGridView_CellContentClick;
             especialidadesDataGridView.DataBindingComplete += EspecialidadesDataGridView_DataBindingComplete;
@@ -239,7 +244,6 @@ namespace WindowsForms.DatosMaestros
             ((System.ComponentModel.ISupportInitialize)mainSplitContainer).EndInit();
             mainSplitContainer.ResumeLayout(false);
             listPanel.ResumeLayout(false);
-            listPanel.PerformLayout();
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel1.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)especialidadesDataGridView).EndInit();
