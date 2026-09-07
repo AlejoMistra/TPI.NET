@@ -28,87 +28,86 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.lblUsuario = new System.Windows.Forms.Label();
-            this.txtUsuario = new System.Windows.Forms.TextBox();
-            this.lblPassword = new System.Windows.Forms.Label();
-            this.txtPassword = new System.Windows.Forms.TextBox();
-            this.lblError = new System.Windows.Forms.Label();
-            this.btnIngresar = new System.Windows.Forms.Button();
-            this.SuspendLayout();
+            lblUsuario = new Label();
+            txtUsuario = new TextBox();
+            lblPassword = new Label();
+            txtPassword = new TextBox();
+            lblError = new Label();
+            btnIngresar = new Button();
+            SuspendLayout();
             // 
             // lblUsuario
             // 
-            this.lblUsuario.AutoSize = true;
-            this.lblUsuario.Location = new System.Drawing.Point(30, 28);
-            this.lblUsuario.Name = "lblUsuario";
-            this.lblUsuario.Size = new System.Drawing.Size(53, 15);
-            this.lblUsuario.TabIndex = 0;
-            this.lblUsuario.Text = "Usuario:";
+            lblUsuario.AutoSize = true;
+            lblUsuario.Location = new Point(30, 28);
+            lblUsuario.Name = "lblUsuario";
+            lblUsuario.Size = new Size(50, 15);
+            lblUsuario.TabIndex = 0;
+            lblUsuario.Text = "Usuario:";
             // 
             // txtUsuario
             // 
-            this.txtUsuario.Location = new System.Drawing.Point(30, 48);
-            this.txtUsuario.Name = "txtUsuario";
-            this.txtUsuario.Size = new System.Drawing.Size(300, 23);
-            this.txtUsuario.TabIndex = 1;
+            txtUsuario.Location = new Point(30, 48);
+            txtUsuario.Name = "txtUsuario";
+            txtUsuario.Size = new Size(300, 23);
+            txtUsuario.TabIndex = 1;
             // 
             // lblPassword
             // 
-            this.lblPassword.AutoSize = true;
-            this.lblPassword.Location = new System.Drawing.Point(30, 86);
-            this.lblPassword.Name = "lblPassword";
-            this.lblPassword.Size = new System.Drawing.Size(73, 15);
-            this.lblPassword.TabIndex = 2;
-            this.lblPassword.Text = "Contrase\u00f1a:";
+            lblPassword.AutoSize = true;
+            lblPassword.Location = new Point(30, 86);
+            lblPassword.Name = "lblPassword";
+            lblPassword.Size = new Size(70, 15);
+            lblPassword.TabIndex = 2;
+            lblPassword.Text = "Contraseña:";
             // 
             // txtPassword
             // 
-            this.txtPassword.Location = new System.Drawing.Point(30, 106);
-            this.txtPassword.Name = "txtPassword";
-            this.txtPassword.Size = new System.Drawing.Size(300, 23);
-            this.txtPassword.TabIndex = 3;
-            this.txtPassword.UseSystemPasswordChar = true;
+            txtPassword.Location = new Point(30, 106);
+            txtPassword.Name = "txtPassword";
+            txtPassword.Size = new Size(300, 23);
+            txtPassword.TabIndex = 3;
+            txtPassword.UseSystemPasswordChar = true;
             // 
             // lblError
             // 
-            this.lblError.ForeColor = System.Drawing.Color.Firebrick;
-            this.lblError.Location = new System.Drawing.Point(30, 138);
-            this.lblError.Name = "lblError";
-            this.lblError.Size = new System.Drawing.Size(300, 34);
-            this.lblError.TabIndex = 4;
-            this.lblError.Text = "";
+            lblError.AutoSize = true;
+            lblError.ForeColor = Color.Firebrick;
+            lblError.Location = new Point(30, 138);
+            lblError.Name = "lblError";
+            lblError.Size = new Size(0, 15);
+            lblError.TabIndex = 4;
             // 
             // btnIngresar
             // 
-            this.btnIngresar.Location = new System.Drawing.Point(30, 178);
-            this.btnIngresar.Name = "btnIngresar";
-            this.btnIngresar.Size = new System.Drawing.Size(300, 32);
-            this.btnIngresar.TabIndex = 5;
-            this.btnIngresar.Text = "Ingresar";
-            this.btnIngresar.UseVisualStyleBackColor = true;
-            this.btnIngresar.Click += new System.EventHandler(this.btnIngresar_Click);
+            btnIngresar.Location = new Point(30, 178);
+            btnIngresar.Name = "btnIngresar";
+            btnIngresar.Size = new Size(300, 32);
+            btnIngresar.TabIndex = 5;
+            btnIngresar.Text = "Ingresar";
+            btnIngresar.UseVisualStyleBackColor = true;
+            btnIngresar.Click += btnIngresar_Click;
             // 
             // LoginForm
             // 
-            this.AcceptButton = this.btnIngresar;
-            this.AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(360, 232);
-            this.Controls.Add(this.btnIngresar);
-            this.Controls.Add(this.lblError);
-            this.Controls.Add(this.txtPassword);
-            this.Controls.Add(this.lblPassword);
-            this.Controls.Add(this.txtUsuario);
-            this.Controls.Add(this.lblUsuario);
-            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.Name = "LoginForm";
-            this.StartPosition = System.Windows.Forms.FormStartPosition.CenterScreen;
-            this.Text = "Iniciar sesi\u00f3n";
-            this.ResumeLayout(false);
-            this.PerformLayout();
+            AcceptButton = btnIngresar;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(360, 232);
+            Controls.Add(btnIngresar);
+            Controls.Add(lblError);
+            Controls.Add(txtPassword);
+            Controls.Add(lblPassword);
+            Controls.Add(txtUsuario);
+            Controls.Add(lblUsuario);
+            FormBorderStyle = FormBorderStyle.FixedDialog;
+            MaximizeBox = false;
+            MinimizeBox = false;
+            Name = "LoginForm";
+            StartPosition = FormStartPosition.CenterScreen;
+            Text = "Iniciar sesión";
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion

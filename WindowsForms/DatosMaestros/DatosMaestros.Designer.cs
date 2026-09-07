@@ -28,30 +28,30 @@ namespace WindowsForms.DatosMaestros
         /// </summary>
         private void InitializeComponent()
         {
-            datosMaestrosTabControl = new System.Windows.Forms.TabControl();
-            profesionalesTabPage = new System.Windows.Forms.TabPage();
-            especialidadesTabPage = new System.Windows.Forms.TabPage();
+            datosMaestrosTabControl = new TabControl();
+            profesionalesTabPage = new TabPage();
+            especialidadesTabPage = new TabPage();
             datosMaestrosTabControl.SuspendLayout();
             SuspendLayout();
             // 
             // datosMaestrosTabControl
             // 
+            datosMaestrosTabControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
             datosMaestrosTabControl.Controls.Add(profesionalesTabPage);
             datosMaestrosTabControl.Controls.Add(especialidadesTabPage);
-            datosMaestrosTabControl.Dock = System.Windows.Forms.DockStyle.Fill;
-            datosMaestrosTabControl.Location = new System.Drawing.Point(0, 0);
+            datosMaestrosTabControl.Location = new Point(0, 0);
             datosMaestrosTabControl.Name = "datosMaestrosTabControl";
             datosMaestrosTabControl.SelectedIndex = 0;
-            datosMaestrosTabControl.Size = new System.Drawing.Size(1090, 700);
+            datosMaestrosTabControl.Size = new Size(1090, 700);
             datosMaestrosTabControl.TabIndex = 0;
             // 
             // profesionalesTabPage
             // 
-            profesionalesTabPage.Location = new System.Drawing.Point(4, 24);
-            profesionalesTabPage.Margin = new System.Windows.Forms.Padding(10);
+            profesionalesTabPage.Location = new Point(4, 24);
+            profesionalesTabPage.Margin = new Padding(10);
             profesionalesTabPage.Name = "profesionalesTabPage";
-            profesionalesTabPage.Padding = new System.Windows.Forms.Padding(3);
-            profesionalesTabPage.Size = new System.Drawing.Size(1082, 672);
+            profesionalesTabPage.Padding = new Padding(3);
+            profesionalesTabPage.Size = new Size(1082, 672);
             profesionalesTabPage.TabIndex = 0;
             profesionalesTabPage.Text = "Profesionales";
             profesionalesTabPage.UseVisualStyleBackColor = true;
@@ -59,10 +59,10 @@ namespace WindowsForms.DatosMaestros
             // 
             // especialidadesTabPage
             // 
-            especialidadesTabPage.Location = new System.Drawing.Point(4, 24);
+            especialidadesTabPage.Location = new Point(4, 24);
             especialidadesTabPage.Name = "especialidadesTabPage";
-            especialidadesTabPage.Padding = new System.Windows.Forms.Padding(3);
-            especialidadesTabPage.Size = new System.Drawing.Size(1082, 672);
+            especialidadesTabPage.Padding = new Padding(3);
+            especialidadesTabPage.Size = new Size(1082, 672);
             especialidadesTabPage.TabIndex = 1;
             especialidadesTabPage.Text = "Especialidades";
             especialidadesTabPage.UseVisualStyleBackColor = true;
@@ -70,11 +70,11 @@ namespace WindowsForms.DatosMaestros
             // 
             // DatosMaestros
             // 
-            AutoScaleDimensions = new System.Drawing.SizeF(7F, 15F);
-            AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
+            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleMode = AutoScaleMode.Font;
             Controls.Add(datosMaestrosTabControl);
             Name = "DatosMaestros";
-            Size = new System.Drawing.Size(1090, 700);
+            Size = new Size(1090, 700);
             datosMaestrosTabControl.ResumeLayout(false);
             ResumeLayout(false);
         }

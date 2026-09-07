@@ -443,6 +443,11 @@ namespace WindowsForms.DatosMaestros
 
             guardarProfesionalButton.Text = "Guardar Profesional";
         }
+
+        private void label11_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 
     public class ProfesionalGridRow
