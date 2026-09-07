@@ -116,71 +116,12 @@ namespace WindowsForms.DatosMaestros
             });
         }
 
-        private void CancelarButton_Click(object? sender, EventArgs e)
-        {
-            LimpiarFormulario();
-        }
-
-        private void ProfesionalesDataGridView_DataBindingComplete(object? sender, DataGridViewBindingCompleteEventArgs e)
-        {
-            profesionalesDataGridView.ClearSelection();
-            profesionalesDataGridView.CurrentCell = null;
-        }
-
-        private void AgregarProfesionalButton_Click(object? sender, EventArgs e)
-        {
-            LimpiarFormulario();
-            habilitadoCheckBox.Checked = true;
-            nombreTextBox.Focus();
-        }
-
+        // Load
         private async void Profesionales_Load(object? sender, EventArgs e)
         {
             await CargarEspecialidadesAsync();
             InicializarFiltroEstado();
             await CargarProfesionalesAsync();
-        }
-
-        private void InicializarFiltroEstado()
-        {
-            busquedaEstadoComboBox.Items.Clear();
-            busquedaEstadoComboBox.Items.Add("Todos");
-            busquedaEstadoComboBox.Items.Add("Activo");
-            busquedaEstadoComboBox.Items.Add("Inactivo");
-            busquedaEstadoComboBox.SelectedIndex = 0;
-        }
-
-        private async Task CargarEspecialidadesAsync()
-        {
-            try
-            {
-                var especialidades = await EspecialidadApiClient.GetAllAsync();
-                _especialidades = especialidades.ToList();
-
-                // Combo de búsqueda con opción 'Todas'
-                var listaBusqueda = new List<EspecialidadDTO>
-                {
-                    new EspecialidadDTO { Id = 0, Nombre = "Todas las especialidades" }
-                };
-                listaBusqueda.AddRange(_especialidades);
-                busquedaEspecialidadComboBox.DataSource = listaBusqueda;
-                busquedaEspecialidadComboBox.DisplayMember = "Nombre";
-                busquedaEspecialidadComboBox.ValueMember = "Id";
-
-                // Combo del formulario de alta/edición
-                var listaFormulario = new List<EspecialidadDTO>
-                {
-                    new EspecialidadDTO { Id = 0, Nombre = "Seleccionar especialidad" }
-                };
-                listaFormulario.AddRange(_especialidades);
-                especialidadComboBox.DataSource = listaFormulario;
-                especialidadComboBox.DisplayMember = "Nombre";
-                especialidadComboBox.ValueMember = "Id";
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Error al cargar especialidades: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
         }
 
         private async Task CargarProfesionalesAsync()
@@ -214,6 +155,48 @@ namespace WindowsForms.DatosMaestros
             {
                 MessageBox.Show($"Error al cargar profesionales: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
+        }
+        private async Task CargarEspecialidadesAsync()
+        {
+            try
+            {
+                var especialidades = await EspecialidadApiClient.GetAllAsync();
+                _especialidades = especialidades.ToList();
+
+                // Combo de búsqueda con opción 'Todas'
+                var listaBusqueda = new List<EspecialidadDTO>
+                {
+                    new EspecialidadDTO { Id = 0, Nombre = "Todas las especialidades" }
+                };
+                listaBusqueda.AddRange(_especialidades);
+                busquedaEspecialidadComboBox.DataSource = listaBusqueda;
+                busquedaEspecialidadComboBox.DisplayMember = "Nombre";
+                busquedaEspecialidadComboBox.ValueMember = "Id";
+
+                // Combo del formulario de alta/edición
+                var listaFormulario = new List<EspecialidadDTO>
+                {
+                    new EspecialidadDTO { Id = 0, Nombre = "Seleccionar especialidad" }
+                };
+                listaFormulario.AddRange(_especialidades);
+                especialidadComboBox.DataSource = listaFormulario;
+                especialidadComboBox.DisplayMember = "Nombre";
+                especialidadComboBox.ValueMember = "Id";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error al cargar especialidades: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Filtering
+        private void InicializarFiltroEstado()
+        {
+            busquedaEstadoComboBox.Items.Clear();
+            busquedaEstadoComboBox.Items.Add("Todos");
+            busquedaEstadoComboBox.Items.Add("Activo");
+            busquedaEstadoComboBox.Items.Add("Inactivo");
+            busquedaEstadoComboBox.SelectedIndex = 0;
         }
 
         private void AplicarFiltros()
@@ -264,6 +247,65 @@ namespace WindowsForms.DatosMaestros
             }
 
             AplicarFiltros();
+        }
+
+        // Grid events
+        private void ProfesionalesDataGridView_DataBindingComplete(object? sender, DataGridViewBindingCompleteEventArgs e)
+        {
+            profesionalesDataGridView.ClearSelection();
+            profesionalesDataGridView.CurrentCell = null;
+        }
+
+        private async void ProfesionalesDataGridView_CellContentClick(object? sender, DataGridViewCellEventArgs e)
+        {
+            if (e.RowIndex < 0) return;
+
+            var grid = (DataGridView)sender!;
+            var rowItem = grid.Rows[e.RowIndex].DataBoundItem as ProfesionalGridRow;
+            if (rowItem == null) return;
+
+            // Clic en Editar
+            if (grid.Columns[e.ColumnIndex].Name == "accionesColumn")
+            {
+                CargarProfesionalEnFormulario(rowItem);
+            }
+            // Clic en Eliminar
+            else if (grid.Columns[e.ColumnIndex].Name == "eliminarColumn")
+            {
+                var confirmResult = MessageBox.Show(
+                    $"¿Está seguro de que desea eliminar al profesional {rowItem.Nombre} {rowItem.Apellido} (Matrícula: {rowItem.Matricula})?",
+                    "Confirmar eliminación",
+                    MessageBoxButtons.YesNo,
+                    MessageBoxIcon.Question);
+
+                if (confirmResult == DialogResult.Yes)
+                {
+                    try
+                    {
+                        await ProfesionalApiClient.DeleteAsync(rowItem.Id);
+                        MessageBox.Show("Profesional eliminado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
+
+                        if (_selectedProfesionalId == rowItem.Id)
+                        {
+                            LimpiarFormulario();
+                        }
+
+                        await CargarProfesionalesAsync();
+                    }
+                    catch (Exception ex)
+                    {
+                        MessageBox.Show($"Error al eliminar profesional: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    }
+                }
+            }
+        }
+
+        // Form actions
+        private void AgregarProfesionalButton_Click(object? sender, EventArgs e)
+        {
+            LimpiarFormulario();
+            habilitadoCheckBox.Checked = true;
+            nombreTextBox.Focus();
         }
 
         private async void GuardarProfesionalButton_Click(object? sender, EventArgs e)
@@ -363,48 +405,9 @@ namespace WindowsForms.DatosMaestros
             }
         }
 
-        private async void ProfesionalesDataGridView_CellContentClick(object? sender, DataGridViewCellEventArgs e)
+        private void CancelarButton_Click(object? sender, EventArgs e)
         {
-            if (e.RowIndex < 0) return;
-
-            var grid = (DataGridView)sender!;
-            var rowItem = grid.Rows[e.RowIndex].DataBoundItem as ProfesionalGridRow;
-            if (rowItem == null) return;
-
-            // Clic en Editar
-            if (grid.Columns[e.ColumnIndex].Name == "accionesColumn")
-            {
-                CargarProfesionalEnFormulario(rowItem);
-            }
-            // Clic en Eliminar
-            else if (grid.Columns[e.ColumnIndex].Name == "eliminarColumn")
-            {
-                var confirmResult = MessageBox.Show(
-                    $"¿Está seguro de que desea eliminar al profesional {rowItem.Nombre} {rowItem.Apellido} (Matrícula: {rowItem.Matricula})?",
-                    "Confirmar eliminación",
-                    MessageBoxButtons.YesNo,
-                    MessageBoxIcon.Question);
-
-                if (confirmResult == DialogResult.Yes)
-                {
-                    try
-                    {
-                        await ProfesionalApiClient.DeleteAsync(rowItem.Id);
-                        MessageBox.Show("Profesional eliminado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                        if (_selectedProfesionalId == rowItem.Id)
-                        {
-                            LimpiarFormulario();
-                        }
-
-                        await CargarProfesionalesAsync();
-                    }
-                    catch (Exception ex)
-                    {
-                        MessageBox.Show($"Error al eliminar profesional: {ex.Message}", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                    }
-                }
-            }
+            LimpiarFormulario();
         }
 
         private void CargarProfesionalEnFormulario(ProfesionalGridRow profesional)
