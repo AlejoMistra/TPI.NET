@@ -7,10 +7,8 @@ namespace WebAPI
     {
         public static void MapUsuarioEndpoints(this WebApplication app)
         {
-            app.MapGet("/usuarios/{id}", async (int id) =>
+            app.MapGet("/usuarios/{id}", async (int id, UsuarioService usuarioService) =>
             {
-                UsuarioService usuarioService = new UsuarioService();
-
                 UsuarioDTO? dto = await usuarioService.GetAsync(id);
 
                 if (dto == null)
@@ -26,10 +24,8 @@ namespace WebAPI
             .WithOpenApi()
             .RequireAuthorization("UsuariosLeer");
 
-            app.MapGet("/usuarios", async () =>
+            app.MapGet("/usuarios", async (UsuarioService usuarioService) =>
             {
-                UsuarioService usuarioService = new UsuarioService();
-
                 var dtos = await usuarioService.GetAllAsync();
 
                 return Results.Ok(dtos);
@@ -39,12 +35,10 @@ namespace WebAPI
             .WithOpenApi()
             .RequireAuthorization("UsuariosLeer");
 
-            app.MapPost("/usuarios", async (UsuarioCreateDTO dto) =>
+            app.MapPost("/usuarios", async (UsuarioCreateDTO dto, UsuarioService usuarioService) =>
             {
                 try
                 {
-                    UsuarioService usuarioService = new UsuarioService();
-
                     UsuarioDTO usuarioDTO = await usuarioService.AddAsync(dto);
 
                     return Results.Created($"/usuarios/{usuarioDTO.Id}", usuarioDTO);
@@ -60,12 +54,10 @@ namespace WebAPI
             .WithOpenApi()
             .RequireAuthorization("UsuariosAgregar");
 
-            app.MapPut("/usuarios", async (UsuarioUpdateDTO dto) =>
+            app.MapPut("/usuarios", async (UsuarioUpdateDTO dto, UsuarioService usuarioService) =>
             {
                 try
                 {
-                    UsuarioService usuarioService = new UsuarioService();
-
                     var found = await usuarioService.UpdateAsync(dto);
 
                     if (!found)
@@ -87,10 +79,8 @@ namespace WebAPI
             .WithOpenApi()
             .RequireAuthorization("UsuariosActualizar");
 
-            app.MapDelete("/usuarios/{id}", async (int id) =>
+            app.MapDelete("/usuarios/{id}", async (int id, UsuarioService usuarioService) =>
             {
-                UsuarioService usuarioService = new UsuarioService();
-
                 var deleted = await usuarioService.DeleteAsync(id);
 
                 if (!deleted)

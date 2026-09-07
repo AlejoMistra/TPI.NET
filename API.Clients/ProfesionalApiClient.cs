@@ -7,7 +7,7 @@ namespace API.Clients
     {
       try
       {
-        using var client = await CreateHttpClientAsync();
+        var client = await CreateHttpClientAsync();
         HttpResponseMessage response = await client.GetAsync($"profesionales/{id}");
 
         if (response.IsSuccessStatusCode)
@@ -34,7 +34,7 @@ namespace API.Clients
     {
       try
       {
-        using var client = await CreateHttpClientAsync();
+        var client = await CreateHttpClientAsync();
         HttpResponseMessage response = await client.GetAsync("profesionales");
 
         if (response.IsSuccessStatusCode)
@@ -61,7 +61,7 @@ namespace API.Clients
     {
       try
       {
-        using var client = await CreateHttpClientAsync();
+        var client = await CreateHttpClientAsync();
         HttpResponseMessage response = await client.PostAsJsonAsync("profesionales", profesional);
 
         if (!response.IsSuccessStatusCode)
@@ -84,7 +84,7 @@ namespace API.Clients
     {
       try
       {
-        using var client = await CreateHttpClientAsync();
+        var client = await CreateHttpClientAsync();
         HttpResponseMessage response = await client.DeleteAsync($"profesionales/{id}");
 
         if (!response.IsSuccessStatusCode)
@@ -107,7 +107,7 @@ namespace API.Clients
     {
       try
       {
-        using var client = await CreateHttpClientAsync();
+        var client = await CreateHttpClientAsync();
         HttpResponseMessage response = await client.GetAsync($"profesionales/especialidad?especialidad={especialidad}");
 
         if (response.IsSuccessStatusCode)
@@ -134,7 +134,7 @@ namespace API.Clients
     {
       try
       {
-        using var client = await CreateHttpClientAsync();
+        var client = await CreateHttpClientAsync();
         HttpResponseMessage response = await client.PutAsJsonAsync($"profesionales/{profesional.Id}", profesional);
 
         if (!response.IsSuccessStatusCode)

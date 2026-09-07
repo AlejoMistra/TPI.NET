@@ -3,28 +3,28 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Data
 {
-       public class UsuarioRepository
+    public class UsuarioRepository : IUsuarioRepository
     {
-        private TPIContext CreateContext()
+        private readonly TPIContext _context;
+
+        public UsuarioRepository(TPIContext context)
         {
-            return new TPIContext();
+            _context = context;
         }
 
         public async Task AddAsync(Usuario usuario)
         {
-            using var context = CreateContext();
-            context.Usuarios.Add(usuario);
-            await context.SaveChangesAsync();
+            _context.Usuarios.Add(usuario);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> DeleteAsync(int id)
         {
-            using var context = CreateContext();
-            var usuario = await context.Usuarios.FindAsync(id);
+            var usuario = await _context.Usuarios.FindAsync(id);
             if (usuario != null)
             {
-                context.Usuarios.Remove(usuario);
-                await context.SaveChangesAsync();
+                _context.Usuarios.Remove(usuario);
+                await _context.SaveChangesAsync();
                 return true;
             }
             return false;
@@ -32,30 +32,26 @@ namespace Data
 
         public async Task<Usuario?> GetAsync(int id)
         {
-            using var context = CreateContext();
-            return await context.Usuarios
+            return await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<Usuario?> GetByUsernameAsync(string username)
         {
-            using var context = CreateContext();
-            return await context.Usuarios
+            return await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Username == username && u.Activo);
         }
 
         public async Task<IEnumerable<Usuario>> GetAllAsync()
         {
-            using var context = CreateContext();
-            return await context.Usuarios.ToListAsync();
+            return await _context.Usuarios.ToListAsync();
         }
 
         public async Task<bool> UpdateAsync(Usuario usuario)
         {
-            using var context = CreateContext();
-            context.Usuarios.Update(usuario);
-            await context.SaveChangesAsync();
+            _context.Usuarios.Update(usuario);
+            await _context.SaveChangesAsync();
             return true;
         }
-        }
     }
+}

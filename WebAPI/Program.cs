@@ -41,14 +41,21 @@ builder.Services.AddSwaggerGen(options =>
 
 // Add Entity Framework Context
 builder.Services.AddDbContext<TPIContext>(options =>
-    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection" +
-    "")));
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("DefaultConnection"),
+        sqlOptions => sqlOptions.EnableRetryOnFailure(
+            maxRetryCount: 5,
+            maxRetryDelay: TimeSpan.FromSeconds(10),
+            errorNumbersToAdd: null)));
 
 // Add Dependency Injection
 builder.Services.AddScoped<IProfesionalRepository, ProfesionalRepository>();
 builder.Services.AddScoped<IProfesionalService, ProfesionalService>();
 builder.Services.AddScoped<IEspecialidadRepository, EspecialidadRepository>();
 builder.Services.AddScoped<IEspecialidadService, EspecialidadService>();
+builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
+builder.Services.AddScoped<UsuarioService>();
+builder.Services.AddScoped<AuthService>();
 
 // Autenticacion JWT: los valores salen de la misma seccion que usa AuthService,
 // asi el token que se emite y el que se valida no pueden desincronizarse.

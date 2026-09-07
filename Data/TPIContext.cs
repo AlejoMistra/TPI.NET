@@ -20,16 +20,11 @@ namespace Data
             //SeedInitialData();
         }
 
-        internal TPIContext()
-        {
-            //this.Database.EnsureCreated();
-            //SeedInitialData();
-        }
-
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             if (!optionsBuilder.IsConfigured)
             {
+                // Fallback solo para herramientas de diseño (ej. dotnet-ef) que no pasan por Program.cs
                 var configuration = new ConfigurationBuilder()
                     .SetBasePath(AppContext.BaseDirectory)
                     .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
