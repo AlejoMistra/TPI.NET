@@ -16,6 +16,8 @@ namespace Data
             await SeedEspecialidadesAsync(context, logger);
             await SeedProfesionalesAsync(context, logger);
             await SeedPacientesAsync(context, logger);
+            await SeedUsuariosAsync(context, logger);
+
         }
 
         // Especialidades
@@ -51,21 +53,37 @@ namespace Data
             }
 
             // Cargar IDs reales de especialidades por nombre
-            var cardio   = await context.Especialidades.FirstAsync(e => e.Nombre == "Cardiología");
-            var dermato  = await context.Especialidades.FirstAsync(e => e.Nombre == "Dermatología");
-            var neuro    = await context.Especialidades.FirstAsync(e => e.Nombre == "Neurología");
+            var cardio = await context.Especialidades.FirstAsync(e => e.Nombre == "Cardiología");
+            var dermato = await context.Especialidades.FirstAsync(e => e.Nombre == "Dermatología");
+            var neuro = await context.Especialidades.FirstAsync(e => e.Nombre == "Neurología");
             var pediatria = await context.Especialidades.FirstAsync(e => e.Nombre == "Pediatría");
 
             var profesionales = new List<Profesional>
             {
-                new Profesional("María",   "Fernández", "DNI", "20111222", "MP-1001", cardio.Id),
-                new Profesional("Juan",    "Rodríguez", "DNI", "20222333", "MP-1002", dermato.Id),
-                new Profesional("Luciana", "Torres",    "DNI", "20333444", "MP-1003", neuro.Id),
-                new Profesional("Martín",  "Suárez",    "DNI", "20444555", "MP-1004", pediatria.Id),
-            };
+                new Profesional(
+                    "María", "Fernández", "DNI", "20111222", "MP-1001", cardio.Id,
+                    telefono: "011-4523-1100",
+                    email: "m.fernandez@clinica.med.ar",
+                    estado: Profesional.EstadoProfesional.Activo),
 
-            // Asignar Email y Teléfono opcionales a través de la API pública de Persona
-            // (Solo si Persona expone setters; si no, los dejamos vacíos)
+                new Profesional(
+                    "Juan", "Rodríguez", "DNI", "20222333", "MP-1002", dermato.Id,
+                    telefono: "011-4523-1101",
+                    email: "j.rodriguez@clinica.med.ar",
+                    estado: Profesional.EstadoProfesional.Activo),
+
+                new Profesional(
+                    "Luciana", "Torres", "DNI", "20333444", "MP-1003", neuro.Id,
+                    telefono: "011-4523-1102",
+                    email: "l.torres@clinica.med.ar",
+                    estado: Profesional.EstadoProfesional.Inactivo), // de baja temporaria
+
+                new Profesional(
+                    "Martín", "Suárez", "DNI", "20444555", "MP-1004", pediatria.Id,
+                    telefono: "011-4523-1103",
+                    email: "m.suarez@clinica.med.ar",
+                    estado: Profesional.EstadoProfesional.Activo),
+            };
 
             context.Profesionales.AddRange(profesionales);
             await context.SaveChangesAsync();
@@ -106,5 +124,25 @@ namespace Data
                 logger.LogInformation("HistoriasClinicas: {Count} registros insertados.", historias.Count);
             }
         }
+
+        private static async Task SeedUsuariosAsync(TPIContext context, ILogger logger)
+        {
+            const string adminUsername = "admin";
+            const string adminEmail = "admin@tpi.com";
+
+            // Username y Email tienen indice unico: si cualquiera de los dos ya esta
+            // tomado el insert falla, asi que el guard mira los dos.
+            if (await context.Usuarios.AnyAsync(u => u.Username == adminUsername || u.Email == adminEmail))
+            {
+                logger.LogInformation("Usuarios: ya existe un usuario con username '{Username}' o email '{Email}', se omite el seed.", adminUsername, adminEmail);
+                return;
+            }
+
+            var admin = new Usuario(0, adminUsername, adminEmail, "admin123", DateTime.Now, Usuario.Roles.Administrativo, true);
+            context.Usuarios.Add(admin);
+            await context.SaveChangesAsync();
+            logger.LogInformation("Usuarios: usuario '{Username}' insertado.", adminUsername);
+        }
     }
 }
+
