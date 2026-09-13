@@ -17,27 +17,16 @@ namespace Domain.Model
             Profesional
         }
 
-        
-
         public int Id { get; private set; }
-
         public string Username { get; private set; } = string.Empty;
-
         public string Email { get; private set; } = string.Empty;
-
         public string PasswordHash { get; private set; } = string.Empty;
-
-        public string Salt { get; private set; } = string.Empty; 
-
-
-        public DateTime FechaCreacion {  get; private set; }= DateTime.Now;
-
+        public string Salt { get; private set; } = string.Empty;
+        public DateTime FechaCreacion { get; private set; } = DateTime.Now;
         public Roles Rol { get; private set; }
-
         public bool Activo { get; private set; }
-
         public int? PersonaId { get; private set; }
-        public Persona? Persona { get; private set; } 
+        public Persona? Persona { get; private set; }
 
         public Usuario(int id, string username, string email, string password, DateTime fechaCreacion, Roles rol, bool activo)
         {
@@ -62,7 +51,7 @@ namespace Domain.Model
         public void SetUsername(string username)
         {
             if (string.IsNullOrWhiteSpace(username))
-                throw new ArgumentException("El nombre de usuario no puede ser nulo o vacío.", nameof(username));
+                throw new ArgumentException("El nombre de usuario no puede ser nulo o vacï¿½o.", nameof(username));
 
             if (username.Length < 5)
                 throw new ArgumentException("El nombre de usuario debe tener al menos 5 caracteres.", nameof(username));
@@ -73,17 +62,17 @@ namespace Domain.Model
         public void SetEmail(string email)
         {
             if (!EsEmailValido(email))
-                throw new ArgumentException("El email no tiene un formato válido.", nameof(email));
+                throw new ArgumentException("El email no tiene un formato vï¿½lido.", nameof(email));
             Email = email;
         }
 
         public void SetPassword(string password)
         {
             if (string.IsNullOrWhiteSpace(password))
-                throw new ArgumentException("La contraseña no puede ser nula o vacía.", nameof(password));
+                throw new ArgumentException("La contraseï¿½a no puede ser nula o vacï¿½a.", nameof(password));
 
             if (password.Length < 6)
-                throw new ArgumentException("La contraseña debe tener al menos 6 caracteres.", nameof(password));
+                throw new ArgumentException("La contraseï¿½a debe tener al menos 6 caracteres.", nameof(password));
 
             Salt = GenerateSalt();
             PasswordHash = HashPassword(password, Salt);
@@ -92,11 +81,11 @@ namespace Domain.Model
         public void SetFechaCreacion(DateTime fechaCreacion)
         {
             if (fechaCreacion == default)
-                throw new ArgumentException("La fecha de creación no puede ser nula.", nameof(fechaCreacion));
+                throw new ArgumentException("La fecha de creaciï¿½n no puede ser nula.", nameof(fechaCreacion));
             FechaCreacion = fechaCreacion;
         }
 
-        public void SetRol (Roles rol)
+        public void SetRol(Roles rol)
         {
             this.Rol = rol;
         }

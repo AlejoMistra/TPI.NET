@@ -51,6 +51,7 @@ namespace WindowsForms
             agendaDeTurnosToolStripMenuItem.Name = "agendaDeTurnosToolStripMenuItem";
             agendaDeTurnosToolStripMenuItem.Size = new Size(116, 20);
             agendaDeTurnosToolStripMenuItem.Text = "Agenda de Turnos";
+            agendaDeTurnosToolStripMenuItem.Click += agendaDeTurnosToolStripMenuItem_Click;
             // 
             // facturaciónToolStripMenuItem
             // 
@@ -85,6 +86,7 @@ namespace WindowsForms
             Name = "Home";
             StartPosition = FormStartPosition.WindowsDefaultBounds;
             Text = "Sistema de Gestión Médico";
+            Load += agendaDeTurnosToolStripMenuItem_Click;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ResumeLayout(false);

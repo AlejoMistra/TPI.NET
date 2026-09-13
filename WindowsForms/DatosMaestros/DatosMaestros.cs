@@ -6,13 +6,19 @@ namespace WindowsForms.DatosMaestros
     public partial class DatosMaestros : UserControl
     {
         // Lazy-loaded backing fields — instantiated only on first tab activation
+        private Turnos? _turnos;
         private Profesionales? _profesionales;
         private Especialidades? _especialidades;
 
         public DatosMaestros()
         {
             InitializeComponent();
-            LoadProfesionales();
+            LoadTurnos();
+        }
+
+        private void turnosTabPage_Enter(object sender, EventArgs e)
+        {
+            LoadTurnos();
         }
 
         private void profesionalesTabPage_Enter(object sender, EventArgs e)
@@ -23,6 +29,15 @@ namespace WindowsForms.DatosMaestros
         private void especialidadesTabPage_Enter(object sender, EventArgs e)
         {
             LoadEspecialidades();
+        }
+
+        private void LoadTurnos()
+        {
+            if (_turnos != null) return;
+
+            _turnos = new Turnos();
+            _turnos.Dock = DockStyle.Fill;
+            turnosTabPage.Controls.Add(_turnos);
         }
 
         private void LoadProfesionales()

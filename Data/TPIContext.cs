@@ -6,11 +6,12 @@ namespace Data
 {
     public class TPIContext : DbContext
     {
-        public DbSet<Usuario> Usuarios {  get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Persona> Personas { get; set; }
         public DbSet<Profesional> Profesionales { get; set; }
         public DbSet<Paciente> Pacientes { get; set; }
         public DbSet<Especialidad> Especialidades { get; set; }
+        public DbSet<Turno> Turnos { get; set; }
         public DbSet<HistoriaClinica> HistoriasClinicas { get; set; }
         public DbSet<RegistroClinico> RegistrosClinicos { get; set; }
 
@@ -40,7 +41,6 @@ namespace Data
             base.OnModelCreating(modelBuilder);
 
             // Evita que EF Core mapee estas clases arrastradas por navegación
-            modelBuilder.Ignore<Turno>();
             modelBuilder.Ignore<Factura>();
 
             modelBuilder.Entity<Usuario>(entity =>
@@ -165,6 +165,23 @@ namespace Data
                 // EF debe usar el campo backing _registrosClinicos para la colección readonly
                 entity.Navigation(h => h.RegistrosClinicos)
                     .UsePropertyAccessMode(PropertyAccessMode.Field);
+            });
+
+            modelBuilder.Entity<Turno>(entity =>
+            {
+                entity.HasKey(t => t.Id);
+                entity.Property(t => t.FechaHoraInicio)
+                    .IsRequired();
+                entity.Property(t => t.FechaHoraFin)
+                    .IsRequired();
+                entity.HasOne<Paciente>()
+                    .WithMany()
+                    .HasForeignKey(t => t.PacienteId)
+                    .OnDelete(DeleteBehavior.Restrict);
+                entity.HasOne<Profesional>()
+                    .WithMany()
+                    .HasForeignKey(t => t.ProfesionalId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<RegistroClinico>(entity =>

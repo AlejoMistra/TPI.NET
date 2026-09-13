@@ -31,12 +31,14 @@ namespace WindowsForms.DatosMaestros
             datosMaestrosTabControl = new TabControl();
             profesionalesTabPage = new TabPage();
             especialidadesTabPage = new TabPage();
+            turnosTabPage = new TabPage();
             datosMaestrosTabControl.SuspendLayout();
             SuspendLayout();
             // 
             // datosMaestrosTabControl
             // 
             datosMaestrosTabControl.Anchor = AnchorStyles.Top | AnchorStyles.Bottom | AnchorStyles.Left | AnchorStyles.Right;
+            datosMaestrosTabControl.Controls.Add(turnosTabPage);
             datosMaestrosTabControl.Controls.Add(profesionalesTabPage);
             datosMaestrosTabControl.Controls.Add(especialidadesTabPage);
             datosMaestrosTabControl.Location = new Point(0, 0);
@@ -68,6 +70,17 @@ namespace WindowsForms.DatosMaestros
             especialidadesTabPage.UseVisualStyleBackColor = true;
             especialidadesTabPage.Enter += especialidadesTabPage_Enter;
             // 
+            // turnosTabPage
+            // 
+            turnosTabPage.Location = new Point(4, 24);
+            turnosTabPage.Name = "turnosTabPage";
+            turnosTabPage.Padding = new Padding(3);
+            turnosTabPage.Size = new Size(1082, 672);
+            turnosTabPage.TabIndex = 2;
+            turnosTabPage.Text = "Turnos";
+            turnosTabPage.UseVisualStyleBackColor = true;
+            turnosTabPage.Enter += turnosTabPage_Enter;
+            // 
             // DatosMaestros
             // 
             AutoScaleDimensions = new SizeF(7F, 15F);
@@ -82,6 +95,7 @@ namespace WindowsForms.DatosMaestros
         #endregion
 
         private System.Windows.Forms.TabControl datosMaestrosTabControl;
+        private System.Windows.Forms.TabPage turnosTabPage;
         private System.Windows.Forms.TabPage profesionalesTabPage;
         private System.Windows.Forms.TabPage especialidadesTabPage;
     }

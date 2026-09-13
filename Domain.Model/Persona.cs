@@ -10,16 +10,10 @@ namespace Domain.Model
         }
         public int Id { get; private set; }
         public string Nombre { get; private set; } = nombre;
-
         public string Apellido { get; private set; } = apellido;
-
         public string TipoDocumento { get; private set; } = tipoDocumento;
         public string NroDocumento { get; private set; } = nroDocumento;
-
-        /// <summary>Correo electrónico de contacto (institucional o personal).</summary>
         public string? Email { get; private set; } = email;
-
-        /// <summary>Teléfono de contacto.</summary>
         public string? Telefono { get; private set; } = telefono;
 
         public void SetId(int id)

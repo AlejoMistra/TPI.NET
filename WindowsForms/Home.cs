@@ -25,10 +25,19 @@ namespace WindowsForms
             ContentPanel.Controls.Add(control);
         }
 
+        private void agendaDeTurnosToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            datosMaestrosToolStripMenuItem.BackColor = SystemColors.Control;
+            agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.ControlLight;
+            ShowControl(new Turnos());
+        }
+
         private void datosMaestrosToolStripMenuItem_Click(object sender, EventArgs e)
         {
-            ShowControl(new DatosMaestrosUC());
+            agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.Control;
             datosMaestrosToolStripMenuItem.BackColor = SystemColors.ControlLight;
+            ShowControl(new DatosMaestrosUC());
         }
+
     }
 }

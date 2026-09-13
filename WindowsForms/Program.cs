@@ -21,16 +21,16 @@ namespace WindowsForms
             // TEMPORAL (desarrollo): registra un auth service falso para bypassear
             // la capa de autenticación hasta que el login real esté implementado.
             // Eliminar esta línea y DevAuthService.cs al integrar el login real.
-            //AuthServiceProvider.Register(new DevAuthService());
+            AuthServiceProvider.Register(new DevAuthService());
           
             // Login primero: si el usuario cancela o cierra el dialogo, la app no arranca.
-            using (var login = new LoginForm())
-            {
-                if (login.ShowDialog() != DialogResult.OK)
-                {
-                    return;
-                }
-            }
+            //using (var login = new LoginForm())
+            //{
+            //    if (login.ShowDialog() != DialogResult.OK)
+            //    {
+            //        return;
+            //    }
+            //}
 
             Application.Run(new Home());
         }
