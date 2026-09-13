@@ -16,7 +16,7 @@ namespace Domain.Model
 
         // Factura — ignorada en EF Core hasta implementar facturación
         public Factura? Factura { get; private set; }
-        public int FacturaId { get; private set; }
+        public int? FacturaId { get; private set; }
 
         // Participantes del turno
         public Profesional? Profesional { get; private set; }
@@ -24,10 +24,6 @@ namespace Domain.Model
 
         public Paciente? Paciente { get; private set; }
         public int PacienteId { get; private set; }
-
-        public int AdministrativoId { get; private set; }
-        public Usuario? Usuario { get; private set; }
-        public int UsuarioId { get; private set; }
 
         // Registros clínicos originados en este turno (navegación inversa de solo lectura)
         private readonly List<RegistroClinico> _registros = new();

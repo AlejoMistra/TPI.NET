@@ -6,13 +6,14 @@ namespace Data
 {
     public class TPIContext : DbContext
     {
-        public DbSet<Usuario> Usuarios {  get; set; }
+        public DbSet<Usuario> Usuarios { get; set; }
         public DbSet<Persona> Personas { get; set; }
         public DbSet<Profesional> Profesionales { get; set; }
         public DbSet<Paciente> Pacientes { get; set; }
         public DbSet<Especialidad> Especialidades { get; set; }
         public DbSet<HistoriaClinica> HistoriasClinicas { get; set; }
         public DbSet<RegistroClinico> RegistrosClinicos { get; set; }
+        public DbSet<Turno> Turnos { get; set; }
 
         public TPIContext(DbContextOptions<TPIContext> options) : base(options)
         {
@@ -40,7 +41,6 @@ namespace Data
             base.OnModelCreating(modelBuilder);
 
             // Evita que EF Core mapee estas clases arrastradas por navegación
-            modelBuilder.Ignore<Turno>();
             modelBuilder.Ignore<Factura>();
 
             modelBuilder.Entity<Usuario>(entity =>
@@ -184,9 +184,10 @@ namespace Data
                     .HasForeignKey(r => r.ProfesionalId)
                     .OnDelete(DeleteBehavior.Restrict);
 
-                // TurnoId: sin FK real mientras Turno esté en Ignore()
-                // Cuando se implemente Turno, agregar la FK a Turno.Id
-                entity.Property(r => r.TurnoId).IsRequired(false);
+                entity.HasOne<Turno>()
+                    .WithMany(t => t.Registros)
+                    .HasForeignKey(r => r.TurnoId)
+                    .OnDelete(DeleteBehavior.Restrict);
             });
 
             modelBuilder.Entity<Especialidad>(entity =>
@@ -195,6 +196,38 @@ namespace Data
                 entity.Property(e => e.Nombre)
                     .IsRequired()
                     .HasMaxLength(100);
+            });
+
+            modelBuilder.Entity<Turno>(entity =>
+            {
+                entity.HasKey(t => t.Id);
+                entity.Property(t => t.FechaHoraInicio).IsRequired();
+                entity.Property(t => t.FechaHoraFin).IsRequired();
+                entity.Property(t => t.Motivo)
+                    .IsRequired(false)
+                    .HasMaxLength(200);
+                entity.Property(t => t.EstadoTurno)
+                    .IsRequired()
+                    .HasConversion<string>()
+                    .HasMaxLength(30);
+                entity.Property(t => t.Observacion)
+                    .IsRequired(false)
+                    .HasMaxLength(200);
+                
+                entity.Ignore(t => t.FacturaId);
+
+                entity.HasOne(t => t.Profesional)
+                    .WithMany()
+                    .HasForeignKey(t => t.ProfesionalId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasOne(t => t.Paciente)
+                    .WithMany(p => p.Turnos)
+                    .HasForeignKey(t => t.PacienteId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.Navigation(t => t.Registros)
+                    .UsePropertyAccessMode(PropertyAccessMode.Field);
             });
         }
     }
