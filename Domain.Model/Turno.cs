@@ -4,7 +4,7 @@ namespace Domain.Model
     {
         public enum EstadosTurno
         {
-            Pendiente, Confirmado, Atendido, Ausente, Cancelado, Reprogramado
+            Libre, Asignado, Confirmado, Atendido, Cancelado
         }
 
         public int Id { get; private set; }
@@ -12,23 +12,50 @@ namespace Domain.Model
         public DateTime FechaHoraFin { get; private set; }
         public string Motivo { get; private set; } = string.Empty;
         public EstadosTurno EstadoTurno { get; private set; }
-        public string Observacion { get; private set; } = string.Empty;
+        public string Observaciones { get; private set; } = string.Empty;
 
         // Factura — ignorada en EF Core hasta implementar facturación
         public Factura? Factura { get; private set; }
         public int? FacturaId { get; private set; }
 
         // Participantes del turno
-        public Profesional? Profesional { get; private set; }
+        public Profesional Profesional { get; private set; } = null!;
         public int ProfesionalId { get; private set; }
 
         public Paciente? Paciente { get; private set; }
-        public int PacienteId { get; private set; }
+        public int? PacienteId { get; private set; }
 
         // Registros clínicos originados en este turno (navegación inversa de solo lectura)
         private readonly List<RegistroClinico> _registros = new();
         public IReadOnlyCollection<RegistroClinico> Registros => _registros.AsReadOnly();
 
+        // Constructor privado para EF Core
+        private Turno()
+        {
+        }
+
+        public Turno(
+            int id,
+            DateTime fechaHoraInicio,
+            DateTime fechaHoraFin,
+            string motivo,
+            EstadosTurno estadoTurno,
+            string observaciones,
+            int? facturaId,
+            int profesionalId,
+            int? pacienteId
+            )
+        {
+            Id = id;
+            FechaHoraInicio = fechaHoraInicio;
+            FechaHoraFin = fechaHoraFin;
+            Motivo = motivo;
+            EstadoTurno = estadoTurno;
+            Observaciones = observaciones;
+            FacturaId = facturaId;
+            ProfesionalId = profesionalId;
+            PacienteId = pacienteId;
+        }
 
         /// Registra un RegistroClinico en la historia del paciente a partir de este turno.
         /// Valida que el turno está en estado Atendido, sino InvalidOperationExeption

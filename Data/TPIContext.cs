@@ -210,10 +210,11 @@ namespace Data
                     .IsRequired()
                     .HasConversion<string>()
                     .HasMaxLength(30);
-                entity.Property(t => t.Observacion)
+                entity.Property(t => t.Observaciones)
+                    .HasColumnName("Observacion") // Pendiente de meter en una migración para que quede obsevaciones
                     .IsRequired(false)
                     .HasMaxLength(200);
-                
+
                 entity.Ignore(t => t.FacturaId);
 
                 entity.HasOne(t => t.Profesional)
