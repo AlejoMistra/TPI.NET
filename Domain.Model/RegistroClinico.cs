@@ -34,5 +34,6 @@ namespace Domain.Model
         Diagnostico,
         Tratamiento,
         Evolucion,
+        Otro
     }
 }

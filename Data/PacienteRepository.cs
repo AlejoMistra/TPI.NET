@@ -16,6 +16,11 @@ namespace Data
         {
             await _context.Pacientes.AddAsync(paciente);
             await _context.SaveChangesAsync();
+
+            // Asegurar que cada paciente nuevo tenga su historia clínica inicializada
+            var historiaClinica = new HistoriaClinica(paciente.Id, TypeGrupoSanguineo.NO_ESPECIFICADO);
+            await _context.HistoriasClinicas.AddAsync(historiaClinica);
+            await _context.SaveChangesAsync();
         }
 
         public async Task<bool> UpdateAsync(Paciente paciente)

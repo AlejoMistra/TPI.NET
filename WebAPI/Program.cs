@@ -56,6 +56,8 @@ builder.Services.AddScoped<IEspecialidadService, EspecialidadService>();
 builder.Services.AddScoped<IPacienteRepository, PacienteRepository>();
 builder.Services.AddScoped<ITurnoRepository, TurnoRepository>();
 builder.Services.AddScoped<ITurnoService, TurnoService>();
+builder.Services.AddScoped<IHistoriaClinicaRepository, HistoriaClinicaRepository>();
+builder.Services.AddScoped<IHistoriaClinicaService, HistoriaClinicaService>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<AuthService>();
@@ -125,5 +127,6 @@ app.MapUsuarioEndpoints();
 app.MapProfesionalEndpoints();
 app.MapEspecialidadEndpoints();
 app.MapTurnoEndpoints();
+app.MapHistoriaClinicaEndpoints();
 
 await app.RunAsync();
