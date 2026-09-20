@@ -7,6 +7,7 @@ namespace WebAPI
     {
         public static void MapProfesionalEndpoints(this WebApplication app)
         {
+
             app.MapPost("/profesionales", async (ProfesionalDTO profesional, IProfesionalService profesionalService) =>
             {
                 try
