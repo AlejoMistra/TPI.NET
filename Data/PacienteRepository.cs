@@ -34,6 +34,8 @@ namespace Data
             existing.SetNroDocumento(paciente.NroDocumento);
             existing.SetTelefono(paciente.Telefono);
             existing.SetEmail(paciente.Email);
+            existing.SetFechaNacimiento(paciente.FechaNacimiento);
+            existing.SetObraSocial(paciente.ObraSocial);
 
             await _context.SaveChangesAsync();
             return true;

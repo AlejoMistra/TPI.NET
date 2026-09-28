@@ -10,6 +10,8 @@ using WebAPI;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
      {
@@ -54,6 +56,7 @@ builder.Services.AddScoped<IProfesionalService, ProfesionalService>();
 builder.Services.AddScoped<IEspecialidadRepository, EspecialidadRepository>();
 builder.Services.AddScoped<IEspecialidadService, EspecialidadService>();
 builder.Services.AddScoped<IPacienteRepository, PacienteRepository>();
+builder.Services.AddScoped<IPacienteService, PacienteService>();
 builder.Services.AddScoped<ITurnoRepository, TurnoRepository>();
 builder.Services.AddScoped<ITurnoService, TurnoService>();
 builder.Services.AddScoped<IHistoriaClinicaRepository, HistoriaClinicaRepository>();
@@ -97,6 +100,8 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+
 // Add pending migrations and seed the database
 using (var scope = app.Services.CreateScope())
 {
@@ -116,7 +121,7 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
-// Autenticacion antes que autorizacion: la primera arma el ClaimsPrincipal,
+// Autenticacion antes que autorizacion
 // la segunda decide sobre el.
 app.UseAuthentication();
 app.UseAuthorization();
@@ -128,5 +133,6 @@ app.MapProfesionalEndpoints();
 app.MapEspecialidadEndpoints();
 app.MapTurnoEndpoints();
 app.MapHistoriaClinicaEndpoints();
+app.MapPacienteEndpoints();
 
 await app.RunAsync();

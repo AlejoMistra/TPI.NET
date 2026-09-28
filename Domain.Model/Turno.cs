@@ -57,6 +57,58 @@ namespace Domain.Model
             PacienteId = pacienteId;
         }
 
+        /// <summary>
+        /// Asigna el turno a un paciente, pasando su estado a Asignado.
+        /// </summary>
+        public void Asignar(int pacienteId, string? motivo = null)
+        {
+            if (EstadoTurno != EstadosTurno.Libre)
+                throw new InvalidOperationException($"Solo se puede asignar un turno en estado Libre. Estado actual: {EstadoTurno}.");
+
+            if (pacienteId <= 0)
+                throw new ArgumentException("El ID de paciente debe ser mayor que cero.", nameof(pacienteId));
+
+            PacienteId = pacienteId;
+            EstadoTurno = EstadosTurno.Asignado;
+            if (motivo != null)
+                Motivo = motivo;
+        }
+
+        /// <summary>
+        /// Libera un turno asignado o confirmado, quitando el paciente y devolviéndolo a estado Libre.
+        /// </summary>
+        public void Liberar()
+        {
+            if (EstadoTurno == EstadosTurno.Atendido)
+                throw new InvalidOperationException("No se puede liberar un turno que ya fue atendido.");
+
+            PacienteId = null;
+            Paciente = null;
+            EstadoTurno = EstadosTurno.Libre;
+        }
+
+        /// <summary>
+        /// Cancela el turno manteniendo el paciente asociado (si lo hubiera) para trazabilidad.
+        /// </summary>
+        public void Cancelar()
+        {
+            if (EstadoTurno == EstadosTurno.Atendido)
+                throw new InvalidOperationException("No se puede cancelar un turno que ya fue atendido.");
+
+            EstadoTurno = EstadosTurno.Cancelado;
+        }
+
+        /// <summary>
+        /// Confirma un turno previamente asignado.
+        /// </summary>
+        public void Confirmar()
+        {
+            if (EstadoTurno != EstadosTurno.Asignado)
+                throw new InvalidOperationException($"Solo se puede confirmar un turno en estado Asignado. Estado actual: {EstadoTurno}.");
+
+            EstadoTurno = EstadosTurno.Confirmado;
+        }
+
         /// Registra un RegistroClinico en la historia del paciente a partir de este turno.
         /// Valida que el turno está en estado Atendido, sino InvalidOperationExeption
         public RegistroClinico Registrar(TipoRegistroClinico tipo, string descripcion,

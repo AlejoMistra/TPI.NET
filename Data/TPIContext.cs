@@ -14,7 +14,6 @@ namespace Data
         public DbSet<Turno> Turnos { get; set; }
         public DbSet<HistoriaClinica> HistoriasClinicas { get; set; }
         public DbSet<RegistroClinico> RegistrosClinicos { get; set; }
-        public DbSet<Turno> Turnos { get; set; }
 
         public TPIContext(DbContextOptions<TPIContext> options) : base(options)
         {
@@ -168,23 +167,6 @@ namespace Data
                     .UsePropertyAccessMode(PropertyAccessMode.Field);
             });
 
-            modelBuilder.Entity<Turno>(entity =>
-            {
-                entity.HasKey(t => t.Id);
-                entity.Property(t => t.FechaHoraInicio)
-                    .IsRequired();
-                entity.Property(t => t.FechaHoraFin)
-                    .IsRequired();
-                entity.HasOne<Paciente>()
-                    .WithMany()
-                    .HasForeignKey(t => t.PacienteId)
-                    .OnDelete(DeleteBehavior.Restrict);
-                entity.HasOne<Profesional>()
-                    .WithMany()
-                    .HasForeignKey(t => t.ProfesionalId)
-                    .OnDelete(DeleteBehavior.Restrict);
-            });
-
             modelBuilder.Entity<RegistroClinico>(entity =>
             {
                 entity.HasKey(r => r.Id);
@@ -233,6 +215,9 @@ namespace Data
                     .IsRequired(false)
                     .HasMaxLength(200);
 
+                entity.Property(t => t.PacienteId)
+                    .IsRequired(false);
+
                 entity.Ignore(t => t.FacturaId);
 
                 entity.HasOne(t => t.Profesional)
@@ -243,6 +228,7 @@ namespace Data
                 entity.HasOne(t => t.Paciente)
                     .WithMany(p => p.Turnos)
                     .HasForeignKey(t => t.PacienteId)
+                    .IsRequired(false)
                     .OnDelete(DeleteBehavior.Restrict);
 
                 entity.Navigation(t => t.Registros)

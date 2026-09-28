@@ -10,15 +10,8 @@ namespace WebAPI
             // POST: /especialidades
             app.MapPost("/especialidades", async (EspecialidadDTO especialidadDto, IEspecialidadService especialidadService) =>
             {
-                try
-                {
-                    var createdDto = await especialidadService.AddAsync(especialidadDto);
-                    return Results.Created($"/especialidades/{createdDto.Id}", createdDto);
-                }
-                catch (ArgumentException ex)
-                {
-                    return Results.BadRequest(new { error = ex.Message });
-                }
+                var createdDto = await especialidadService.AddAsync(especialidadDto);
+                return Results.Created($"/especialidades/{createdDto.Id}", createdDto);
             })
             .WithName("CreateEspecialidad")
             .Produces<EspecialidadDTO>(StatusCodes.Status201Created)
@@ -39,7 +32,7 @@ namespace WebAPI
             app.MapGet("/especialidades/{id:int}", async (int id, IEspecialidadService especialidadService) =>
             {
                 if (id <= 0)
-                    return Results.BadRequest(new { error = "El ID debe ser un número positivo." });
+                    throw new ArgumentException("El ID debe ser un número positivo.", nameof(id));
 
                 var dto = await especialidadService.GetByIdAsync(id);
                 return dto is not null ? Results.Ok(dto) : Results.NotFound();
@@ -54,17 +47,10 @@ namespace WebAPI
             app.MapPut("/especialidades/{id:int}", async (int id, EspecialidadDTO especialidadDto, IEspecialidadService especialidadService) =>
             {
                 if (id != especialidadDto.Id)
-                    return Results.BadRequest(new { error = "El ID en la URL no coincide con el ID en el cuerpo." });
+                    throw new ArgumentException("El ID en la URL no coincide con el ID en el cuerpo.", nameof(id));
 
-                try
-                {
-                    var updatedDto = await especialidadService.UpdateAsync(especialidadDto);
-                    return updatedDto is not null ? Results.Ok(updatedDto) : Results.NotFound();
-                }
-                catch (ArgumentException ex)
-                {
-                    return Results.BadRequest(new { error = ex.Message });
-                }
+                var updatedDto = await especialidadService.UpdateAsync(especialidadDto);
+                return updatedDto is not null ? Results.Ok(updatedDto) : Results.NotFound();
             })
             .WithName("UpdateEspecialidad")
             .Produces<EspecialidadDTO>(StatusCodes.Status200OK)
@@ -76,17 +62,10 @@ namespace WebAPI
             app.MapDelete("/especialidades/{id:int}", async (int id, IEspecialidadService especialidadService) =>
             {
                 if (id <= 0)
-                    return Results.BadRequest(new { error = "El ID debe ser un número positivo." });
+                    throw new ArgumentException("El ID debe ser un número positivo.", nameof(id));
 
-                try
-                {
-                    var deleted = await especialidadService.DeleteAsync(id);
-                    return deleted ? Results.NoContent() : Results.NotFound();
-                }
-                catch (InvalidOperationException ex)
-                {
-                    return Results.Conflict(new { error = ex.Message });
-                }
+                var deleted = await especialidadService.DeleteAsync(id);
+                return deleted ? Results.NoContent() : Results.NotFound();
             })
             .WithName("DeleteEspecialidad")
             .Produces(StatusCodes.Status400BadRequest)
