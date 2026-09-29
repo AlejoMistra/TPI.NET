@@ -1,5 +1,8 @@
+using API.Clients.Exceptions;
 using System.Net;
 using System.Net.Http.Headers;
+using System.Net.Http.Json;
+using System.Text.Json;
 
 namespace API.Clients
 {
@@ -79,6 +82,10 @@ namespace API.Clients
                 client.DefaultRequestHeaders.Authorization =
                     new AuthenticationHeaderValue("Bearer", token);
             }
+            else
+            {
+                client.DefaultRequestHeaders.Authorization = null;
+            }
         }
 
         protected static async Task EnsureAuthenticatedAsync()
@@ -90,7 +97,7 @@ namespace API.Clients
 
             if (!await authService.IsAuthenticatedAsync())
             {
-                throw new UnauthorizedAccessException("Su sesión ha expirado.");
+                throw new UnauthorizedApiException("Su sesión ha expirado.");
             }
         }
 
@@ -101,10 +108,187 @@ namespace API.Clients
                 // Limpiar sesión actual
                 var authService = AuthServiceProvider.Instance;
                 await authService.LogoutAsync();
-
-                // Lanzar excepción con mensaje simple
-                throw new UnauthorizedAccessException("Su sesión ha expirado.");
             }
+        }
+
+        // ==========================================
+        // MÉTODOS GENÉRICOS REUTILIZABLES DE PETICIÓN
+        // ==========================================
+
+        protected static async Task<HttpResponseMessage> ExecuteRequestAsync(Func<HttpClient, Task<HttpResponseMessage>> requestFunc)
+        {
+            HttpResponseMessage response;
+            try
+            {
+                var client = await CreateHttpClientAsync();
+                response = await requestFunc(client);
+            }
+            catch (HttpRequestException ex)
+            {
+                throw new NetworkApiException("No se pudo conectar con el servidor. Compruebe si la API está en ejecución o su conexión de red.", ex);
+            }
+            catch (TaskCanceledException ex)
+            {
+                throw new NetworkApiException("La solicitud al servidor excedió el tiempo de espera (timeout).", ex);
+            }
+
+            if (!response.IsSuccessStatusCode)
+            {
+                await HandleResponseErrorAsync(response);
+            }
+
+            return response;
+        }
+
+        protected static async Task<T> SendGetAsync<T>(string endpoint)
+        {
+            var response = await ExecuteRequestAsync(client => client.GetAsync(endpoint));
+            var result = await response.Content.ReadFromJsonAsync<T>();
+            if (result == null)
+            {
+                throw new ApiException($"La respuesta del servidor para '{endpoint}' fue nula o no se pudo deserializar.", response.StatusCode);
+            }
+            return result;
+        }
+
+        protected static async Task<T?> SendGetOrDefaultAsync<T>(string endpoint)
+        {
+            try
+            {
+                var response = await ExecuteRequestAsync(client => client.GetAsync(endpoint));
+                return await response.Content.ReadFromJsonAsync<T>();
+            }
+            catch (NotFoundApiException)
+            {
+                return default;
+            }
+        }
+
+        protected static async Task<TResponse> SendPostAsync<TRequest, TResponse>(string endpoint, TRequest data)
+        {
+            var response = await ExecuteRequestAsync(client => client.PostAsJsonAsync(endpoint, data));
+            var result = await response.Content.ReadFromJsonAsync<TResponse>();
+            if (result == null)
+            {
+                throw new ApiException($"La respuesta del servidor para '{endpoint}' fue nula o no se pudo deserializar.", response.StatusCode);
+            }
+            return result;
+        }
+
+        protected static async Task SendPostAsync<TRequest>(string endpoint, TRequest data)
+        {
+            await ExecuteRequestAsync(client => client.PostAsJsonAsync(endpoint, data));
+        }
+
+        protected static async Task<TResponse> SendPutAsync<TRequest, TResponse>(string endpoint, TRequest data)
+        {
+            var response = await ExecuteRequestAsync(client => client.PutAsJsonAsync(endpoint, data));
+            var result = await response.Content.ReadFromJsonAsync<TResponse>();
+            if (result == null)
+            {
+                throw new ApiException($"La respuesta del servidor para '{endpoint}' fue nula o no se pudo deserializar.", response.StatusCode);
+            }
+            return result;
+        }
+
+        protected static async Task SendPutAsync<TRequest>(string endpoint, TRequest data)
+        {
+            await ExecuteRequestAsync(client => client.PutAsJsonAsync(endpoint, data));
+        }
+
+        protected static async Task SendDeleteAsync(string endpoint)
+        {
+            await ExecuteRequestAsync(client => client.DeleteAsync(endpoint));
+        }
+
+        // ==========================================
+        // PROCESAMIENTO CENTRALIZADO DE ERRORES HTTP
+        // ==========================================
+
+        private static async Task HandleResponseErrorAsync(HttpResponseMessage response)
+        {
+            if (response.StatusCode == HttpStatusCode.Unauthorized)
+            {
+                await HandleUnauthorizedResponseAsync(response);
+                throw new UnauthorizedApiException();
+            }
+
+            string rawContent = await response.Content.ReadAsStringAsync();
+            string? title = null;
+            string? detail = null;
+            IDictionary<string, string[]>? errors = null;
+
+            if (!string.IsNullOrWhiteSpace(rawContent))
+            {
+                try
+                {
+                    using var doc = JsonDocument.Parse(rawContent);
+                    var root = doc.RootElement;
+
+                    if (root.TryGetProperty("title", out var titleProp) && titleProp.ValueKind == JsonValueKind.String)
+                    {
+                        title = titleProp.GetString();
+                    }
+
+                    if (root.TryGetProperty("detail", out var detailProp) && detailProp.ValueKind == JsonValueKind.String)
+                    {
+                        detail = detailProp.GetString();
+                    }
+
+                    if (root.TryGetProperty("message", out var msgProp) && msgProp.ValueKind == JsonValueKind.String)
+                    {
+                        detail ??= msgProp.GetString();
+                    }
+
+                    if (root.TryGetProperty("error", out var errProp) && errProp.ValueKind == JsonValueKind.String)
+                    {
+                        detail ??= errProp.GetString();
+                    }
+
+                    if (root.TryGetProperty("errors", out var errorsProp) && errorsProp.ValueKind == JsonValueKind.Object)
+                    {
+                        var dict = new Dictionary<string, string[]>();
+                        var errorList = new List<string>();
+
+                        foreach (var prop in errorsProp.EnumerateObject())
+                        {
+                            if (prop.Value.ValueKind == JsonValueKind.Array)
+                            {
+                                var messages = prop.Value.EnumerateArray()
+                                    .Where(x => x.ValueKind == JsonValueKind.String)
+                                    .Select(x => x.GetString()!)
+                                    .ToArray();
+                                dict[prop.Name] = messages;
+                                errorList.AddRange(messages);
+                            }
+                        }
+
+                        errors = dict;
+                        if (errorList.Count > 0 && string.IsNullOrWhiteSpace(detail))
+                        {
+                            detail = string.Join(" ", errorList);
+                        }
+                    }
+                }
+                catch
+                {
+                    // se mantiene rawContent como detalle
+                    detail = rawContent;
+                }
+            }
+
+            string cleanMessage = !string.IsNullOrWhiteSpace(detail)
+                ? detail
+                : (!string.IsNullOrWhiteSpace(title) ? title : $"Error HTTP {(int)response.StatusCode} ({response.ReasonPhrase})");
+
+            throw response.StatusCode switch
+            {
+                HttpStatusCode.BadRequest => new ValidationApiException(cleanMessage, title, detail, errors),
+                HttpStatusCode.NotFound => new NotFoundApiException(cleanMessage, title, detail),
+                HttpStatusCode.Conflict => new ConflictApiException(cleanMessage, title, detail),
+                HttpStatusCode.Unauthorized => new UnauthorizedApiException(cleanMessage),
+                _ => new ApiException(cleanMessage, response.StatusCode, title, detail, errors)
+            };
         }
     }
 }

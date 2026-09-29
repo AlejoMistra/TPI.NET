@@ -16,11 +16,25 @@ namespace Domain.Model
             string apellido,
             string tipoDocumento,
             string nroDocumento,
+            DateTime fechaNacimiento = default,
+            string obraSocial = "",
             string? telefono = null,
             string? email = null)
             : base(nombre, apellido, tipoDocumento, nroDocumento, telefono, email)
         {
+            FechaNacimiento = fechaNacimiento;
+            ObraSocial = obraSocial;
             Turnos = new List<Turno>();
+        }
+
+        public void SetFechaNacimiento(DateTime fechaNacimiento)
+        {
+            FechaNacimiento = fechaNacimiento;
+        }
+
+        public void SetObraSocial(string obraSocial)
+        {
+            ObraSocial = obraSocial;
         }
     }
 }

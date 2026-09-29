@@ -30,13 +30,13 @@ namespace WindowsForms.DatosMaestros
         {
             mainSplitContainer = new SplitContainer();
             listPanel = new Panel();
+            especialidadesDataGridView = new DataGridView();
             tableLayoutPanel1 = new TableLayoutPanel();
             limpiarFiltrosLinkLabel = new LinkLabel();
             filtrarButton = new Button();
-            busquedaEspecialidadTextBox = new TextBox();
-            busquedaLabel = new Label();
-            especialidadesDataGridView = new DataGridView();
             agregarEspecialidadButton = new Button();
+            busquedaLabel = new Label();
+            busquedaEspecialidadTextBox = new TextBox();
             formPanel = new Panel();
             formTitleLabel = new Label();
             nombreLabel = new Label();
@@ -48,8 +48,8 @@ namespace WindowsForms.DatosMaestros
             mainSplitContainer.Panel2.SuspendLayout();
             mainSplitContainer.SuspendLayout();
             listPanel.SuspendLayout();
-            tableLayoutPanel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)especialidadesDataGridView).BeginInit();
+            tableLayoutPanel1.SuspendLayout();
             formPanel.SuspendLayout();
             SuspendLayout();
             // 
@@ -74,76 +74,12 @@ namespace WindowsForms.DatosMaestros
             // 
             listPanel.Controls.Add(especialidadesDataGridView);
             listPanel.Controls.Add(tableLayoutPanel1);
-            listPanel.Controls.Add(agregarEspecialidadButton);
             listPanel.Dock = DockStyle.Fill;
             listPanel.Location = new Point(0, 0);
             listPanel.Name = "listPanel";
             listPanel.Padding = new Padding(8);
             listPanel.Size = new Size(574, 672);
             listPanel.TabIndex = 0;
-            // 
-            // tableLayoutPanel1
-            // 
-            tableLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            tableLayoutPanel1.ColumnCount = 4;
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
-            tableLayoutPanel1.Controls.Add(limpiarFiltrosLinkLabel, 3, 0);
-            tableLayoutPanel1.Controls.Add(filtrarButton, 2, 0);
-            tableLayoutPanel1.Controls.Add(busquedaEspecialidadTextBox, 1, 0);
-            tableLayoutPanel1.Controls.Add(busquedaLabel, 0, 0);
-            tableLayoutPanel1.Dock = DockStyle.Top;
-            tableLayoutPanel1.Location = new Point(8, 8);
-            tableLayoutPanel1.Name = "tableLayoutPanel1";
-            tableLayoutPanel1.RowCount = 1;
-            tableLayoutPanel1.RowStyles.Add(new RowStyle());
-            tableLayoutPanel1.Size = new Size(558, 34);
-            tableLayoutPanel1.TabIndex = 3;
-            // 
-            // limpiarFiltrosLinkLabel
-            // 
-            limpiarFiltrosLinkLabel.AutoSize = true;
-            limpiarFiltrosLinkLabel.Dock = DockStyle.Fill;
-            limpiarFiltrosLinkLabel.Location = new Point(374, 0);
-            limpiarFiltrosLinkLabel.Name = "limpiarFiltrosLinkLabel";
-            limpiarFiltrosLinkLabel.Size = new Size(181, 34);
-            limpiarFiltrosLinkLabel.TabIndex = 2;
-            limpiarFiltrosLinkLabel.TabStop = true;
-            limpiarFiltrosLinkLabel.Text = "Limpiar filtros";
-            limpiarFiltrosLinkLabel.TextAlign = ContentAlignment.MiddleLeft;
-            limpiarFiltrosLinkLabel.LinkClicked += LimpiarFiltrosLinkLabel_LinkClicked;
-            // 
-            // filtrarButton
-            // 
-            filtrarButton.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            filtrarButton.AutoSize = true;
-            filtrarButton.Location = new Point(278, 3);
-            filtrarButton.Name = "filtrarButton";
-            filtrarButton.Size = new Size(90, 25);
-            filtrarButton.TabIndex = 1;
-            filtrarButton.Text = "Filtrar";
-            filtrarButton.UseVisualStyleBackColor = true;
-            filtrarButton.Click += FiltrarButton_Click;
-            // 
-            // busquedaEspecialidadTextBox
-            // 
-            busquedaEspecialidadTextBox.Location = new Point(54, 3);
-            busquedaEspecialidadTextBox.Name = "busquedaEspecialidadTextBox";
-            busquedaEspecialidadTextBox.Size = new Size(218, 23);
-            busquedaEspecialidadTextBox.TabIndex = 0;
-            // 
-            // busquedaLabel
-            // 
-            busquedaLabel.AutoSize = true;
-            busquedaLabel.Dock = DockStyle.Fill;
-            busquedaLabel.Location = new Point(3, 0);
-            busquedaLabel.Name = "busquedaLabel";
-            busquedaLabel.Size = new Size(45, 34);
-            busquedaLabel.TabIndex = 0;
-            busquedaLabel.Text = "Buscar:";
-            busquedaLabel.TextAlign = ContentAlignment.MiddleLeft;
             // 
             // especialidadesDataGridView
             // 
@@ -160,16 +96,81 @@ namespace WindowsForms.DatosMaestros
             especialidadesDataGridView.CellContentClick += EspecialidadesDataGridView_CellContentClick;
             especialidadesDataGridView.DataBindingComplete += EspecialidadesDataGridView_DataBindingComplete;
             // 
+            // tableLayoutPanel1
+            // 
+            tableLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
+            tableLayoutPanel1.ColumnCount = 5;
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel1.Controls.Add(limpiarFiltrosLinkLabel, 3, 0);
+            tableLayoutPanel1.Controls.Add(filtrarButton, 2, 0);
+            tableLayoutPanel1.Controls.Add(agregarEspecialidadButton, 4, 0);
+            tableLayoutPanel1.Controls.Add(busquedaLabel, 0, 0);
+            tableLayoutPanel1.Controls.Add(busquedaEspecialidadTextBox, 1, 0);
+            tableLayoutPanel1.Dock = DockStyle.Top;
+            tableLayoutPanel1.Location = new Point(8, 8);
+            tableLayoutPanel1.Name = "tableLayoutPanel1";
+            tableLayoutPanel1.RowCount = 1;
+            tableLayoutPanel1.RowStyles.Add(new RowStyle());
+            tableLayoutPanel1.Size = new Size(558, 34);
+            tableLayoutPanel1.TabIndex = 3;
+            // 
+            // limpiarFiltrosLinkLabel
+            // 
+            limpiarFiltrosLinkLabel.AutoSize = true;
+            limpiarFiltrosLinkLabel.Dock = DockStyle.Fill;
+            limpiarFiltrosLinkLabel.Location = new Point(281, 0);
+            limpiarFiltrosLinkLabel.Name = "limpiarFiltrosLinkLabel";
+            limpiarFiltrosLinkLabel.Size = new Size(80, 34);
+            limpiarFiltrosLinkLabel.TabIndex = 2;
+            limpiarFiltrosLinkLabel.TabStop = true;
+            limpiarFiltrosLinkLabel.Text = "Limpiar filtros";
+            limpiarFiltrosLinkLabel.TextAlign = ContentAlignment.MiddleLeft;
+            limpiarFiltrosLinkLabel.LinkClicked += LimpiarFiltrosLinkLabel_LinkClicked;
+            // 
+            // filtrarButton
+            // 
+            filtrarButton.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
+            filtrarButton.AutoSize = true;
+            filtrarButton.Location = new Point(185, 3);
+            filtrarButton.Name = "filtrarButton";
+            filtrarButton.Size = new Size(90, 25);
+            filtrarButton.TabIndex = 1;
+            filtrarButton.Text = "Filtrar";
+            filtrarButton.UseVisualStyleBackColor = true;
+            filtrarButton.Click += FiltrarButton_Click;
+            // 
             // agregarEspecialidadButton
             // 
-            agregarEspecialidadButton.Anchor = AnchorStyles.Bottom | AnchorStyles.Left;
-            agregarEspecialidadButton.Location = new Point(8, 1200);
+            agregarEspecialidadButton.Anchor = AnchorStyles.Top | AnchorStyles.Right;
+            agregarEspecialidadButton.Location = new Point(430, 3);
             agregarEspecialidadButton.Name = "agregarEspecialidadButton";
-            agregarEspecialidadButton.Size = new Size(160, 30);
+            agregarEspecialidadButton.Size = new Size(125, 25);
             agregarEspecialidadButton.TabIndex = 3;
-            agregarEspecialidadButton.Text = "+ Agregar Especialidad";
+            agregarEspecialidadButton.Text = "Nuevo Especialidad";
             agregarEspecialidadButton.UseVisualStyleBackColor = true;
             agregarEspecialidadButton.Click += AgregarEspecialidadButton_Click;
+            // 
+            // busquedaLabel
+            // 
+            busquedaLabel.AutoSize = true;
+            busquedaLabel.Dock = DockStyle.Fill;
+            busquedaLabel.Location = new Point(3, 0);
+            busquedaLabel.Name = "busquedaLabel";
+            busquedaLabel.Size = new Size(45, 34);
+            busquedaLabel.TabIndex = 0;
+            busquedaLabel.Text = "Buscar:";
+            busquedaLabel.TextAlign = ContentAlignment.MiddleLeft;
+            // 
+            // busquedaEspecialidadTextBox
+            // 
+            busquedaEspecialidadTextBox.Location = new Point(54, 3);
+            busquedaEspecialidadTextBox.Name = "busquedaEspecialidadTextBox";
+            busquedaEspecialidadTextBox.Size = new Size(125, 23);
+            busquedaEspecialidadTextBox.TabIndex = 0;
             // 
             // formPanel
             // 
@@ -244,9 +245,9 @@ namespace WindowsForms.DatosMaestros
             ((System.ComponentModel.ISupportInitialize)mainSplitContainer).EndInit();
             mainSplitContainer.ResumeLayout(false);
             listPanel.ResumeLayout(false);
+            ((System.ComponentModel.ISupportInitialize)especialidadesDataGridView).EndInit();
             tableLayoutPanel1.ResumeLayout(false);
             tableLayoutPanel1.PerformLayout();
-            ((System.ComponentModel.ISupportInitialize)especialidadesDataGridView).EndInit();
             formPanel.ResumeLayout(false);
             formPanel.PerformLayout();
             ResumeLayout(false);

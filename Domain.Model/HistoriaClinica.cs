@@ -3,8 +3,8 @@ namespace Domain.Model
     public class HistoriaClinica
     {
         public int Id { get; private set; }
-        public TypeGrupoSanguineo GrupoSanguineo { get; private set; }
         public int PacienteId { get; private set; }
+        public TypeGrupoSanguineo GrupoSanguineo { get; private set; }
         public DateTime FechaCreacion { get; private set; }
 
         private readonly List<RegistroClinico> _registrosClinicos = new();
@@ -13,11 +13,16 @@ namespace Domain.Model
         // Para EF Core
         private HistoriaClinica() { }
 
-        public HistoriaClinica(int pacienteId, TypeGrupoSanguineo grupoSanguineo)
+        public HistoriaClinica(int pacienteId, TypeGrupoSanguineo grupoSanguineo = TypeGrupoSanguineo.NO_ESPECIFICADO)
         {
             PacienteId = pacienteId;
             GrupoSanguineo = grupoSanguineo;
             FechaCreacion = DateTime.UtcNow;
+        }
+
+        public void ActualizarGrupoSanguineo(TypeGrupoSanguineo grupoSanguineo)
+        {
+            GrupoSanguineo = grupoSanguineo;
         }
 
         /// Agrega un registro clínico a la historia. El turno origen es opcional;
@@ -33,6 +38,7 @@ namespace Domain.Model
 
     public enum TypeGrupoSanguineo
     {
+        NO_ESPECIFICADO,
         A_POSITIVO,
         A_NEGATIVO,
         B_POSITIVO,

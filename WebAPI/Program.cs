@@ -1,4 +1,4 @@
-﻿using Application.Services;
+using Application.Services;
 using Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
@@ -10,6 +10,8 @@ using WebAPI;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(options =>
      {
@@ -20,7 +22,7 @@ builder.Services.AddSwaggerGen(options =>
              Scheme = "bearer",
              BearerFormat = "JWT",
              In = ParameterLocation.Header,
-             Description = "Pegá acá el token JWT, sin el prefijo Bearer."
+             Description = "JWT Authorization header. Ejemplo: \"Bearer {token}\""
          });
 
          options.AddSecurityRequirement(new OpenApiSecurityRequirement
@@ -53,6 +55,12 @@ builder.Services.AddScoped<IProfesionalRepository, ProfesionalRepository>();
 builder.Services.AddScoped<IProfesionalService, ProfesionalService>();
 builder.Services.AddScoped<IEspecialidadRepository, EspecialidadRepository>();
 builder.Services.AddScoped<IEspecialidadService, EspecialidadService>();
+builder.Services.AddScoped<IPacienteRepository, PacienteRepository>();
+builder.Services.AddScoped<IPacienteService, PacienteService>();
+builder.Services.AddScoped<ITurnoRepository, TurnoRepository>();
+builder.Services.AddScoped<ITurnoService, TurnoService>();
+builder.Services.AddScoped<IHistoriaClinicaRepository, HistoriaClinicaRepository>();
+builder.Services.AddScoped<IHistoriaClinicaService, HistoriaClinicaService>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<AuthService>();
@@ -92,6 +100,9 @@ builder.Services.AddAuthorization(options =>
 
 var app = builder.Build();
 
+app.UseExceptionHandler();
+
+// Add pending migrations and seed the database
 using (var scope = app.Services.CreateScope())
 {
     var db = scope.ServiceProvider.GetRequiredService<TPIContext>();
@@ -110,15 +121,18 @@ if (!app.Environment.IsDevelopment())
     app.UseHttpsRedirection();
 }
 
-// Autenticacion antes que autorizacion: la primera arma el ClaimsPrincipal,
+// Autenticacion antes que autorizacion
 // la segunda decide sobre el.
 app.UseAuthentication();
 app.UseAuthorization();
 
 // Map endpoints
+app.MapAuthEndpoints();
+app.MapUsuarioEndpoints();
 app.MapProfesionalEndpoints();
 app.MapEspecialidadEndpoints();
-app.MapUsuarioEndpoints();
-app.MapAuthEndpoints();
+app.MapTurnoEndpoints();
+app.MapHistoriaClinicaEndpoints();
+app.MapPacienteEndpoints();
 
 await app.RunAsync();

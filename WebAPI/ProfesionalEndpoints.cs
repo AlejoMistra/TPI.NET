@@ -1,4 +1,4 @@
-﻿using Application.Services;
+using Application.Services;
 using DTOs;
 
 namespace WebAPI
@@ -9,15 +9,8 @@ namespace WebAPI
         {
             app.MapPost("/profesionales", async (ProfesionalDTO profesional, IProfesionalService profesionalService) =>
             {
-                try
-                {
-                    ProfesionalDTO createdProfesional = await profesionalService.AddAsync(profesional);
-                    return Results.Created($"/profesionales/{createdProfesional.Id}", createdProfesional);
-                }
-                catch (ArgumentException ex)
-                {
-                    return Results.BadRequest(new { message = ex.Message });
-                }
+                ProfesionalDTO createdProfesional = await profesionalService.AddAsync(profesional);
+                return Results.Created($"/profesionales/{createdProfesional.Id}", createdProfesional);
             })
             .WithName("AddProfesional")
             .Produces<ProfesionalDTO>(StatusCodes.Status201Created)
@@ -36,12 +29,10 @@ namespace WebAPI
             app.MapGet("/profesionales/{id:int}", async (int id, IProfesionalService profesionalService) =>
             {
                 if (id <= 0)
-                {
-                    return Results.BadRequest(new { message = "El ID debe ser mayor a 0" });
-                }
+                    throw new ArgumentException("El ID debe ser mayor a 0", nameof(id));
 
                 ProfesionalDTO? dto = await profesionalService.GetByIdAsync(id);
-                return dto is null ? Results.NotFound() : Results.Ok(dto);
+                return dto is not null ? Results.Ok(dto) : Results.NotFound();
             })
             .WithName("GetProfesionalById")
             .Produces<ProfesionalDTO>(StatusCodes.Status200OK)
@@ -52,19 +43,10 @@ namespace WebAPI
             app.MapPut("/profesionales/{id:int}", async (int id, ProfesionalDTO profesional, IProfesionalService profesionalService) =>
             {
                 if (id != profesional.Id)
-                {
-                    return Results.BadRequest(new { message = "ID in the URL does not match ID in the body." });
-                }
+                    throw new ArgumentException("El Id de la URL no coincide con el Id del cuerpo de la solicitud.", nameof(id));
 
-                try
-                {
-                    ProfesionalDTO? updatedProfesional = await profesionalService.UpdateAsync(profesional);
-                    return updatedProfesional is null ? Results.NotFound() : Results.Ok(updatedProfesional);
-                }
-                catch (ArgumentException ex)
-                {
-                    return Results.BadRequest(new { message = ex.Message });
-                }
+                ProfesionalDTO? updatedProfesional = await profesionalService.UpdateAsync(profesional);
+                return updatedProfesional is not null ? Results.Ok(updatedProfesional) : Results.NotFound();
             })
             .WithName("UpdateProfesional")
             .Produces<ProfesionalDTO>(StatusCodes.Status200OK)
@@ -75,9 +57,7 @@ namespace WebAPI
             app.MapDelete("/profesionales/{id:int}", async (int id, IProfesionalService profesionalService) =>
             {
                 if (id <= 0)
-                {
-                    return Results.BadRequest(new { message = "El ID debe ser mayor a 0" });
-                }
+                    throw new ArgumentException("El ID debe ser mayor a 0", nameof(id));
 
                 bool deleted = await profesionalService.DeleteAsync(id);
                 return deleted ? Results.NoContent() : Results.NotFound();
