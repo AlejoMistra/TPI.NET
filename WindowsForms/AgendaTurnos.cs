@@ -5,13 +5,13 @@ using WindowsForms.Helpers;
 
 namespace WindowsForms
 {
-    public partial class Turnos : UserControl
+    public partial class AgendaTurnos : UserControl
     {
         private List<AgendaGridRow> _allTurnos = new();
         private List<ProfesionalDTO> _profesionales = new();
         private List<PacienteDTO> _pacientes = new();
 
-        public Turnos()
+        public AgendaTurnos()
         {
             InitializeComponent();
             ConfigurarColumnas();
@@ -20,10 +20,6 @@ namespace WindowsForms
             busquedaFechaDateTimePicker.ShowCheckBox = true;
             busquedaFechaDateTimePicker.Checked = true;
             busquedaFechaDateTimePicker.Value = DateTime.Today;
-
-            this.Load += Turnos_Load;
-            turnosDataGridView.CellContentClick += TurnosDataGridView_CellContentClick;
-            turnosDataGridView.DataBindingComplete += TurnosDataGridView_DataBindingComplete;
         }
 
         private void ConfigurarColumnas()
@@ -76,17 +72,17 @@ namespace WindowsForms
 
             turnosDataGridView.Columns.Add(new DataGridViewTextBoxColumn
             {
-                Name = "profesionalColumn",
-                HeaderText = "Profesional",
-                DataPropertyName = nameof(AgendaGridRow.ProfesionalNombre),
+                Name = "pacienteColumn",
+                HeaderText = "Paciente",
+                DataPropertyName = nameof(AgendaGridRow.PacienteNombre),
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
 
             turnosDataGridView.Columns.Add(new DataGridViewTextBoxColumn
             {
-                Name = "pacienteColumn",
-                HeaderText = "Paciente",
-                DataPropertyName = nameof(AgendaGridRow.PacienteNombre),
+                Name = "profesionalColumn",
+                HeaderText = "Profesional",
+                DataPropertyName = nameof(AgendaGridRow.ProfesionalNombre),
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
 
@@ -265,12 +261,15 @@ namespace WindowsForms
 
         private void nuevoTurnoButton_Click(object? sender, EventArgs e)
         {
-            MessageBox.Show(
-                "La asignación de turnos a pacientes se incorporará en la próxima iteración.\n\n" +
-                "Para dar de alta nuevos turnos libres u horarios disponibles, ingrese a la solapa 'Turnos' en Datos Maestros.",
-                "Agenda de Turnos",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+            // abre form AsignacionTurno estilo modal para crear un nuevo turno
+            using (var form = new AsignacionTurno())
+            {
+                if (form.ShowDialog() == DialogResult.OK)
+                {
+                    // recargar agenda
+                    _ = CargarAgendaAsync();
+                }
+            }
         }
 
         // ==========================================

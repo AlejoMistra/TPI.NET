@@ -29,7 +29,7 @@ namespace WindowsForms
         {
             datosMaestrosToolStripMenuItem.BackColor = SystemColors.Control;
             agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.ControlLight;
-            ShowControl(new Turnos());
+            ShowControl(new AgendaTurnos());
         }
 
         private void datosMaestrosToolStripMenuItem_Click(object sender, EventArgs e)

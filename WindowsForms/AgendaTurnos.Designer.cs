@@ -1,6 +1,6 @@
 namespace WindowsForms
 {
-    partial class Turnos
+    partial class AgendaTurnos
     {
         /// <summary> 
         /// Required designer variable.
@@ -171,7 +171,7 @@ namespace WindowsForms
             // 
             limpiarFiltrosLinkLabel.Anchor = AnchorStyles.None;
             limpiarFiltrosLinkLabel.AutoSize = true;
-            limpiarFiltrosLinkLabel.Location = new Point(617, 22);
+            limpiarFiltrosLinkLabel.Location = new Point(617, 26);
             limpiarFiltrosLinkLabel.Name = "limpiarFiltrosLinkLabel";
             limpiarFiltrosLinkLabel.Size = new Size(80, 15);
             limpiarFiltrosLinkLabel.TabIndex = 5;
@@ -207,6 +207,9 @@ namespace WindowsForms
             turnosDataGridView.RowHeadersVisible = false;
             turnosDataGridView.Size = new Size(994, 513);
             turnosDataGridView.TabIndex = 1;
+            this.Load += Turnos_Load;
+            turnosDataGridView.CellContentClick += TurnosDataGridView_CellContentClick;
+            turnosDataGridView.DataBindingComplete += TurnosDataGridView_DataBindingComplete;
             // 
             // Turnos
             // 
