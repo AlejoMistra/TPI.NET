@@ -1,4 +1,8 @@
 ﻿@inherits LayoutComponentBase
+@using API.Clients
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+@implements IDisposable
 
 <PageTitle>Blazor.Server</PageTitle>
 
@@ -9,6 +13,10 @@
 
     <main>
         <div class="top-row px-4 d-flex justify-content-end">
+            @if (isAuthenticated)
+            {
+                <button class="btn btn-primary btn-sm" @onclick="Logout">Cerrar Sesión</button>
+            }
         </div>
 
         <article class="content px-4">
@@ -16,3 +24,42 @@
         </article>
     </main>
 </div>
+
+@code {
+    private bool isAuthenticated = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await CheckAuthenticationState();
+            AuthService.AuthenticationStateChanged += OnAuthenticationStateChanged;
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task CheckAuthenticationState()
+    {
+        isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        StateHasChanged();
+    }
+
+    private void OnAuthenticationStateChanged(bool authenticated)
+    {
+        InvokeAsync(async () =>
+        {
+            await CheckAuthenticationState();
+        });
+    }
+
+    private async Task Logout()
+    {
+        await AuthService.LogoutAsync();
+        Navigation.NavigateTo("/login");
+    }
+
+    public void Dispose()
+    {
+        AuthService.AuthenticationStateChanged -= OnAuthenticationStateChanged;
+    }
+}
