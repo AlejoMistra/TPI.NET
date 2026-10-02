@@ -6,4 +6,9 @@ var builder = WebAssemblyHostBuilder.CreateDefault(args);
 builder.RootComponents.Add<App>("#app");
 builder.RootComponents.Add<HeadOutlet>("head::after");
 
-await builder.Build().RunAsync();
+// Configurar HttpClient para llamadas a la API
+builder.Services.AddScoped(sp => new HttpClient { BaseAddress = new Uri("https://localhost:7146/") });
+
+var app = builder.Build();
+
+await app.RunAsync();
