@@ -19,6 +19,14 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Clients", "API.Clients\
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Auth.WindowsForms", "API.Auth.WindowsForms\API.Auth.WindowsForms.csproj", "{4C1BFF9A-5A3F-4911-9514-9ED19600CF98}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.WebAssembly", "Blazor.WebAssembly\Blazor.WebAssembly.csproj", "{A679A676-3CC1-4773-BAFE-4D1680E88617}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Blazor.Server", "Blazor.Server\Blazor.Server.csproj", "{EF717EAF-138A-427F-A87A-8DF8B600406A}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Auth.Blazor.Server", "API.Auth.Blazor.Server\API.Auth.Blazor.Server.csproj", "{082BD1CB-EACC-4B2C-8374-36B8D39086C4}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "API.Auth.Blazor.WebAssembly", "API.Auth.Blazor.WebAssembly\API.Auth.Blazor.WebAssembly.csproj", "{C227226F-61C1-4E3A-82FA-3DED99B9C3A8}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -57,6 +65,22 @@ Global
 		{4C1BFF9A-5A3F-4911-9514-9ED19600CF98}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{4C1BFF9A-5A3F-4911-9514-9ED19600CF98}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{4C1BFF9A-5A3F-4911-9514-9ED19600CF98}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A679A676-3CC1-4773-BAFE-4D1680E88617}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A679A676-3CC1-4773-BAFE-4D1680E88617}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A679A676-3CC1-4773-BAFE-4D1680E88617}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A679A676-3CC1-4773-BAFE-4D1680E88617}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF717EAF-138A-427F-A87A-8DF8B600406A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF717EAF-138A-427F-A87A-8DF8B600406A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF717EAF-138A-427F-A87A-8DF8B600406A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF717EAF-138A-427F-A87A-8DF8B600406A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{082BD1CB-EACC-4B2C-8374-36B8D39086C4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{082BD1CB-EACC-4B2C-8374-36B8D39086C4}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{082BD1CB-EACC-4B2C-8374-36B8D39086C4}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{082BD1CB-EACC-4B2C-8374-36B8D39086C4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{C227226F-61C1-4E3A-82FA-3DED99B9C3A8}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{C227226F-61C1-4E3A-82FA-3DED99B9C3A8}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{C227226F-61C1-4E3A-82FA-3DED99B9C3A8}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{C227226F-61C1-4E3A-82FA-3DED99B9C3A8}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

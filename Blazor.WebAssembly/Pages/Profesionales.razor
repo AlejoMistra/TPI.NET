@@ -1,0 +1,208 @@
+@page "/profesionales"
+@using DTOs
+@using API.Clients
+@using Blazor.WebAssembly.Components
+@inject IJSRuntime JSRuntime
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>Profesionales</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h3>Profesionales</h3>
+            
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @errorMessage
+                    <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                </div>
+            }
+            
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @successMessage
+                    <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+                </div>
+            }
+
+            @if (canAdd)
+            {
+                <div class="mb-3">
+                    <button class="btn btn-primary" @onclick="OpenAddModal">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+            }
+
+            @if (loading)
+            {
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Id</th>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>N° Doc</th>
+                                <th>Matrícula</th>
+                                <th>Especialidad</th>
+                                <th>Teléfono</th>
+                                <th>Email</th>
+                                <th>Estado</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (profesionales != null && profesionales.Any())
+                            {
+                                @foreach (var profesional in profesionales)
+                                {
+                                    <tr>
+                                        <td>@profesional.Id</td>
+                                        <td>@profesional.Nombre</td>
+                                        <td>@profesional.Apellido</td>
+                                        <td>@profesional.NroDocumento</td>
+                                        <td>@profesional.Matricula</td>
+                                        <td>@(especialidades?.FirstOrDefault(e => e.Id == profesional.EspecialidadId)?.Nombre)</td>
+                                        <td>@profesional.Telefono</td>
+                                        <td>@profesional.Email</td>
+                                        <td>@profesional.Estado</td>
+                                        <td>
+                                            @if (canUpdate)
+                                            {
+                                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => OpenEditModal(profesional)">
+                                                    <i class="fas fa-edit"></i> Editar
+                                                </button>
+                                            }
+                                            @if (canDelete)
+                                            {
+                                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmDelete(profesional)">
+                                                    <i class="fas fa-trash"></i> Eliminar
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<ProfesionalModal @ref="profesionalModal" OnProfesionalChanged="LoadProfesionales" />
+
+@code {
+    private List<ProfesionalDTO>? profesionales;
+    private List<EspecialidadDTO>? especialidades;
+    private bool loading = true;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+    private ProfesionalModal profesionalModal = null!;
+    
+    // Permisos de autorización
+    private bool canRead = false;
+    private bool canAdd = false;
+    private bool canUpdate = false;
+    private bool canDelete = false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        if (!isAuthenticated)
+        {
+            Navigation.NavigateTo("/login");
+            return;
+        }
+
+        // Verificar permisos
+        await LoadPermissions();
+        
+        // Solo cargar datos si tiene permiso de lectura
+        if (canRead)
+        {
+            await LoadProfesionales();
+        }
+        else
+        {
+            errorMessage = "No tiene permisos para ver profesionales.";
+            loading = false;
+        }
+    }
+
+    private async Task LoadPermissions()
+    {
+        canRead = await AuthService.HasPermissionAsync("Administrativo");
+        canAdd = await AuthService.HasPermissionAsync("Administrativo");
+        canUpdate = await AuthService.HasPermissionAsync("Administrativo");
+        canDelete = await AuthService.HasPermissionAsync("Administrativo");
+    }
+
+    private async Task LoadProfesionales()
+    {
+        try
+        {
+            loading = true;
+            especialidades = (await EspecialidadApiClient.GetAllAsync())?.ToList();
+            profesionales = (await ProfesionalApiClient.GetAllAsync())?.ToList();
+            successMessage = string.Empty; // Clear success message when reloading
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar profesionales: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task OpenAddModal()
+    {
+        await profesionalModal.ShowAddModal();
+    }
+
+    private async Task OpenEditModal(ProfesionalDTO profesional)
+    {
+        await profesionalModal.ShowEditModal(profesional);
+    }
+
+    private async Task ConfirmDelete(ProfesionalDTO profesional)
+    {
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", 
+            $"¿Está seguro que desea eliminar el profesional {profesional.Nombre} {profesional.Apellido} ({profesional.Matricula})?");
+        
+        if (confirm)
+        {
+            await DeleteProfesional(profesional.Id);
+        }
+    }
+
+    private async Task DeleteProfesional(int id)
+    {
+        try
+        {
+            await ProfesionalApiClient.DeleteAsync(id);
+            successMessage = "Profesional eliminado exitosamente.";
+            await LoadProfesionales();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al eliminar profesional: {ex.Message}";
+        }
+    }
+}

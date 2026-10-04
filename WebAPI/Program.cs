@@ -98,6 +98,18 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("UsuariosEliminar", policy => policy.RequireRole("Administrativo"));
 });
 
+// Add CORS for Blazor WebAssembly + React Native
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowBlazorWasm",
+        policy =>
+        {
+            policy.AllowAnyOrigin() // TODO: En producción especificar orígenes exactos por seguridad
+                  .AllowAnyHeader()
+                  .AllowAnyMethod();
+        });
+});
+
 var app = builder.Build();
 
 app.UseExceptionHandler();
@@ -120,6 +132,9 @@ if (!app.Environment.IsDevelopment())
 {
     app.UseHttpsRedirection();
 }
+
+// Use CORS
+app.UseCors("AllowBlazorWasm");
 
 // Autenticacion antes que autorizacion
 // la segunda decide sobre el.
