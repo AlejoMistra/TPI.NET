@@ -98,6 +98,9 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("UsuariosAgregar", policy => policy.RequireRole("Administrativo"));
     options.AddPolicy("UsuariosActualizar", policy => policy.RequireRole("Administrativo"));
     options.AddPolicy("UsuariosEliminar", policy => policy.RequireRole("Administrativo"));
+
+    // Fallback: Requerir autenticación para endpoints no especificados
+    options.FallbackPolicy = options.DefaultPolicy;
 });
 
 // Add CORS for Blazor WebAssembly + React Native

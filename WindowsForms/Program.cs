@@ -19,23 +19,43 @@ namespace WindowsForms
             Application.ThreadException += Application_ThreadException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
-            AuthServiceProvider.Register(new WindowsFormsAuthService());
+            // Ejecutar async main
+            Task.Run(async () => await MainAsync()).GetAwaiter().GetResult();
+        }
 
-            // TEMPORAL (desarrollo): registra un auth service falso para bypassear
-            // la capa de autenticación hasta que el login real esté implementado.
-            // Eliminar esta línea y DevAuthService.cs al integrar el login real.
-            AuthServiceProvider.Register(new DevAuthService());
+        static async Task MainAsync()
+        {
+            // Registrar AuthService en singleton
+            var authService = new WindowsFormsAuthService();
+            AuthServiceProvider.Register(authService);
 
-            // Login primero: si el usuario cancela o cierra el dialogo, la app no arranca.
-            //using (var login = new LoginForm())
-            //{
-            //    if (login.ShowDialog() != DialogResult.OK)
-            //    {
-            //        return;
-            //    }
-            //}
+            // Loop principal de autenticación
+            while (true)
+            {
 
-            Application.Run(new Home());
+                if (!await authService.IsAuthenticatedAsync())
+                {
+                    var loginForm = new LoginForm();
+                    if (loginForm.ShowDialog() != DialogResult.OK)
+                    {
+                        // Usuario canceló login, cerrar aplicación
+                        return;
+                    }
+                }
+
+                try
+                {
+                    Application.Run(new Home());
+                    break; // La aplicación se cerró normalmente
+                }
+                catch (Exception ex) when (ex is UnauthorizedAccessException or UnauthorizedApiException)
+                {
+                    // Sesión expirada, mostrar mensaje y volver al login
+                    MessageBox.Show(ex.Message, "Sesión Expirada",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    // El loop continuará y volverá a mostrar login
+                }
+            }
         }
 
         private static void Application_ThreadException(object sender, ThreadExceptionEventArgs e)
