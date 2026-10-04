@@ -1,6 +1,6 @@
 [
   {
-    "Name": "New Profile",
+    "Name": "Api and FormApp ",
     "Projects": [
       {
         "Path": "WebAPI\\WebAPI.csproj",
@@ -11,6 +11,21 @@
         "Path": "WindowsForms\\WindowsForms.csproj",
         "Action": "Start",
         "DebugTarget": "WindowsForms"
+      }
+    ]
+  },
+  {
+    "Name": "Api and Blazor Server",
+    "Projects": [
+      {
+        "Path": "WebAPI\\WebAPI.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
+      },
+      {
+        "Path": "Blazor.Server\\Blazor.Server.csproj",
+        "Action": "Start",
+        "DebugTarget": "https"
       }
     ]
   }

@@ -19,12 +19,6 @@ namespace WindowsForms
             Application.ThreadException += Application_ThreadException;
             AppDomain.CurrentDomain.UnhandledException += CurrentDomain_UnhandledException;
 
-            // Ejecutar async main
-            Task.Run(async () => await MainAsync()).GetAwaiter().GetResult();
-        }
-
-        static async Task MainAsync()
-        {
             // Registrar AuthService en singleton
             var authService = new WindowsFormsAuthService();
             AuthServiceProvider.Register(authService);
@@ -32,10 +26,9 @@ namespace WindowsForms
             // Loop principal de autenticación
             while (true)
             {
-
-                if (!await authService.IsAuthenticatedAsync())
+                if (!authService.IsAuthenticatedAsync().GetAwaiter().GetResult())
                 {
-                    var loginForm = new LoginForm();
+                    using var loginForm = new LoginForm();
                     if (loginForm.ShowDialog() != DialogResult.OK)
                     {
                         // Usuario canceló login, cerrar aplicación
