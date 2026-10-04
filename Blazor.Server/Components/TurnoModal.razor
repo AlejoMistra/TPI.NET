@@ -1,0 +1,237 @@
+@using DTOs
+@using API.Clients
+@inject IJSRuntime JSRuntime
+
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        @if (mode == FormMode.Add)
+                        {
+                            <text>Agregar</text>
+                        }
+                        else
+                        {
+                            <text>Editar</text>
+                        }
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="currentTurno" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        
+                        @if (mode == FormMode.Update)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Id</label>
+                                <input type="text" class="form-control" value="@currentTurno.Id" readonly />
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label class="form-label">Fecha y Hora Inicio *</label>
+                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="currentTurno.FechaHoraInicio" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Fecha y Hora Fin *</label>
+                            <InputDate Type="InputDateType.DateTimeLocal" @bind-Value="currentTurno.FechaHoraFin" class="form-control" />
+                            @if (validationErrors.ContainsKey("FechaHoraFin"))
+                            {
+                                <div class="text-danger small">@validationErrors["FechaHoraFin"]</div>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Motivo</label>
+                            <InputText @bind-Value="currentTurno.Motivo" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Estado</label>
+                            <InputSelect @bind-Value="currentTurno.EstadoTurno" class="form-select">
+                                <option value="Libre">Libre</option>
+                                <option value="Asignado">Asignado</option>
+                                <option value="Confirmado">Confirmado</option>
+                                <option value="Atendido">Atendido</option>
+                                <option value="Cancelado">Cancelado</option>
+                            </InputSelect>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Profesional *</label>
+                            <InputSelect @bind-Value="currentTurno.ProfesionalId" class="form-select">
+                                <option value="0">Seleccionar Profesional</option>
+                                @if (profesionales != null)
+                                {
+                                    @foreach (var profesional in profesionales)
+                                    {
+                                        <option value="@profesional.Id">@profesional.Apellido, @profesional.Nombre</option>
+                                    }
+                                }
+                            </InputSelect>
+                            @if (validationErrors.ContainsKey("Profesional"))
+                            {
+                                <div class="text-danger small">@validationErrors["Profesional"]</div>
+                            }
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                @errorMessage
+                            </div>
+                        }
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="Close">Cancelar</button>
+                            <button type="submit" class="btn btn-primary" disabled="@saving">
+                                @if (saving)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                }
+                                @(mode == FormMode.Add ? "Agregar" : "Actualizar")
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public EventCallback OnTurnoChanged { get; set; }
+    
+    private bool showModal = false;
+    private FormMode mode = FormMode.Add;
+    private TurnoDTO currentTurno = new TurnoDTO();
+    private bool saving = false;
+    private string errorMessage = string.Empty;
+    private Dictionary<string, string> validationErrors = new Dictionary<string, string>();
+    private List<ProfesionalDTO>? profesionales;
+
+    public enum FormMode
+    {
+        Add,
+        Update
+    }
+
+    public async Task ShowAddModal()
+    {
+        mode = FormMode.Add;
+        currentTurno = new TurnoDTO
+        {
+            FechaHoraInicio = DateTime.Today.AddHours(8),
+            FechaHoraFin = DateTime.Today.AddHours(8).AddMinutes(30),
+            EstadoTurno = "Libre"
+        };
+        await LoadProfesionales();
+        ClearValidationErrors();
+        showModal = true;
+        StateHasChanged();
+    }
+
+    public async Task ShowEditModal(TurnoDTO turno)
+    {
+        mode = FormMode.Update;
+        currentTurno = new TurnoDTO
+        {
+            Id = turno.Id,
+            FechaHoraInicio = turno.FechaHoraInicio,
+            FechaHoraFin = turno.FechaHoraFin,
+            Motivo = turno.Motivo,
+            EstadoTurno = turno.EstadoTurno,
+            Observaciones = turno.Observaciones,
+            FacturaId = turno.FacturaId,
+            ProfesionalId = turno.ProfesionalId,
+            PacienteId = turno.PacienteId
+        };
+        await LoadProfesionales();
+        ClearValidationErrors();
+        showModal = true;
+        StateHasChanged();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (!ValidateTurno())
+            return;
+
+        try
+        {
+            saving = true;
+            errorMessage = string.Empty;
+
+            if (mode == FormMode.Add)
+            {
+                await TurnoApiClient.AddAsync(currentTurno);
+            }
+            else
+            {
+                await TurnoApiClient.UpdateAsync(currentTurno);
+            }
+
+            await OnTurnoChanged.InvokeAsync();
+            Close();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private bool ValidateTurno()
+    {
+        ClearValidationErrors();
+        bool isValid = true;
+
+        if (currentTurno.FechaHoraFin <= currentTurno.FechaHoraInicio)
+        {
+            validationErrors["FechaHoraFin"] = "La hora de fin debe ser posterior a la hora de inicio";
+            isValid = false;
+        }
+
+        if (currentTurno.ProfesionalId <= 0)
+        {
+            validationErrors["Profesional"] = "Debe seleccionar un profesional";
+            isValid = false;
+        }
+
+        StateHasChanged();
+        return isValid;
+    }
+
+    private void ClearValidationErrors()
+    {
+        validationErrors.Clear();
+        errorMessage = string.Empty;
+    }
+
+    private async Task LoadProfesionales()
+    {
+        try
+        {
+            profesionales = (await ProfesionalApiClient.GetAllAsync())?.ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar profesionales: {ex.Message}";
+        }
+    }
+
+    private void Close()
+    {
+        showModal = false;
+        ClearValidationErrors();
+        StateHasChanged();
+    }
+}
