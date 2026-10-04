@@ -81,7 +81,8 @@ namespace Application.Services
           observaciones: turnoDto.Observaciones,
           facturaId: turnoDto.FacturaId,
           profesionalId: turnoDto.ProfesionalId,
-          pacienteId: turnoDto.PacienteId
+          pacienteId: turnoDto.PacienteId,
+          fechaHoraLlegada: turnoDto.FechaHoraLlegada
       );
 
       await _turnoRepository.AddAsync(turno);
@@ -98,12 +99,12 @@ namespace Application.Services
       if (existingTurno == null)
         return null;
 
-      // Proteger estados: Atendido y Cancelado no se pueden modificar
+      // Proteger estados: Atendido y Ausente no se pueden modificar directamente
       if (existingTurno.EstadoTurno == Turno.EstadosTurno.Atendido)
         throw new InvalidOperationException("No se puede modificar un turno que ya ha sido Atendido.");
 
-      if (existingTurno.EstadoTurno == Turno.EstadosTurno.Cancelado)
-        throw new InvalidOperationException("No se puede modificar un turno en estado Cancelado.");
+      if (existingTurno.EstadoTurno == Turno.EstadosTurno.Ausente)
+        throw new InvalidOperationException("No se puede modificar un turno en estado Ausente.");
 
       // valida el estado del turno sea válido
       if (!Enum.TryParse<Turno.EstadosTurno>(turnoDto.EstadoTurno, ignoreCase: true, out var estado))
@@ -145,7 +146,8 @@ namespace Application.Services
           observaciones: turnoDto.Observaciones,
           facturaId: turnoDto.FacturaId,
           profesionalId: turnoDto.ProfesionalId,
-          pacienteId: turnoDto.PacienteId
+          pacienteId: turnoDto.PacienteId,
+          fechaHoraLlegada: turnoDto.FechaHoraLlegada ?? existingTurno.FechaHoraLlegada
       );
 
       var updatedTurno = await _turnoRepository.UpdateAsync(turno);
@@ -167,9 +169,101 @@ namespace Application.Services
       return await _turnoRepository.DeleteAsync(id);
     }
 
+    public async Task<TurnoDTO> AsignarAsync(int id, int pacienteId, string? motivo = null, string? observaciones = null)
+    {
+      if (id <= 0)
+        throw new ArgumentException("El Id del turno no es válido.", nameof(id));
+
+      if (pacienteId <= 0)
+        throw new ArgumentException("El Id del paciente debe ser mayor que cero.", nameof(pacienteId));
+
+      var turno = await _turnoRepository.GetByIdAsync(id);
+      if (turno == null)
+        throw new KeyNotFoundException($"No se encontró el turno con Id {id}.");
+
+      var paciente = await _pacienteRepository.GetByIdAsync(pacienteId);
+      if (paciente == null)
+        throw new ArgumentException($"No se encontró el paciente con Id {pacienteId}.", nameof(pacienteId));
+
+      turno.Asignar(pacienteId, motivo, observaciones);
+      await _turnoRepository.UpdateAsync(turno);
+      return MapToDTO(turno);
+    }
+
+    public async Task<TurnoDTO> LiberarAsync(int id)
+    {
+      if (id <= 0)
+        throw new ArgumentException("El Id del turno no es válido.", nameof(id));
+
+      var turno = await _turnoRepository.GetByIdAsync(id);
+      if (turno == null)
+        throw new KeyNotFoundException($"No se encontró el turno con Id {id}.");
+
+      turno.Liberar();
+      await _turnoRepository.UpdateAsync(turno);
+      return MapToDTO(turno);
+    }
+
+    public async Task<TurnoDTO> RegistrarLlegadaAsync(int id)
+    {
+      if (id <= 0)
+        throw new ArgumentException("El Id del turno no es válido.", nameof(id));
+
+      var turno = await _turnoRepository.GetByIdAsync(id);
+      if (turno == null)
+        throw new KeyNotFoundException($"No se encontró el turno con Id {id}.");
+
+      turno.RegistrarLlegada();
+      await _turnoRepository.UpdateAsync(turno);
+      return MapToDTO(turno);
+    }
+
+    public async Task<TurnoDTO> RevertirLlegadaAsync(int id)
+    {
+      if (id <= 0)
+        throw new ArgumentException("El Id del turno no es válido.", nameof(id));
+
+      var turno = await _turnoRepository.GetByIdAsync(id);
+      if (turno == null)
+        throw new KeyNotFoundException($"No se encontró el turno con Id {id}.");
+
+      turno.RevertirLlegada();
+      await _turnoRepository.UpdateAsync(turno);
+      return MapToDTO(turno);
+    }
+
+    public async Task<TurnoDTO> MarcarAusenteAsync(int id)
+    {
+      if (id <= 0)
+        throw new ArgumentException("El Id del turno no es válido.", nameof(id));
+
+      var turno = await _turnoRepository.GetByIdAsync(id);
+      if (turno == null)
+        throw new KeyNotFoundException($"No se encontró el turno con Id {id}.");
+
+      turno.MarcarAusente();
+      await _turnoRepository.UpdateAsync(turno);
+      return MapToDTO(turno);
+    }
+
+    public async Task<TurnoDTO> AtenderAsync(int id)
+    {
+      if (id <= 0)
+        throw new ArgumentException("El Id del turno no es válido.", nameof(id));
+
+      var turno = await _turnoRepository.GetByIdAsync(id);
+      if (turno == null)
+        throw new KeyNotFoundException($"No se encontró el turno con Id {id}.");
+
+      turno.Atender();
+      await _turnoRepository.UpdateAsync(turno);
+      return MapToDTO(turno);
+    }
+
     /// <summary>
     /// Valida que el estado del turno sea coherente con la presencia o ausencia de un paciente asignado.
-    /// Estado libre; PacienteId debe ser nulo. Estado Asignado, Confirmado o Atendido; se exige PacienteId. Estado Cancelado; admite tener PacienteId (turno reservado que se canceló) o nulo(turno libre cancelado).
+    /// Estado Libre: PacienteId debe ser nulo.
+    /// Estado Asignado, Presente, Atendido o Ausente: se exige PacienteId.
     /// </summary>
     private static void ValidarCoherenciaEstadoYPaciente(Turno.EstadosTurno estado, int? pacienteId)
     {
@@ -178,7 +272,10 @@ namespace Application.Services
         if (pacienteId.HasValue && pacienteId.Value > 0)
           throw new ArgumentException("Un turno en estado 'Libre' no debe tener un paciente asignado.", nameof(pacienteId));
       }
-      else if (estado == Turno.EstadosTurno.Asignado || estado == Turno.EstadosTurno.Confirmado || estado == Turno.EstadosTurno.Atendido)
+      else if (estado == Turno.EstadosTurno.Asignado ||
+               estado == Turno.EstadosTurno.Presente ||
+               estado == Turno.EstadosTurno.Atendido ||
+               estado == Turno.EstadosTurno.Ausente)
       {
         if (!pacienteId.HasValue || pacienteId.Value <= 0)
           throw new ArgumentException($"Un turno en estado '{estado}' requiere un paciente asignado.", nameof(pacienteId));
@@ -195,7 +292,8 @@ namespace Application.Services
       Observaciones = t.Observaciones,
       FacturaId = t.FacturaId,
       ProfesionalId = t.ProfesionalId,
-      PacienteId = t.PacienteId
+      PacienteId = t.PacienteId,
+      FechaHoraLlegada = t.FechaHoraLlegada
     };
   }
 }

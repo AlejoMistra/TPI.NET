@@ -215,17 +215,64 @@ namespace Data
                     pacienteId: diego.Id
                 ),
 
-                // Turnos Pendientes / Próximos (próximos días)
+                // Turnos del día y próximos días con diversos estados
+                new Turno(
+                    id: 0,
+                    fechaHoraInicio: today.AddHours(8),
+                    fechaHoraFin: today.AddHours(8).AddMinutes(30),
+                    motivo: "Control de rutina",
+                    estadoTurno: Turno.EstadosTurno.Ausente,
+                    observaciones: "El paciente nunca se presentó al turno.",
+                    facturaId: null,
+                    profesionalId: drRodriguez.Id,
+                    pacienteId: carlos.Id,
+                    fechaHoraLlegada: null
+                ),
+                new Turno(
+                    id: 0,
+                    fechaHoraInicio: today.AddHours(8).AddMinutes(30),
+                    fechaHoraFin: today.AddHours(9),
+                    motivo: "Control de laboratorio",
+                    estadoTurno: Turno.EstadosTurno.Ausente,
+                    observaciones: "El paciente se anunció en sala de espera pero se retiró por demora antes de la atención.",
+                    facturaId: null,
+                    profesionalId: drRodriguez.Id,
+                    pacienteId: sofia.Id,
+                    fechaHoraLlegada: today.AddHours(8).AddMinutes(25)
+                ),
+                new Turno(
+                    id: 0,
+                    fechaHoraInicio: today.AddHours(10),
+                    fechaHoraFin: today.AddHours(10).AddMinutes(30),
+                    motivo: "Consulta por dolor lumbar",
+                    estadoTurno: Turno.EstadosTurno.Presente,
+                    observaciones: "Paciente anunciado en sala de espera.",
+                    facturaId: null,
+                    profesionalId: drSuarez.Id,
+                    pacienteId: diego.Id,
+                    fechaHoraLlegada: today.AddHours(9).AddMinutes(50)
+                ),
                 new Turno(
                     id: 0,
                     fechaHoraInicio: today.AddDays(1).AddHours(9),
                     fechaHoraFin: today.AddDays(1).AddHours(9).AddMinutes(30),
                     motivo: "Control de respuesta a Enalapril",
-                    estadoTurno: Turno.EstadosTurno.Confirmado,
+                    estadoTurno: Turno.EstadosTurno.Asignado,
                     observaciones: "Control a los 7 días de inicio del tratamiento.",
                     facturaId: null,
                     profesionalId: draFernandez.Id,
                     pacienteId: ana.Id
+                ),
+                new Turno(
+                    id: 0,
+                    fechaHoraInicio: today.AddDays(1).AddHours(14),
+                    fechaHoraFin: today.AddDays(1).AddHours(14).AddMinutes(30),
+                    motivo: string.Empty,
+                    estadoTurno: Turno.EstadosTurno.Libre,
+                    observaciones: "Turno disponible para asignación.",
+                    facturaId: null,
+                    profesionalId: draFernandez.Id,
+                    pacienteId: null
                 ),
                 new Turno(
                     id: 0,
@@ -242,12 +289,12 @@ namespace Data
                     id: 0,
                     fechaHoraInicio: today.AddDays(3).AddHours(15),
                     fechaHoraFin: today.AddDays(3).AddHours(15).AddMinutes(30),
-                    motivo: "Lectura de resultados de electrocardiograma y laboratorio",
-                    estadoTurno: Turno.EstadosTurno.Confirmado,
-                    observaciones: "Concurrir con estudios realizados.",
+                    motivo: string.Empty,
+                    estadoTurno: Turno.EstadosTurno.Libre,
+                    observaciones: "Turno disponible para asignación.",
                     facturaId: null,
                     profesionalId: draFernandez.Id,
-                    pacienteId: diego.Id
+                    pacienteId: null
                 ),
                 new Turno(
                     id: 0,

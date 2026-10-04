@@ -39,7 +39,6 @@ namespace WindowsForms.DatosMaestros
             busquedaFechaDateTimePicker = new DateTimePicker();
             busquedaEstadoLabel = new Label();
             busquedaEstadoComboBox = new ComboBox();
-            filtrarButton = new Button();
             limpiarFiltrosLinkLabel = new LinkLabel();
             agregarTurnoButton = new Button();
             turnosDataGridView = new DataGridView();
@@ -59,8 +58,6 @@ namespace WindowsForms.DatosMaestros
             horaFinDateTimePicker = new DateTimePicker();
             estadoLabel = new Label();
             estadoComboBox = new ComboBox();
-            motivoLabel = new Label();
-            motivoTextBox = new TextBox();
             obligatorioLabel = new Label();
             tableLayoutPanel4 = new TableLayoutPanel();
             guardarTurnoButton = new Button();
@@ -107,8 +104,7 @@ namespace WindowsForms.DatosMaestros
             // tableLayoutPanel2
             // 
             tableLayoutPanel2.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            tableLayoutPanel2.ColumnCount = 7;
-            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel2.ColumnCount = 6;
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle());
@@ -123,9 +119,8 @@ namespace WindowsForms.DatosMaestros
             tableLayoutPanel2.Controls.Add(busquedaFechaDateTimePicker, 2, 1);
             tableLayoutPanel2.Controls.Add(busquedaEstadoLabel, 3, 0);
             tableLayoutPanel2.Controls.Add(busquedaEstadoComboBox, 3, 1);
-            tableLayoutPanel2.Controls.Add(filtrarButton, 4, 1);
-            tableLayoutPanel2.Controls.Add(limpiarFiltrosLinkLabel, 5, 1);
-            tableLayoutPanel2.Controls.Add(agregarTurnoButton, 6, 1);
+            tableLayoutPanel2.Controls.Add(limpiarFiltrosLinkLabel, 4, 1);
+            tableLayoutPanel2.Controls.Add(agregarTurnoButton, 5, 1);
             tableLayoutPanel2.Dock = DockStyle.Fill;
             tableLayoutPanel2.Location = new Point(3, 19);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -153,6 +148,7 @@ namespace WindowsForms.DatosMaestros
             busquedaProfesionalComboBox.Name = "busquedaProfesionalComboBox";
             busquedaProfesionalComboBox.Size = new Size(180, 23);
             busquedaProfesionalComboBox.TabIndex = 1;
+            busquedaProfesionalComboBox.SelectedValueChanged += FiltrarDataGridView;
             // 
             // busquedaEspecialidadLabel
             // 
@@ -172,6 +168,7 @@ namespace WindowsForms.DatosMaestros
             busquedaEspecialidadComboBox.Name = "busquedaEspecialidadComboBox";
             busquedaEspecialidadComboBox.Size = new Size(160, 23);
             busquedaEspecialidadComboBox.TabIndex = 2;
+            busquedaEspecialidadComboBox.SelectedValueChanged += FiltrarDataGridView;
             // 
             // busquedaFechaLabel
             // 
@@ -189,6 +186,8 @@ namespace WindowsForms.DatosMaestros
             busquedaFechaDateTimePicker.Name = "busquedaFechaDateTimePicker";
             busquedaFechaDateTimePicker.Size = new Size(130, 23);
             busquedaFechaDateTimePicker.TabIndex = 3;
+            busquedaFechaDateTimePicker.ValueChanged += FiltrarDataGridView;
+            busquedaFechaDateTimePicker.BindingContextChanged += FiltrarDataGridView;
             // 
             // busquedaEstadoLabel
             // 
@@ -208,22 +207,13 @@ namespace WindowsForms.DatosMaestros
             busquedaEstadoComboBox.Name = "busquedaEstadoComboBox";
             busquedaEstadoComboBox.Size = new Size(120, 23);
             busquedaEstadoComboBox.TabIndex = 4;
-            // 
-            // filtrarButton
-            // 
-            filtrarButton.Location = new Point(617, 18);
-            filtrarButton.Name = "filtrarButton";
-            filtrarButton.Size = new Size(100, 23);
-            filtrarButton.TabIndex = 5;
-            filtrarButton.Text = "Filtrar";
-            filtrarButton.UseVisualStyleBackColor = true;
-            filtrarButton.Click += FiltrarButton_Click;
+            busquedaEstadoComboBox.SelectedValueChanged += FiltrarDataGridView;
             // 
             // limpiarFiltrosLinkLabel
             // 
             limpiarFiltrosLinkLabel.Anchor = AnchorStyles.None;
             limpiarFiltrosLinkLabel.AutoSize = true;
-            limpiarFiltrosLinkLabel.Location = new Point(723, 22);
+            limpiarFiltrosLinkLabel.Location = new Point(617, 26);
             limpiarFiltrosLinkLabel.Name = "limpiarFiltrosLinkLabel";
             limpiarFiltrosLinkLabel.Size = new Size(80, 15);
             limpiarFiltrosLinkLabel.TabIndex = 6;
@@ -294,8 +284,6 @@ namespace WindowsForms.DatosMaestros
             tableLayoutPanel3.Controls.Add(horaFinDateTimePicker, 1, 3);
             tableLayoutPanel3.Controls.Add(estadoLabel, 2, 2);
             tableLayoutPanel3.Controls.Add(estadoComboBox, 2, 3);
-            tableLayoutPanel3.Controls.Add(motivoLabel, 3, 2);
-            tableLayoutPanel3.Controls.Add(motivoTextBox, 3, 3);
             tableLayoutPanel3.Controls.Add(obligatorioLabel, 0, 4);
             tableLayoutPanel3.Controls.Add(tableLayoutPanel4, 2, 4);
             tableLayoutPanel3.Dock = DockStyle.Fill;
@@ -433,7 +421,7 @@ namespace WindowsForms.DatosMaestros
             estadoLabel.AutoSize = true;
             estadoLabel.Location = new Point(497, 44);
             estadoLabel.Name = "estadoLabel";
-            estadoLabel.Size = new Size(82, 15);
+            estadoLabel.Size = new Size(84, 15);
             estadoLabel.TabIndex = 7;
             estadoLabel.Text = "Estado Inicial *";
             // 
@@ -449,24 +437,6 @@ namespace WindowsForms.DatosMaestros
             estadoComboBox.Size = new Size(241, 23);
             estadoComboBox.TabIndex = 7;
             // 
-            // motivoLabel
-            // 
-            motivoLabel.AutoSize = true;
-            motivoLabel.Location = new Point(744, 44);
-            motivoLabel.Name = "motivoLabel";
-            motivoLabel.Size = new Size(122, 15);
-            motivoLabel.TabIndex = 8;
-            motivoLabel.Text = "Motivo / Observación";
-            // 
-            // motivoTextBox
-            // 
-            motivoTextBox.Dock = DockStyle.Fill;
-            motivoTextBox.Location = new Point(744, 62);
-            motivoTextBox.Name = "motivoTextBox";
-            motivoTextBox.PlaceholderText = "Motivo de consulta o nota...";
-            motivoTextBox.Size = new Size(241, 23);
-            motivoTextBox.TabIndex = 8;
-            // 
             // obligatorioLabel
             // 
             obligatorioLabel.Anchor = AnchorStyles.Left;
@@ -474,7 +444,7 @@ namespace WindowsForms.DatosMaestros
             tableLayoutPanel3.SetColumnSpan(obligatorioLabel, 2);
             obligatorioLabel.Location = new Point(3, 99);
             obligatorioLabel.Name = "obligatorioLabel";
-            obligatorioLabel.Size = new Size(393, 15);
+            obligatorioLabel.Size = new Size(390, 15);
             obligatorioLabel.TabIndex = 9;
             obligatorioLabel.Text = "Los campos marcados con (*) son obligatorios para el registro del Turno.";
             obligatorioLabel.TextAlign = ContentAlignment.MiddleLeft;
@@ -551,7 +521,6 @@ namespace WindowsForms.DatosMaestros
         private DateTimePicker busquedaFechaDateTimePicker;
         private Label busquedaEstadoLabel;
         private ComboBox busquedaEstadoComboBox;
-        private Button filtrarButton;
         private LinkLabel limpiarFiltrosLinkLabel;
         private Button agregarTurnoButton;
         private DataGridView turnosDataGridView;
@@ -571,11 +540,10 @@ namespace WindowsForms.DatosMaestros
         private DateTimePicker horaFinDateTimePicker;
         private Label estadoLabel;
         private ComboBox estadoComboBox;
-        private Label motivoLabel;
-        private TextBox motivoTextBox;
         private Label obligatorioLabel;
         private TableLayoutPanel tableLayoutPanel4;
         private Button guardarTurnoButton;
         private Button cancelarButton;
     }
 }
+

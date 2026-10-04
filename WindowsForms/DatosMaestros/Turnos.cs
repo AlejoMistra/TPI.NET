@@ -13,6 +13,7 @@ namespace WindowsForms.DatosMaestros
         private int? _selectedTurnoId = null;
         private int? _selectedTurnoPacienteId = null;
         private bool _isUpdatingCombos = false;
+        private bool _isUpdatingBusquedaCombos = false;
 
         public Turnos()
         {
@@ -31,6 +32,9 @@ namespace WindowsForms.DatosMaestros
 
             especialidadComboBox.SelectedIndexChanged += EspecialidadComboBox_SelectedIndexChanged;
             profesionalComboBox.SelectedIndexChanged += ProfesionalComboBox_SelectedIndexChanged;
+
+            busquedaEspecialidadComboBox.SelectedIndexChanged += BusquedaEspecialidadComboBox_SelectedIndexChanged;
+            busquedaProfesionalComboBox.SelectedIndexChanged += BusquedaProfesionalComboBox_SelectedIndexChanged;
         }
 
         private void ConfigurarColumnas()
@@ -134,7 +138,7 @@ namespace WindowsForms.DatosMaestros
 
         private void InicializarEstados()
         {
-            var estados = new[] { "Libre", "Asignado", "Confirmado", "Atendido", "Cancelado" };
+            var estados = new[] { "Libre", "Asignado", "Presente", "Atendido", "Ausente" };
 
             // Combo de búsqueda
             busquedaEstadoComboBox.Items.Clear();
@@ -176,9 +180,12 @@ namespace WindowsForms.DatosMaestros
                 new EspecialidadDTO { Id = 0, Nombre = "Todas las especialidades" }
             };
             listaBusqueda.AddRange(_especialidades);
+
+            _isUpdatingBusquedaCombos = true;
             busquedaEspecialidadComboBox.DataSource = listaBusqueda;
             busquedaEspecialidadComboBox.DisplayMember = "Nombre";
             busquedaEspecialidadComboBox.ValueMember = "Id";
+            _isUpdatingBusquedaCombos = false;
 
             // Combo de formulario
             PoblarComboEspecialidadFormulario();
@@ -205,22 +212,33 @@ namespace WindowsForms.DatosMaestros
             _profesionales = profesionales.OrderBy(p => p.Apellido).ThenBy(p => p.Nombre).ToList();
 
             // Combo de búsqueda
+            PoblarComboProfesionalesBusqueda(0);
+
+            // Combo de formulario
+            PoblarComboProfesionalesFormulario(0);
+        }
+
+        private void PoblarComboProfesionalesBusqueda(int especialidadIdFiltrar)
+        {
+            var filtrados = especialidadIdFiltrar > 0
+                ? _profesionales.Where(p => p.EspecialidadId == especialidadIdFiltrar).ToList()
+                : _profesionales;
+
             var listaBusqueda = new List<ProfesionalItem>
             {
                 new ProfesionalItem { Id = 0, DisplayName = "Todos los profesionales" }
             };
-            listaBusqueda.AddRange(_profesionales.Select(p => new ProfesionalItem
+            listaBusqueda.AddRange(filtrados.Select(p => new ProfesionalItem
             {
                 Id = p.Id,
                 DisplayName = $"{p.Apellido}, {p.Nombre} (MP: {p.Matricula})"
             }));
 
+            _isUpdatingBusquedaCombos = true;
             busquedaProfesionalComboBox.DataSource = listaBusqueda;
             busquedaProfesionalComboBox.DisplayMember = "DisplayName";
             busquedaProfesionalComboBox.ValueMember = "Id";
-
-            // Combo de formulario
-            PoblarComboProfesionalesFormulario(0);
+            _isUpdatingBusquedaCombos = false;
         }
 
         private void PoblarComboProfesionalesFormulario(int especialidadIdFiltrar)
@@ -281,19 +299,74 @@ namespace WindowsForms.DatosMaestros
         // INTERACCIÓN REACTIVA ESPECIALIDAD <-> PROFESIONAL
         // ==========================================
 
+        private void BusquedaEspecialidadComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (_isUpdatingBusquedaCombos) return;
+
+            var especialidadId = ObtenerComboSelectedId(busquedaEspecialidadComboBox);
+            var currentProfId = ObtenerComboSelectedId(busquedaProfesionalComboBox);
+
+            PoblarComboProfesionalesBusqueda(especialidadId);
+
+            if (currentProfId > 0)
+            {
+                var prof = _profesionales.FirstOrDefault(p => p.Id == currentProfId);
+                if (prof != null && (especialidadId == 0 || prof.EspecialidadId == especialidadId))
+                {
+                    _isUpdatingBusquedaCombos = true;
+                    busquedaProfesionalComboBox.SelectedValue = currentProfId;
+                    _isUpdatingBusquedaCombos = false;
+                }
+            }
+
+            AplicarFiltros();
+        }
+
+        private void BusquedaProfesionalComboBox_SelectedIndexChanged(object? sender, EventArgs e)
+        {
+            if (_isUpdatingBusquedaCombos) return;
+
+            var profesionalId = ObtenerComboSelectedId(busquedaProfesionalComboBox);
+            if (profesionalId > 0)
+            {
+                var prof = _profesionales.FirstOrDefault(p => p.Id == profesionalId);
+                if (prof != null && prof.EspecialidadId > 0)
+                {
+                    _isUpdatingBusquedaCombos = true;
+                    busquedaEspecialidadComboBox.SelectedValue = prof.EspecialidadId;
+                    _isUpdatingBusquedaCombos = false;
+                }
+            }
+
+            AplicarFiltros();
+        }
+
         private void EspecialidadComboBox_SelectedIndexChanged(object? sender, EventArgs e)
         {
             if (_isUpdatingCombos) return;
 
-            var especialidadId = (especialidadComboBox.SelectedValue as int?) ?? 0;
+            var especialidadId = ObtenerComboSelectedId(especialidadComboBox);
+            var currentProfId = ObtenerComboSelectedId(profesionalComboBox);
+
             PoblarComboProfesionalesFormulario(especialidadId);
+
+            if (currentProfId > 0)
+            {
+                var prof = _profesionales.FirstOrDefault(p => p.Id == currentProfId);
+                if (prof != null && (especialidadId == 0 || prof.EspecialidadId == especialidadId))
+                {
+                    _isUpdatingCombos = true;
+                    profesionalComboBox.SelectedValue = currentProfId;
+                    _isUpdatingCombos = false;
+                }
+            }
         }
 
         private void ProfesionalComboBox_SelectedIndexChanged(object? sender, EventArgs e)
         {
             if (_isUpdatingCombos) return;
 
-            var profesionalId = (profesionalComboBox.SelectedValue as int?) ?? 0;
+            var profesionalId = ObtenerComboSelectedId(profesionalComboBox);
             if (profesionalId > 0)
             {
                 var prof = _profesionales.FirstOrDefault(p => p.Id == profesionalId);
@@ -306,14 +379,22 @@ namespace WindowsForms.DatosMaestros
             }
         }
 
+        private static int ObtenerComboSelectedId(ComboBox comboBox)
+        {
+            if (comboBox.SelectedValue is int id) return id;
+            if (comboBox.SelectedValue is EspecialidadDTO esp) return esp.Id;
+            if (comboBox.SelectedValue is ProfesionalItem prof) return prof.Id;
+            return 0;
+        }
+
         // ==========================================
         // FILTRADO
         // ==========================================
 
         private void AplicarFiltros()
         {
-            var profesionalId = (busquedaProfesionalComboBox.SelectedValue as int?) ?? 0;
-            var especialidadId = (busquedaEspecialidadComboBox.SelectedValue as int?) ?? 0;
+            var profesionalId = ObtenerComboSelectedId(busquedaProfesionalComboBox);
+            var especialidadId = ObtenerComboSelectedId(busquedaEspecialidadComboBox);
             var estadoFiltro = busquedaEstadoComboBox.SelectedItem?.ToString() ?? "Todos";
             bool filtrarPorFecha = busquedaFechaDateTimePicker.Checked;
             DateTime fechaSeleccionada = busquedaFechaDateTimePicker.Value.Date;
@@ -343,16 +424,20 @@ namespace WindowsForms.DatosMaestros
             turnosDataGridView.DataSource = filtrados.ToList();
         }
 
-        private void FiltrarButton_Click(object? sender, EventArgs e)
+        private void FiltrarDataGridView(object? sender, EventArgs e)
         {
+            if (_isUpdatingBusquedaCombos) return;
             AplicarFiltros();
         }
 
         private void LimpiarFiltrosLinkLabel_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
         {
-            if (busquedaProfesionalComboBox.Items.Count > 0) busquedaProfesionalComboBox.SelectedIndex = 0;
+            _isUpdatingBusquedaCombos = true;
             if (busquedaEspecialidadComboBox.Items.Count > 0) busquedaEspecialidadComboBox.SelectedIndex = 0;
+            PoblarComboProfesionalesBusqueda(0);
+            if (busquedaProfesionalComboBox.Items.Count > 0) busquedaProfesionalComboBox.SelectedIndex = 0;
             if (busquedaEstadoComboBox.Items.Count > 0) busquedaEstadoComboBox.SelectedIndex = 0;
+            _isUpdatingBusquedaCombos = false;
 
             busquedaFechaDateTimePicker.Checked = false;
             busquedaFechaDateTimePicker.Value = DateTime.Today;
@@ -428,12 +513,8 @@ namespace WindowsForms.DatosMaestros
             fechaTurnoDateTimePicker.Value = row.FechaHoraInicio.Date;
             horaInicioDateTimePicker.Value = row.FechaHoraInicio;
             horaFinDateTimePicker.Value = row.FechaHoraFin;
-
             estadoComboBox.SelectedItem = row.Estado;
-            motivoTextBox.Text = row.Motivo;
-
             guardarTurnoButton.Text = "Actualizar Turno";
-            motivoTextBox.Focus();
         }
 
         // ==========================================
@@ -476,7 +557,6 @@ namespace WindowsForms.DatosMaestros
                 Id = _selectedTurnoId ?? 0,
                 FechaHoraInicio = fechaHoraInicio,
                 FechaHoraFin = fechaHoraFin,
-                Motivo = motivoTextBox.Text.Trim(),
                 EstadoTurno = estadoComboBox.SelectedItem?.ToString() ?? "Libre",
                 Observaciones = string.Empty,
                 FacturaId = null,
@@ -524,7 +604,6 @@ namespace WindowsForms.DatosMaestros
             {
                 estadoComboBox.SelectedIndex = 0; // "Libre"
             }
-            motivoTextBox.Text = string.Empty;
 
             guardarTurnoButton.Text = "Guardar Turno";
         }
