@@ -570,9 +570,9 @@ namespace WindowsForms
             // 
             buttonsFlowPanel.Anchor = AnchorStyles.Right;
             buttonsFlowPanel.AutoSize = true;
+            buttonsFlowPanel.Controls.Add(cancelarButton);
             buttonsFlowPanel.Controls.Add(anularButton);
             buttonsFlowPanel.Controls.Add(confirmarButton);
-            buttonsFlowPanel.Controls.Add(cancelarButton);
             buttonsFlowPanel.Location = new Point(360, 4);
             buttonsFlowPanel.Name = "buttonsFlowPanel";
             buttonsFlowPanel.Size = new Size(431, 38);
@@ -583,7 +583,7 @@ namespace WindowsForms
             // 
             anularButton.BackColor = Color.FromArgb(255, 235, 235);
             anularButton.ForeColor = Color.DarkRed;
-            anularButton.Location = new Point(3, 3);
+            anularButton.Location = new Point(114, 3);
             anularButton.Name = "anularButton";
             anularButton.Size = new Size(140, 32);
             anularButton.TabIndex = 0;
@@ -594,7 +594,7 @@ namespace WindowsForms
             // confirmarButton
             // 
             confirmarButton.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            confirmarButton.Location = new Point(149, 3);
+            confirmarButton.Location = new Point(260, 3);
             confirmarButton.Name = "confirmarButton";
             confirmarButton.Size = new Size(170, 32);
             confirmarButton.TabIndex = 1;
@@ -603,7 +603,7 @@ namespace WindowsForms
             // 
             // cancelarButton
             // 
-            cancelarButton.Location = new Point(325, 3);
+            cancelarButton.Location = new Point(3, 3);
             cancelarButton.Name = "cancelarButton";
             cancelarButton.Size = new Size(105, 32);
             cancelarButton.TabIndex = 2;

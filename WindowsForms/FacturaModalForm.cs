@@ -194,7 +194,7 @@ namespace WindowsForms
 
             bannerLabel.BackColor = Color.FromArgb(235, 243, 255);
             bannerLabel.ForeColor = Color.FromArgb(0, 102, 204);
-            bannerLabel.Text = "Emisión Maestro/Detalle: ingrese el Precio Unitario (> $0) en la grilla y sume otros conceptos si corresponde.";
+            bannerLabel.Text = "Emisión de Factura; ingrese el Precio Unitario en la grilla y sume otros conceptos si corresponde.";
 
             nroFacturaValueLabel.Text = "Nueva (Al emitir)";
             fechaEmisionValueLabel.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
