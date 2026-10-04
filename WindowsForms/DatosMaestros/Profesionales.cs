@@ -229,7 +229,7 @@ namespace WindowsForms.DatosMaestros
             profesionalesDataGridView.DataSource = filtrados.ToList();
         }
 
-        private void FiltrarButton_Click(object? sender, EventArgs e)
+        private void FiltrarDataGridView(object? sender, EventArgs e)
         {
             AplicarFiltros();
         }

@@ -33,7 +33,6 @@ namespace WindowsForms.DatosMaestros
             especialidadesDataGridView = new DataGridView();
             tableLayoutPanel1 = new TableLayoutPanel();
             limpiarFiltrosLinkLabel = new LinkLabel();
-            filtrarButton = new Button();
             agregarEspecialidadButton = new Button();
             busquedaLabel = new Label();
             busquedaEspecialidadTextBox = new TextBox();
@@ -99,15 +98,13 @@ namespace WindowsForms.DatosMaestros
             // tableLayoutPanel1
             // 
             tableLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            tableLayoutPanel1.ColumnCount = 5;
+            tableLayoutPanel1.ColumnCount = 4;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
-            tableLayoutPanel1.Controls.Add(limpiarFiltrosLinkLabel, 3, 0);
-            tableLayoutPanel1.Controls.Add(filtrarButton, 2, 0);
-            tableLayoutPanel1.Controls.Add(agregarEspecialidadButton, 4, 0);
+            tableLayoutPanel1.Controls.Add(limpiarFiltrosLinkLabel, 2, 0);
+            tableLayoutPanel1.Controls.Add(agregarEspecialidadButton, 3, 0);
             tableLayoutPanel1.Controls.Add(busquedaLabel, 0, 0);
             tableLayoutPanel1.Controls.Add(busquedaEspecialidadTextBox, 1, 0);
             tableLayoutPanel1.Dock = DockStyle.Top;
@@ -122,7 +119,7 @@ namespace WindowsForms.DatosMaestros
             // 
             limpiarFiltrosLinkLabel.AutoSize = true;
             limpiarFiltrosLinkLabel.Dock = DockStyle.Fill;
-            limpiarFiltrosLinkLabel.Location = new Point(281, 0);
+            limpiarFiltrosLinkLabel.Location = new Point(185, 0);
             limpiarFiltrosLinkLabel.Name = "limpiarFiltrosLinkLabel";
             limpiarFiltrosLinkLabel.Size = new Size(80, 34);
             limpiarFiltrosLinkLabel.TabIndex = 2;
@@ -130,18 +127,6 @@ namespace WindowsForms.DatosMaestros
             limpiarFiltrosLinkLabel.Text = "Limpiar filtros";
             limpiarFiltrosLinkLabel.TextAlign = ContentAlignment.MiddleLeft;
             limpiarFiltrosLinkLabel.LinkClicked += LimpiarFiltrosLinkLabel_LinkClicked;
-            // 
-            // filtrarButton
-            // 
-            filtrarButton.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            filtrarButton.AutoSize = true;
-            filtrarButton.Location = new Point(185, 3);
-            filtrarButton.Name = "filtrarButton";
-            filtrarButton.Size = new Size(90, 25);
-            filtrarButton.TabIndex = 1;
-            filtrarButton.Text = "Filtrar";
-            filtrarButton.UseVisualStyleBackColor = true;
-            filtrarButton.Click += FiltrarButton_Click;
             // 
             // agregarEspecialidadButton
             // 
@@ -171,6 +156,7 @@ namespace WindowsForms.DatosMaestros
             busquedaEspecialidadTextBox.Name = "busquedaEspecialidadTextBox";
             busquedaEspecialidadTextBox.Size = new Size(125, 23);
             busquedaEspecialidadTextBox.TabIndex = 0;
+            busquedaEspecialidadTextBox.TextChanged += FiltrarDataGridView;
             // 
             // formPanel
             // 
@@ -259,7 +245,6 @@ namespace WindowsForms.DatosMaestros
         private System.Windows.Forms.Panel listPanel;
         private System.Windows.Forms.Label busquedaLabel;
         private System.Windows.Forms.TextBox busquedaEspecialidadTextBox;
-        private System.Windows.Forms.Button filtrarButton;
         private System.Windows.Forms.LinkLabel limpiarFiltrosLinkLabel;
         private System.Windows.Forms.DataGridView especialidadesDataGridView;
         private System.Windows.Forms.Button agregarEspecialidadButton;

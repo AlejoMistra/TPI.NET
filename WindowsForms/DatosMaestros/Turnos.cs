@@ -138,7 +138,7 @@ namespace WindowsForms.DatosMaestros
 
         private void InicializarEstados()
         {
-            var estados = new[] { "Libre", "Asignado", "Confirmado", "Atendido", "Cancelado" };
+            var estados = new[] { "Libre", "Asignado", "Presente", "Atendido", "Ausente" };
 
             // Combo de búsqueda
             busquedaEstadoComboBox.Items.Clear();
@@ -318,6 +318,8 @@ namespace WindowsForms.DatosMaestros
                     _isUpdatingBusquedaCombos = false;
                 }
             }
+
+            AplicarFiltros();
         }
 
         private void BusquedaProfesionalComboBox_SelectedIndexChanged(object? sender, EventArgs e)
@@ -335,6 +337,8 @@ namespace WindowsForms.DatosMaestros
                     _isUpdatingBusquedaCombos = false;
                 }
             }
+
+            AplicarFiltros();
         }
 
         private void EspecialidadComboBox_SelectedIndexChanged(object? sender, EventArgs e)
@@ -420,8 +424,9 @@ namespace WindowsForms.DatosMaestros
             turnosDataGridView.DataSource = filtrados.ToList();
         }
 
-        private void FiltrarButton_Click(object? sender, EventArgs e)
+        private void FiltrarDataGridView(object? sender, EventArgs e)
         {
+            if (_isUpdatingBusquedaCombos) return;
             AplicarFiltros();
         }
 
@@ -508,12 +513,8 @@ namespace WindowsForms.DatosMaestros
             fechaTurnoDateTimePicker.Value = row.FechaHoraInicio.Date;
             horaInicioDateTimePicker.Value = row.FechaHoraInicio;
             horaFinDateTimePicker.Value = row.FechaHoraFin;
-
             estadoComboBox.SelectedItem = row.Estado;
-            motivoTextBox.Text = row.Motivo;
-
             guardarTurnoButton.Text = "Actualizar Turno";
-            motivoTextBox.Focus();
         }
 
         // ==========================================
@@ -556,7 +557,6 @@ namespace WindowsForms.DatosMaestros
                 Id = _selectedTurnoId ?? 0,
                 FechaHoraInicio = fechaHoraInicio,
                 FechaHoraFin = fechaHoraFin,
-                Motivo = motivoTextBox.Text.Trim(),
                 EstadoTurno = estadoComboBox.SelectedItem?.ToString() ?? "Libre",
                 Observaciones = string.Empty,
                 FacturaId = null,
@@ -604,7 +604,6 @@ namespace WindowsForms.DatosMaestros
             {
                 estadoComboBox.SelectedIndex = 0; // "Libre"
             }
-            motivoTextBox.Text = string.Empty;
 
             guardarTurnoButton.Text = "Guardar Turno";
         }

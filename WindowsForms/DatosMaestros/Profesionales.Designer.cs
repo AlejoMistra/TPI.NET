@@ -1,4 +1,4 @@
-﻿namespace WindowsForms.DatosMaestros
+namespace WindowsForms.DatosMaestros
 {
     partial class Profesionales
     {
@@ -35,7 +35,6 @@
             label2 = new Label();
             label3 = new Label();
             busquedaProfesionalTextBox = new TextBox();
-            filtrarButton = new Button();
             limpiarFiltrosLinkLabel = new LinkLabel();
             busquedaEstadoComboBox = new ComboBox();
             AgregarProfesionalButton = new Button();
@@ -85,8 +84,7 @@
             // tableLayoutPanel1
             // 
             tableLayoutPanel1.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            tableLayoutPanel1.ColumnCount = 6;
-            tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
+            tableLayoutPanel1.ColumnCount = 5;
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle());
@@ -97,10 +95,9 @@
             tableLayoutPanel1.Controls.Add(label2, 1, 0);
             tableLayoutPanel1.Controls.Add(label3, 2, 0);
             tableLayoutPanel1.Controls.Add(busquedaProfesionalTextBox, 0, 1);
-            tableLayoutPanel1.Controls.Add(filtrarButton, 3, 1);
-            tableLayoutPanel1.Controls.Add(limpiarFiltrosLinkLabel, 4, 1);
+            tableLayoutPanel1.Controls.Add(limpiarFiltrosLinkLabel, 3, 1);
             tableLayoutPanel1.Controls.Add(busquedaEstadoComboBox, 2, 1);
-            tableLayoutPanel1.Controls.Add(AgregarProfesionalButton, 5, 1);
+            tableLayoutPanel1.Controls.Add(AgregarProfesionalButton, 4, 1);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(3, 19);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
@@ -119,6 +116,7 @@
             busquedaEspecialidadComboBox.Name = "busquedaEspecialidadComboBox";
             busquedaEspecialidadComboBox.Size = new Size(152, 23);
             busquedaEspecialidadComboBox.TabIndex = 4;
+            busquedaEspecialidadComboBox.SelectedValueChanged += FiltrarDataGridView;
             // 
             // label1
             // 
@@ -155,22 +153,13 @@
             busquedaProfesionalTextBox.PlaceholderText = "DNI, Apellido o Matrícula...";
             busquedaProfesionalTextBox.Size = new Size(235, 23);
             busquedaProfesionalTextBox.TabIndex = 3;
-            // 
-            // filtrarButton
-            // 
-            filtrarButton.Location = new Point(533, 18);
-            filtrarButton.Name = "filtrarButton";
-            filtrarButton.Size = new Size(125, 23);
-            filtrarButton.TabIndex = 6;
-            filtrarButton.Text = "Filtrar";
-            filtrarButton.UseVisualStyleBackColor = true;
-            filtrarButton.Click += FiltrarButton_Click;
+            busquedaProfesionalTextBox.TextChanged += FiltrarDataGridView;
             // 
             // limpiarFiltrosLinkLabel
             // 
             limpiarFiltrosLinkLabel.Anchor = AnchorStyles.None;
             limpiarFiltrosLinkLabel.AutoSize = true;
-            limpiarFiltrosLinkLabel.Location = new Point(664, 22);
+            limpiarFiltrosLinkLabel.Location = new Point(533, 22);
             limpiarFiltrosLinkLabel.Name = "limpiarFiltrosLinkLabel";
             limpiarFiltrosLinkLabel.Size = new Size(80, 15);
             limpiarFiltrosLinkLabel.TabIndex = 7;
@@ -187,6 +176,7 @@
             busquedaEstadoComboBox.Name = "busquedaEstadoComboBox";
             busquedaEstadoComboBox.Size = new Size(125, 23);
             busquedaEstadoComboBox.TabIndex = 5;
+            busquedaEstadoComboBox.SelectedValueChanged += FiltrarDataGridView;
             // 
             // AgregarProfesionalButton
             // 
@@ -497,7 +487,6 @@
         private Label label2;
         private Label label3;
         private TextBox busquedaProfesionalTextBox;
-        private Button filtrarButton;
         private LinkLabel limpiarFiltrosLinkLabel;
         private ComboBox busquedaEstadoComboBox;
         private Button AgregarProfesionalButton;

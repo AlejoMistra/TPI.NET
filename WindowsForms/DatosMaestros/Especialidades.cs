@@ -106,7 +106,7 @@ namespace WindowsForms.DatosMaestros
             especialidadesDataGridView.DataSource = filtradas.ToList();
         }
 
-        private void FiltrarButton_Click(object? sender, EventArgs e) => AplicarFiltros();
+        private void FiltrarDataGridView(object? sender, EventArgs e) => AplicarFiltros();
 
         private void LimpiarFiltrosLinkLabel_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
         {
