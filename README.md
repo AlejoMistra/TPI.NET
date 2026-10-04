@@ -21,8 +21,8 @@ Sistema de gestión para consultorios médicos que permite administrar pacientes
 
 ```mermaid
 classDiagram
-    direction LR
-    
+direction LR
+
     class Usuario {
         +int IdUsuario
         +string NombreUsuario
@@ -37,7 +37,7 @@ classDiagram
         +string Nombre
         +string Apellido
         +string NroDocumento
-        +string CorreoElectronico
+        +string Email
         +string Telefono
     }
 
@@ -53,7 +53,6 @@ classDiagram
     class HistoriaClinica {
         +int IdHistoria
         +string GrupoSanguineo
-        +string Alergias
         +string Antecedentes
         +DateTime FechaCreacion
     }
@@ -96,20 +95,20 @@ classDiagram
 
     Persona <|-- Paciente
     Persona <|-- Profesional
-    
+
     %% Relaciones actualizadas
     Usuario "0..1" -- "1" Persona : credenciales de
-    
-    Paciente "1" -- "*" Turno : solicita
+
+    Paciente "0..1" -- "*" Turno : solicita
     Profesional "1" -- "*" Turno : atiende
     Profesional "*" -- "1" Especialidad : tiene
-    
+
     Paciente "1" *-- "1" HistoriaClinica : posee
     HistoriaClinica "1" -- "*" RegistroClinico : registra
-    
+
     Turno "1" -- "0..1" RegistroClinico : genera
     Turno "1" -- "0..1" Factura : origina
-    
+
     Factura "1" *-- "*" DetalleFactura : contiene
 ```
 
@@ -118,8 +117,6 @@ classDiagram
 1. **Administrativo:** Gestiona la agenda de turnos (asignación, reprogramación y cancelación de turnos). Se encarga de emitir y gestionar la facturación de los turnos. Además gestiona los datos maestros del sistema (altas y modificaciones de Especialidades y Profesionales).
 
 2. **Profesional:** Accede a su agenda de turnos asignados. Puede visualizar los antecedentes en la Historia Clínica del Paciente y registrar las Consultas Médicas realizadas completando diagnósticos y notas clínicas necesarias.
-
-3. **Paciente:** Accede al sistema para autogestionar la solicitud de turnos, visualizar el cronograma de sus próximos turnos y consultar un registro básico de sus atenciones previas.
 
 ## CRUDs
 

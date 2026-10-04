@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Data.Migrations
 {
     [DbContext(typeof(TPIContext))]
-    partial class TPIContextModelSnapshot : ModelSnapshot
+    [Migration("20261004155500_AddFacturacionMaestroDetalle")]
+    partial class AddFacturacionMaestroDetalle
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,6 +24,35 @@ namespace Data.Migrations
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
+
+            modelBuilder.Entity("Domain.Model.DetalleFactura", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("Cantidad")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Concepto")
+                        .IsRequired()
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<int>("FacturaId")
+                        .HasColumnType("int");
+
+                    b.Property<decimal>("PrecioUnitario")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FacturaId");
+
+                    b.ToTable("DetallesFactura", (string)null);
+                });
 
             modelBuilder.Entity("Domain.Model.Especialidad", b =>
                 {
@@ -38,6 +70,40 @@ namespace Data.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("Especialidades");
+                });
+
+            modelBuilder.Entity("Domain.Model.Factura", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("EstadoFactura")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("FechaEmision")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("MetodoPago")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<decimal>("MontoTotal")
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("TurnoId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TurnoId");
+
+                    b.ToTable("Facturas", (string)null);
                 });
 
             modelBuilder.Entity("Domain.Model.HistoriaClinica", b =>
@@ -164,6 +230,9 @@ namespace Data.Migrations
                         .HasMaxLength(30)
                         .HasColumnType("nvarchar(30)");
 
+                    b.Property<int?>("FacturaId")
+                        .HasColumnType("int");
+
                     b.Property<DateTime>("FechaHoraFin")
                         .HasColumnType("datetime2");
 
@@ -189,6 +258,8 @@ namespace Data.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("FacturaId");
 
                     b.HasIndex("PacienteId");
 
@@ -290,6 +361,24 @@ namespace Data.Migrations
                     b.ToTable("Profesionales", (string)null);
                 });
 
+            modelBuilder.Entity("Domain.Model.DetalleFactura", b =>
+                {
+                    b.HasOne("Domain.Model.Factura", null)
+                        .WithMany("DetallesFactura")
+                        .HasForeignKey("FacturaId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+                });
+
+            modelBuilder.Entity("Domain.Model.Factura", b =>
+                {
+                    b.HasOne("Domain.Model.Turno", null)
+                        .WithMany()
+                        .HasForeignKey("TurnoId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+                });
+
             modelBuilder.Entity("Domain.Model.HistoriaClinica", b =>
                 {
                     b.HasOne("Domain.Model.Paciente", null)
@@ -321,6 +410,11 @@ namespace Data.Migrations
 
             modelBuilder.Entity("Domain.Model.Turno", b =>
                 {
+                    b.HasOne("Domain.Model.Factura", "Factura")
+                        .WithMany()
+                        .HasForeignKey("FacturaId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("Domain.Model.Paciente", "Paciente")
                         .WithMany("Turnos")
                         .HasForeignKey("PacienteId")
@@ -331,6 +425,8 @@ namespace Data.Migrations
                         .HasForeignKey("ProfesionalId")
                         .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("Factura");
 
                     b.Navigation("Paciente");
 
@@ -371,6 +467,11 @@ namespace Data.Migrations
                         .IsRequired();
 
                     b.Navigation("Especialidad");
+                });
+
+            modelBuilder.Entity("Domain.Model.Factura", b =>
+                {
+                    b.Navigation("DetallesFactura");
                 });
 
             modelBuilder.Entity("Domain.Model.HistoriaClinica", b =>
