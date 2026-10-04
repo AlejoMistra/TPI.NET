@@ -14,6 +14,8 @@ namespace Data
         public DbSet<Turno> Turnos { get; set; }
         public DbSet<HistoriaClinica> HistoriasClinicas { get; set; }
         public DbSet<RegistroClinico> RegistrosClinicos { get; set; }
+        public DbSet<Factura> Facturas { get; set; }
+        public DbSet<DetalleFactura> DetallesFactura { get; set; }
 
         public TPIContext(DbContextOptions<TPIContext> options) : base(options)
         {
@@ -39,9 +41,6 @@ namespace Data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
-
-            // Evita que EF Core mapee estas clases arrastradas por navegación
-            modelBuilder.Ignore<Factura>();
 
             modelBuilder.Entity<Usuario>(entity =>
             {
@@ -218,7 +217,14 @@ namespace Data
                 entity.Property(t => t.PacienteId)
                     .IsRequired(false);
 
-                entity.Ignore(t => t.FacturaId);
+                entity.Property(t => t.FechaHoraLlegada)
+                    .IsRequired(false);
+
+                entity.HasOne(t => t.Factura)
+                    .WithMany()
+                    .HasForeignKey(t => t.FacturaId)
+                    .IsRequired(false)
+                    .OnDelete(DeleteBehavior.Restrict);
 
                 entity.HasOne(t => t.Profesional)
                     .WithMany()
@@ -233,6 +239,61 @@ namespace Data
 
                 entity.Navigation(t => t.Registros)
                     .UsePropertyAccessMode(PropertyAccessMode.Field);
+            });
+
+            modelBuilder.Entity<Factura>(entity =>
+            {
+                entity.ToTable("Facturas");
+                entity.HasKey(f => f.Id);
+
+                entity.Property(f => f.FechaEmision)
+                    .IsRequired();
+
+                entity.Property(f => f.MontoTotal)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Property(f => f.MetodoPago)
+                    .IsRequired()
+                    .HasConversion<string>()
+                    .HasMaxLength(30);
+
+                entity.Property(f => f.EstadoFactura)
+                    .IsRequired()
+                    .HasConversion<string>()
+                    .HasMaxLength(20);
+
+                entity.HasOne<Turno>()
+                    .WithMany()
+                    .HasForeignKey(f => f.TurnoId)
+                    .OnDelete(DeleteBehavior.Restrict);
+
+                entity.HasMany(f => f.DetallesFactura)
+                    .WithOne()
+                    .HasForeignKey(d => d.FacturaId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                entity.Navigation(f => f.DetallesFactura)
+                    .UsePropertyAccessMode(PropertyAccessMode.Field);
+            });
+
+            modelBuilder.Entity<DetalleFactura>(entity =>
+            {
+                entity.ToTable("DetallesFactura");
+                entity.HasKey(d => d.Id);
+
+                entity.Property(d => d.Concepto)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(d => d.Cantidad)
+                    .IsRequired();
+
+                entity.Property(d => d.PrecioUnitario)
+                    .HasColumnType("decimal(18,2)")
+                    .IsRequired();
+
+                entity.Ignore(d => d.Subtotal);
             });
         }
     }

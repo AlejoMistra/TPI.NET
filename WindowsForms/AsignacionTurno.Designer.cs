@@ -39,7 +39,7 @@ namespace WindowsForms
             ProfesionalComboBox = new ComboBox();
             fechaDesdeDateTimePicker = new DateTimePicker();
             label5 = new Label();
-            button3 = new Button();
+            limpiarFiltrosLinkLabel = new LinkLabel();
             dataGridView1 = new DataGridView();
             label6 = new Label();
             groupBox2 = new GroupBox();
@@ -48,15 +48,22 @@ namespace WindowsForms
             searchTableLayoutPanel = new TableLayoutPanel();
             busquedaTextBox = new TextBox();
             button4 = new Button();
+            nuevoPacienteButton = new Button();
             label8 = new Label();
             label9 = new Label();
             label10 = new Label();
             nombreTextBox = new TextBox();
             apellidoTextBox = new TextBox();
             label11 = new Label();
-            label12 = new Label();
+            fechaNacimientoLabel = new Label();
             documentoTextBox = new TextBox();
+            fechaNacimientoDateTimePicker = new DateTimePicker();
+            label12 = new Label();
+            emailLabel = new Label();
             telefonoTextBox = new TextBox();
+            emailTextBox = new TextBox();
+            obraSocialLabel = new Label();
+            obraSocialTextBox = new TextBox();
             label13 = new Label();
             label14 = new Label();
             motivoTextBox = new TextBox();
@@ -141,7 +148,7 @@ namespace WindowsForms
             tableLayoutPanel2.Controls.Add(ProfesionalComboBox, 1, 1);
             tableLayoutPanel2.Controls.Add(fechaDesdeDateTimePicker, 2, 1);
             tableLayoutPanel2.Controls.Add(label5, 0, 2);
-            tableLayoutPanel2.Controls.Add(button3, 2, 2);
+            tableLayoutPanel2.Controls.Add(limpiarFiltrosLinkLabel, 2, 2);
             tableLayoutPanel2.Dock = DockStyle.Fill;
             tableLayoutPanel2.Location = new Point(3, 3);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -149,7 +156,7 @@ namespace WindowsForms
             tableLayoutPanel2.RowStyles.Add(new RowStyle());
             tableLayoutPanel2.RowStyles.Add(new RowStyle());
             tableLayoutPanel2.RowStyles.Add(new RowStyle());
-            tableLayoutPanel2.Size = new Size(568, 75);
+            tableLayoutPanel2.Size = new Size(568, 65);
             tableLayoutPanel2.TabIndex = 0;
             // 
             // label2
@@ -211,29 +218,35 @@ namespace WindowsForms
             label5.Anchor = AnchorStyles.Left;
             label5.AutoSize = true;
             tableLayoutPanel2.SetColumnSpan(label5, 2);
-            label5.Location = new Point(3, 52);
+            label5.Location = new Point(3, 47);
             label5.Name = "label5";
             label5.Size = new Size(356, 15);
             label5.TabIndex = 6;
             label5.Text = "Mostrando únicamente turnos precargados con estado Disponible";
             // 
-            // button3
+            // limpiarFiltrosLinkLabel
             // 
-            button3.Anchor = AnchorStyles.Right;
-            button3.Location = new Point(453, 47);
-            button3.Name = "button3";
-            button3.Size = new Size(112, 25);
-            button3.TabIndex = 7;
-            button3.Text = "Buscar Turnos";
-            button3.UseVisualStyleBackColor = true;
+            limpiarFiltrosLinkLabel.Anchor = AnchorStyles.Right;
+            limpiarFiltrosLinkLabel.AutoSize = true;
+            limpiarFiltrosLinkLabel.Location = new Point(485, 48);
+            limpiarFiltrosLinkLabel.Margin = new Padding(3, 4, 3, 2);
+            limpiarFiltrosLinkLabel.Name = "limpiarFiltrosLinkLabel";
+            limpiarFiltrosLinkLabel.Size = new Size(80, 15);
+            limpiarFiltrosLinkLabel.TabIndex = 7;
+            limpiarFiltrosLinkLabel.TabStop = true;
+            limpiarFiltrosLinkLabel.Text = "Limpiar filtros";
             // 
             // dataGridView1
             // 
+            dataGridView1.AllowUserToAddRows = false;
+            dataGridView1.AllowUserToDeleteRows = false;
+            dataGridView1.AllowUserToResizeRows = false;
             dataGridView1.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
+            dataGridView1.Cursor = Cursors.Hand;
             dataGridView1.Dock = DockStyle.Fill;
-            dataGridView1.Location = new Point(3, 84);
+            dataGridView1.Location = new Point(3, 74);
             dataGridView1.Name = "dataGridView1";
-            dataGridView1.Size = new Size(568, 406);
+            dataGridView1.Size = new Size(568, 416);
             dataGridView1.TabIndex = 1;
             // 
             // label6
@@ -264,6 +277,7 @@ namespace WindowsForms
             // 
             // patientTableLayoutPanel
             // 
+            patientTableLayoutPanel.AutoScroll = true;
             patientTableLayoutPanel.ColumnCount = 2;
             patientTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
             patientTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 50F));
@@ -275,18 +289,27 @@ namespace WindowsForms
             patientTableLayoutPanel.Controls.Add(nombreTextBox, 0, 4);
             patientTableLayoutPanel.Controls.Add(apellidoTextBox, 1, 4);
             patientTableLayoutPanel.Controls.Add(label11, 0, 5);
-            patientTableLayoutPanel.Controls.Add(label12, 1, 5);
+            patientTableLayoutPanel.Controls.Add(fechaNacimientoLabel, 1, 5);
             patientTableLayoutPanel.Controls.Add(documentoTextBox, 0, 6);
-            patientTableLayoutPanel.Controls.Add(telefonoTextBox, 1, 6);
-            patientTableLayoutPanel.Controls.Add(label13, 0, 7);
-            patientTableLayoutPanel.Controls.Add(label14, 0, 8);
-            patientTableLayoutPanel.Controls.Add(motivoTextBox, 0, 9);
-            patientTableLayoutPanel.Controls.Add(label15, 0, 10);
-            patientTableLayoutPanel.Controls.Add(observacionesTextBox, 0, 11);
+            patientTableLayoutPanel.Controls.Add(fechaNacimientoDateTimePicker, 1, 6);
+            patientTableLayoutPanel.Controls.Add(label12, 0, 7);
+            patientTableLayoutPanel.Controls.Add(emailLabel, 1, 7);
+            patientTableLayoutPanel.Controls.Add(telefonoTextBox, 0, 8);
+            patientTableLayoutPanel.Controls.Add(emailTextBox, 1, 8);
+            patientTableLayoutPanel.Controls.Add(obraSocialLabel, 0, 9);
+            patientTableLayoutPanel.Controls.Add(obraSocialTextBox, 0, 10);
+            patientTableLayoutPanel.Controls.Add(label13, 0, 11);
+            patientTableLayoutPanel.Controls.Add(label14, 0, 12);
+            patientTableLayoutPanel.Controls.Add(motivoTextBox, 0, 13);
+            patientTableLayoutPanel.Controls.Add(label15, 0, 14);
+            patientTableLayoutPanel.Controls.Add(observacionesTextBox, 0, 15);
             patientTableLayoutPanel.Dock = DockStyle.Fill;
             patientTableLayoutPanel.Location = new Point(8, 26);
             patientTableLayoutPanel.Name = "patientTableLayoutPanel";
-            patientTableLayoutPanel.RowCount = 13;
+            patientTableLayoutPanel.RowCount = 16;
+            patientTableLayoutPanel.RowStyles.Add(new RowStyle());
+            patientTableLayoutPanel.RowStyles.Add(new RowStyle());
+            patientTableLayoutPanel.RowStyles.Add(new RowStyle());
             patientTableLayoutPanel.RowStyles.Add(new RowStyle());
             patientTableLayoutPanel.RowStyles.Add(new RowStyle());
             patientTableLayoutPanel.RowStyles.Add(new RowStyle());
@@ -318,12 +341,14 @@ namespace WindowsForms
             // 
             searchTableLayoutPanel.AutoSize = true;
             searchTableLayoutPanel.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            searchTableLayoutPanel.ColumnCount = 2;
+            searchTableLayoutPanel.ColumnCount = 3;
             patientTableLayoutPanel.SetColumnSpan(searchTableLayoutPanel, 2);
             searchTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             searchTableLayoutPanel.ColumnStyles.Add(new ColumnStyle());
+            searchTableLayoutPanel.ColumnStyles.Add(new ColumnStyle());
             searchTableLayoutPanel.Controls.Add(busquedaTextBox, 0, 0);
             searchTableLayoutPanel.Controls.Add(button4, 1, 0);
+            searchTableLayoutPanel.Controls.Add(nuevoPacienteButton, 2, 0);
             searchTableLayoutPanel.Dock = DockStyle.Fill;
             searchTableLayoutPanel.Location = new Point(0, 17);
             searchTableLayoutPanel.Margin = new Padding(0);
@@ -339,20 +364,34 @@ namespace WindowsForms
             busquedaTextBox.Location = new Point(3, 3);
             busquedaTextBox.Name = "busquedaTextBox";
             busquedaTextBox.PlaceholderText = "Ingrese DNI o apellido...";
-            busquedaTextBox.Size = new Size(347, 23);
+            busquedaTextBox.Size = new Size(266, 23);
             busquedaTextBox.TabIndex = 0;
             // 
             // button4
             // 
             button4.Anchor = AnchorStyles.Right;
             button4.AutoSize = true;
-            button4.Location = new Point(356, 2);
+            button4.Cursor = Cursors.Hand;
+            button4.Location = new Point(275, 2);
             button4.Margin = new Padding(3, 2, 3, 2);
             button4.Name = "button4";
             button4.Size = new Size(75, 25);
             button4.TabIndex = 1;
             button4.Text = "Buscar";
             button4.UseVisualStyleBackColor = true;
+            // 
+            // nuevoPacienteButton
+            // 
+            nuevoPacienteButton.Anchor = AnchorStyles.Right;
+            nuevoPacienteButton.AutoSize = true;
+            nuevoPacienteButton.Cursor = Cursors.Hand;
+            nuevoPacienteButton.Location = new Point(356, 2);
+            nuevoPacienteButton.Margin = new Padding(3, 2, 3, 2);
+            nuevoPacienteButton.Name = "nuevoPacienteButton";
+            nuevoPacienteButton.Size = new Size(75, 25);
+            nuevoPacienteButton.TabIndex = 2;
+            nuevoPacienteButton.Text = "+ Nuevo";
+            nuevoPacienteButton.UseVisualStyleBackColor = true;
             // 
             // label8
             // 
@@ -368,7 +407,6 @@ namespace WindowsForms
             label8.TabIndex = 2;
             label8.Text = "Paciente encontrado: {Apellido y Nombre} ({DNI})";
             label8.TextAlign = ContentAlignment.MiddleLeft;
-            label8.Click += label8_Click;
             // 
             // label9
             // 
@@ -418,15 +456,15 @@ namespace WindowsForms
             label11.TabIndex = 7;
             label11.Text = "Nro Documento (DNI)";
             // 
-            // label12
+            // fechaNacimientoLabel
             // 
-            label12.AutoSize = true;
-            label12.Location = new Point(220, 132);
-            label12.Margin = new Padding(3, 0, 3, 2);
-            label12.Name = "label12";
-            label12.Size = new Size(53, 15);
-            label12.TabIndex = 8;
-            label12.Text = "Teléfono";
+            fechaNacimientoLabel.AutoSize = true;
+            fechaNacimientoLabel.Location = new Point(220, 132);
+            fechaNacimientoLabel.Margin = new Padding(3, 0, 3, 2);
+            fechaNacimientoLabel.Name = "fechaNacimientoLabel";
+            fechaNacimientoLabel.Size = new Size(119, 15);
+            fechaNacimientoLabel.TabIndex = 8;
+            fechaNacimientoLabel.Text = "Fecha de Nacimiento";
             // 
             // documentoTextBox
             // 
@@ -437,14 +475,76 @@ namespace WindowsForms
             documentoTextBox.Size = new Size(211, 23);
             documentoTextBox.TabIndex = 9;
             // 
+            // fechaNacimientoDateTimePicker
+            // 
+            fechaNacimientoDateTimePicker.Dock = DockStyle.Fill;
+            fechaNacimientoDateTimePicker.Format = DateTimePickerFormat.Short;
+            fechaNacimientoDateTimePicker.Location = new Point(220, 151);
+            fechaNacimientoDateTimePicker.Margin = new Padding(3, 2, 3, 6);
+            fechaNacimientoDateTimePicker.Name = "fechaNacimientoDateTimePicker";
+            fechaNacimientoDateTimePicker.Size = new Size(211, 23);
+            fechaNacimientoDateTimePicker.TabIndex = 10;
+            // 
+            // label12
+            // 
+            label12.AutoSize = true;
+            label12.Location = new Point(3, 180);
+            label12.Margin = new Padding(3, 0, 3, 2);
+            label12.Name = "label12";
+            label12.Size = new Size(53, 15);
+            label12.TabIndex = 11;
+            label12.Text = "Teléfono";
+            // 
+            // emailLabel
+            // 
+            emailLabel.AutoSize = true;
+            emailLabel.Location = new Point(220, 180);
+            emailLabel.Margin = new Padding(3, 0, 3, 2);
+            emailLabel.Name = "emailLabel";
+            emailLabel.Size = new Size(36, 15);
+            emailLabel.TabIndex = 12;
+            emailLabel.Text = "Email";
+            // 
             // telefonoTextBox
             // 
             telefonoTextBox.Dock = DockStyle.Fill;
-            telefonoTextBox.Location = new Point(220, 151);
+            telefonoTextBox.Location = new Point(3, 199);
             telefonoTextBox.Margin = new Padding(3, 2, 3, 6);
             telefonoTextBox.Name = "telefonoTextBox";
             telefonoTextBox.Size = new Size(211, 23);
-            telefonoTextBox.TabIndex = 10;
+            telefonoTextBox.TabIndex = 11;
+            // 
+            // emailTextBox
+            // 
+            emailTextBox.Dock = DockStyle.Fill;
+            emailTextBox.Location = new Point(220, 199);
+            emailTextBox.Margin = new Padding(3, 2, 3, 6);
+            emailTextBox.Name = "emailTextBox";
+            emailTextBox.PlaceholderText = "ejemplo@correo.com";
+            emailTextBox.Size = new Size(211, 23);
+            emailTextBox.TabIndex = 12;
+            // 
+            // obraSocialLabel
+            // 
+            obraSocialLabel.AutoSize = true;
+            patientTableLayoutPanel.SetColumnSpan(obraSocialLabel, 2);
+            obraSocialLabel.Location = new Point(3, 228);
+            obraSocialLabel.Margin = new Padding(3, 0, 3, 2);
+            obraSocialLabel.Name = "obraSocialLabel";
+            obraSocialLabel.Size = new Size(67, 15);
+            obraSocialLabel.TabIndex = 15;
+            obraSocialLabel.Text = "Obra Social";
+            // 
+            // obraSocialTextBox
+            // 
+            patientTableLayoutPanel.SetColumnSpan(obraSocialTextBox, 2);
+            obraSocialTextBox.Dock = DockStyle.Fill;
+            obraSocialTextBox.Location = new Point(3, 247);
+            obraSocialTextBox.Margin = new Padding(3, 2, 3, 6);
+            obraSocialTextBox.Name = "obraSocialTextBox";
+            obraSocialTextBox.PlaceholderText = "Particular / OSDE / Swiss Medical...";
+            obraSocialTextBox.Size = new Size(428, 23);
+            obraSocialTextBox.TabIndex = 13;
             // 
             // label13
             // 
@@ -452,7 +552,7 @@ namespace WindowsForms
             patientTableLayoutPanel.SetColumnSpan(label13, 2);
             label13.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
             label13.ForeColor = Color.FromArgb(0, 102, 204);
-            label13.Location = new Point(3, 190);
+            label13.Location = new Point(3, 286);
             label13.Margin = new Padding(3, 10, 3, 4);
             label13.Name = "label13";
             label13.Size = new Size(195, 15);
@@ -463,7 +563,7 @@ namespace WindowsForms
             // 
             label14.AutoSize = true;
             patientTableLayoutPanel.SetColumnSpan(label14, 2);
-            label14.Location = new Point(3, 209);
+            label14.Location = new Point(3, 305);
             label14.Margin = new Padding(3, 0, 3, 2);
             label14.Name = "label14";
             label14.Size = new Size(111, 15);
@@ -474,17 +574,17 @@ namespace WindowsForms
             // 
             patientTableLayoutPanel.SetColumnSpan(motivoTextBox, 2);
             motivoTextBox.Dock = DockStyle.Fill;
-            motivoTextBox.Location = new Point(3, 228);
+            motivoTextBox.Location = new Point(3, 324);
             motivoTextBox.Margin = new Padding(3, 2, 3, 6);
             motivoTextBox.Name = "motivoTextBox";
             motivoTextBox.Size = new Size(428, 23);
-            motivoTextBox.TabIndex = 13;
+            motivoTextBox.TabIndex = 14;
             // 
             // label15
             // 
             label15.AutoSize = true;
             patientTableLayoutPanel.SetColumnSpan(label15, 2);
-            label15.Location = new Point(3, 257);
+            label15.Location = new Point(3, 353);
             label15.Margin = new Padding(3, 0, 3, 2);
             label15.Name = "label15";
             label15.Size = new Size(161, 15);
@@ -495,7 +595,7 @@ namespace WindowsForms
             // 
             patientTableLayoutPanel.SetColumnSpan(observacionesTextBox, 2);
             observacionesTextBox.Dock = DockStyle.Top;
-            observacionesTextBox.Location = new Point(3, 276);
+            observacionesTextBox.Location = new Point(3, 372);
             observacionesTextBox.Margin = new Padding(3, 2, 3, 4);
             observacionesTextBox.Multiline = true;
             observacionesTextBox.Name = "observacionesTextBox";
@@ -503,7 +603,6 @@ namespace WindowsForms
             observacionesTextBox.ScrollBars = ScrollBars.Vertical;
             observacionesTextBox.Size = new Size(428, 72);
             observacionesTextBox.TabIndex = 15;
-            observacionesTextBox.TextChanged += observacionesTextBox_TextChanged;
             // 
             // tableLayoutPanel1
             // 
@@ -536,18 +635,20 @@ namespace WindowsForms
             // button2
             // 
             button2.Anchor = AnchorStyles.Right;
+            button2.Cursor = Cursors.Hand;
             button2.Location = new Point(738, 9);
             button2.Margin = new Padding(4, 3, 4, 3);
             button2.Name = "button2";
             button2.Size = new Size(85, 27);
             button2.TabIndex = 1;
-            button2.Text = "Cancelar";
+            button2.Text = "Volver";
             button2.UseVisualStyleBackColor = true;
             // 
             // button1
             // 
             button1.Anchor = AnchorStyles.Right;
             button1.AutoSize = true;
+            button1.Cursor = Cursors.Hand;
             button1.Location = new Point(831, 9);
             button1.Margin = new Padding(4, 3, 0, 3);
             button1.Name = "button1";
@@ -604,7 +705,7 @@ namespace WindowsForms
         private ComboBox ProfesionalComboBox;
         private DateTimePicker fechaDesdeDateTimePicker;
         private Label label5;
-        private Button button3;
+        private LinkLabel limpiarFiltrosLinkLabel;
         private TableLayoutPanel tableLayoutPanel3;
         private DataGridView dataGridView1;
         private Label label6;
@@ -627,5 +728,12 @@ namespace WindowsForms
         private TextBox motivoTextBox;
         private Label label15;
         private TextBox observacionesTextBox;
+        private Label fechaNacimientoLabel;
+        private DateTimePicker fechaNacimientoDateTimePicker;
+        private Label emailLabel;
+        private TextBox emailTextBox;
+        private Label obraSocialLabel;
+        private TextBox obraSocialTextBox;
+        private Button nuevoPacienteButton;
     }
 }

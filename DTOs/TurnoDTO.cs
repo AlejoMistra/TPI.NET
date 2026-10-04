@@ -13,5 +13,14 @@ namespace DTOs
 
     public int ProfesionalId { get; set; }
     public int? PacienteId { get; set; }
+
+    public DateTime? FechaHoraLlegada { get; set; }
+  }
+
+  public class AsignarTurnoRequestDTO
+  {
+    public int PacienteId { get; set; }
+    public string? Motivo { get; set; }
+    public string? Observaciones { get; set; }
   }
 }

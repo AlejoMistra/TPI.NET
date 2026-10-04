@@ -57,7 +57,6 @@ namespace Data
     {
       return await _context.Turnos.AnyAsync(t =>
           t.ProfesionalId == profesionalId &&
-          t.EstadoTurno != Turno.EstadosTurno.Cancelado &&
           (excludeTurnoId == null || t.Id != excludeTurnoId) &&
           t.FechaHoraInicio < fechaHoraFin &&
           t.FechaHoraFin > fechaHoraInicio

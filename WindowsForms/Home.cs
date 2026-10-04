@@ -27,17 +27,27 @@ namespace WindowsForms
 
         private void agendaDeTurnosToolStripMenuItem_Click(object sender, EventArgs e)
         {
+            facturacionToolStripMenuItem.BackColor = SystemColors.Control;
             datosMaestrosToolStripMenuItem.BackColor = SystemColors.Control;
             agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.ControlLight;
             ShowControl(new AgendaTurnos());
         }
 
+        private void facturacionToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.Control;
+            datosMaestrosToolStripMenuItem.BackColor = SystemColors.Control;
+            facturacionToolStripMenuItem.BackColor = SystemColors.ControlLight;
+            ShowControl(new Facturacion());
+
+        }
+
         private void datosMaestrosToolStripMenuItem_Click(object sender, EventArgs e)
         {
             agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.Control;
+            facturacionToolStripMenuItem.BackColor = SystemColors.Control;
             datosMaestrosToolStripMenuItem.BackColor = SystemColors.ControlLight;
             ShowControl(new DatosMaestrosUC());
         }
-
     }
 }

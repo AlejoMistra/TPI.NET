@@ -30,7 +30,7 @@ namespace WindowsForms
         {
             menuStrip1 = new MenuStrip();
             agendaDeTurnosToolStripMenuItem = new ToolStripMenuItem();
-            facturaciónToolStripMenuItem = new ToolStripMenuItem();
+            facturacionToolStripMenuItem = new ToolStripMenuItem();
             datosMaestrosToolStripMenuItem = new ToolStripMenuItem();
             ContentPanel = new Panel();
             menuStrip1.SuspendLayout();
@@ -39,7 +39,7 @@ namespace WindowsForms
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { agendaDeTurnosToolStripMenuItem, facturaciónToolStripMenuItem, datosMaestrosToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { agendaDeTurnosToolStripMenuItem, facturacionToolStripMenuItem, datosMaestrosToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(904, 24);
@@ -53,11 +53,12 @@ namespace WindowsForms
             agendaDeTurnosToolStripMenuItem.Text = "Agenda de Turnos";
             agendaDeTurnosToolStripMenuItem.Click += agendaDeTurnosToolStripMenuItem_Click;
             // 
-            // facturaciónToolStripMenuItem
+            // facturacionToolStripMenuItem
             // 
-            facturaciónToolStripMenuItem.Name = "facturaciónToolStripMenuItem";
-            facturaciónToolStripMenuItem.Size = new Size(81, 20);
-            facturaciónToolStripMenuItem.Text = "Facturación";
+            facturacionToolStripMenuItem.Name = "facturacionToolStripMenuItem";
+            facturacionToolStripMenuItem.Size = new Size(81, 20);
+            facturacionToolStripMenuItem.Text = "Facturación";
+            facturacionToolStripMenuItem.Click += facturacionToolStripMenuItem_Click;
             // 
             // datosMaestrosToolStripMenuItem
             // 
@@ -97,7 +98,7 @@ namespace WindowsForms
 
         private MenuStrip menuStrip1;
         private ToolStripMenuItem agendaDeTurnosToolStripMenuItem;
-        private ToolStripMenuItem facturaciónToolStripMenuItem;
+        private ToolStripMenuItem facturacionToolStripMenuItem;
         private ToolStripMenuItem datosMaestrosToolStripMenuItem;
         private Panel ContentPanel;
     }
