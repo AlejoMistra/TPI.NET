@@ -30,6 +30,7 @@ namespace WindowsForms
         {
             menuStrip1 = new MenuStrip();
             agendaDeTurnosToolStripMenuItem = new ToolStripMenuItem();
+            pacientesToolStripMenuItem = new ToolStripMenuItem();
             facturacionToolStripMenuItem = new ToolStripMenuItem();
             datosMaestrosToolStripMenuItem = new ToolStripMenuItem();
             ContentPanel = new Panel();
@@ -39,7 +40,7 @@ namespace WindowsForms
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { agendaDeTurnosToolStripMenuItem, facturacionToolStripMenuItem, datosMaestrosToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { agendaDeTurnosToolStripMenuItem, pacientesToolStripMenuItem, facturacionToolStripMenuItem, datosMaestrosToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(904, 24);
@@ -52,6 +53,13 @@ namespace WindowsForms
             agendaDeTurnosToolStripMenuItem.Size = new Size(116, 20);
             agendaDeTurnosToolStripMenuItem.Text = "Agenda de Turnos";
             agendaDeTurnosToolStripMenuItem.Click += agendaDeTurnosToolStripMenuItem_Click;
+            // 
+            // pacientesToolStripMenuItem
+            // 
+            pacientesToolStripMenuItem.Name = "pacientesToolStripMenuItem";
+            pacientesToolStripMenuItem.Size = new Size(69, 20);
+            pacientesToolStripMenuItem.Text = "Pacientes";
+            pacientesToolStripMenuItem.Click += pacientesToolStripMenuItem_Click;
             // 
             // facturacionToolStripMenuItem
             // 
@@ -98,6 +106,7 @@ namespace WindowsForms
 
         private MenuStrip menuStrip1;
         private ToolStripMenuItem agendaDeTurnosToolStripMenuItem;
+        private ToolStripMenuItem pacientesToolStripMenuItem;
         private ToolStripMenuItem facturacionToolStripMenuItem;
         private ToolStripMenuItem datosMaestrosToolStripMenuItem;
         private Panel ContentPanel;
