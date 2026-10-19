@@ -1,62 +1,112 @@
 using Domain.Model;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Data.SqlClient;
+using Microsoft.Extensions.Configuration;
+using System.Data;
 
 namespace Data;
 
 public class EspecialidadRepository : IEspecialidadRepository
 {
-    private readonly TPIContext _context;
+    private readonly string _connectionString;
 
-    public EspecialidadRepository(TPIContext context)
+    public EspecialidadRepository(IConfiguration configuration)
     {
-        _context = context;
-    }
-
-    public async Task AddAsync(Especialidad especialidad)
-    {
-        _context.Especialidades.Add(especialidad);
-        await _context.SaveChangesAsync();
+        _connectionString = configuration.GetConnectionString("DefaultConnection")
+            ?? throw new InvalidOperationException("Cadena de conexión 'DefaultConnection' no encontrada en la configuración.");
     }
 
     public async Task<IEnumerable<Especialidad>> GetAllAsync()
     {
-        return await _context.Especialidades
-            .OrderBy(e => e.Nombre)
-            .ToListAsync();
+        var result = new List<Especialidad>();
+        const string query = "SELECT Id, Nombre FROM Especialidades ORDER BY Nombre";
+
+        using var connection = new SqlConnection(_connectionString);
+        using var command = new SqlCommand(query, connection);
+
+        await connection.OpenAsync();
+        using var reader = await command.ExecuteReaderAsync();
+
+        while (await reader.ReadAsync())
+        {
+            var id = reader.GetInt32(0);
+            var nombre = reader.GetString(1);
+            result.Add(new Especialidad(id, nombre));
+        }
+
+        return result;
     }
 
     public async Task<Especialidad?> GetByIdAsync(int id)
     {
-        return await _context.Especialidades.FindAsync(id);
+        const string query = "SELECT Id, Nombre FROM Especialidades WHERE Id = @Id";
+
+        using var connection = new SqlConnection(_connectionString);
+        using var command = new SqlCommand(query, connection);
+        command.Parameters.Add("@Id", SqlDbType.Int).Value = id;
+
+        await connection.OpenAsync();
+        using var reader = await command.ExecuteReaderAsync();
+
+        if (await reader.ReadAsync())
+        {
+            var nombre = reader.GetString(1);
+            return new Especialidad(id, nombre);
+        }
+
+        return null;
+    }
+
+    public async Task AddAsync(Especialidad especialidad)
+    {
+        const string query = @"
+            INSERT INTO Especialidades (Nombre) 
+            VALUES (@Nombre);
+            SELECT CAST(SCOPE_IDENTITY() AS int);";
+
+        using var connection = new SqlConnection(_connectionString);
+        using var command = new SqlCommand(query, connection);
+        command.Parameters.Add("@Nombre", SqlDbType.NVarChar, 100).Value = especialidad.Nombre;
+
+        await connection.OpenAsync();
+        var newId = (int)(await command.ExecuteScalarAsync())!;
+        especialidad.SetId(newId);
     }
 
     public async Task<Especialidad?> UpdateAsync(Especialidad especialidad)
     {
-        var existing = await _context.Especialidades.FindAsync(especialidad.Id);
-        if (existing == null)
+        const string query = "UPDATE Especialidades SET Nombre = @Nombre WHERE Id = @Id";
+
+        using var connection = new SqlConnection(_connectionString);
+        using var command = new SqlCommand(query, connection);
+        command.Parameters.Add("@Id", SqlDbType.Int).Value = especialidad.Id;
+        command.Parameters.Add("@Nombre", SqlDbType.NVarChar, 100).Value = especialidad.Nombre;
+
+        await connection.OpenAsync();
+        var rowsAffected = await command.ExecuteNonQueryAsync();
+
+        if (rowsAffected == 0)
             return null;
 
-        existing.SetNombre(especialidad.Nombre);
-        await _context.SaveChangesAsync();
-        return existing;
+        return especialidad;
     }
 
     public async Task<bool> DeleteAsync(int id)
     {
-        var especialidad = await _context.Especialidades.FindAsync(id);
-        if (especialidad == null)
-            return false;
+        const string query = "DELETE FROM Especialidades WHERE Id = @Id";
 
-        _context.Especialidades.Remove(especialidad);
+        using var connection = new SqlConnection(_connectionString);
+        using var command = new SqlCommand(query, connection);
+        command.Parameters.Add("@Id", SqlDbType.Int).Value = id;
 
         try
         {
-            await _context.SaveChangesAsync();
-            return true;
+            await connection.OpenAsync();
+            var rowsAffected = await command.ExecuteNonQueryAsync();
+            return rowsAffected > 0;
         }
-        catch (DbUpdateException)
+        catch (SqlException ex) when (ex.Number == 547)
         {
-            // FK Restrict: hay Profesionales que referencian esta Especialidad
+            // Error 547: Foreign Key restriction (hay registros que referencian esta Especialidad)
             return false;
         }
     }
