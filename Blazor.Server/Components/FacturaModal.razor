@@ -1,0 +1,445 @@
+@using DTOs
+@using API.Clients
+@inject IJSRuntime JSRuntime
+
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        @if (mode == FormMode.Add)
+                        {
+                            <text>Emitir Factura - Turno N° @currentTurno.Id</text>
+                        }
+                        else
+                        {
+                            <text>Detalle de Factura N° @currentFactura.Id - Turno N° @currentTurno.Id</text>
+                        }
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="currentFactura" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+
+                        <div class="mb-3">
+                            <label class="form-label">Turno</label>
+                            <input type="text" class="form-control" value="@turnoTexto" readonly />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Paciente</label>
+                            <input type="text" class="form-control" value="@pacienteTexto" readonly />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Obra Social</label>
+                            <input type="text" class="form-control" value="@obraSocialTexto" readonly />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Profesional</label>
+                            <input type="text" class="form-control" value="@profesionalTexto" readonly />
+                        </div>
+
+                        @if (mode == FormMode.Consulta)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">N° Factura</label>
+                                <input type="text" class="form-control" value="@currentFactura.Id.ToString("D5")" readonly />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Fecha Emisión</label>
+                                <input type="text" class="form-control" value="@currentFactura.FechaEmision.ToString("dd/MM/yyyy HH:mm")" readonly />
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Estado</label>
+                                <input type="text" class="form-control" value="@currentFactura.EstadoFactura" readonly />
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label class="form-label">Método de Pago *</label>
+                            <InputSelect @bind-Value="currentFactura.MetodoPago" class="form-select" disabled="@(mode == FormMode.Consulta)">
+                                <option value="Efectivo">Efectivo</option>
+                                <option value="TarjetaDebito">Tarjeta de Débito</option>
+                                <option value="TarjetaCredito">Tarjeta de Crédito</option>
+                                <option value="TransferenciaBancaria">Transferencia Bancaria</option>
+                            </InputSelect>
+                        </div>
+
+                        <label class="form-label">Detalle</label>
+                        <table class="table table-sm">
+                            <thead>
+                                <tr>
+                                    <th>Concepto / Descripción</th>
+                                    <th>Cantidad</th>
+                                    <th>Precio Unitario ($)</th>
+                                    <th>Subtotal ($)</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var detalle in currentFactura.Detalles)
+                                {
+                                    @if (mode == FormMode.Add)
+                                    {
+                                        <tr>
+                                            <td><InputText @bind-Value="detalle.Concepto" class="form-control form-control-sm" /></td>
+                                            <td><InputNumber @bind-Value="detalle.Cantidad" class="form-control form-control-sm" /></td>
+                                            <td><InputNumber @bind-Value="detalle.PrecioUnitario" class="form-control form-control-sm" /></td>
+                                            <td>@Subtotal(detalle).ToString("N2")</td>
+                                            <td>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" @onclick="() => QuitarDetalle(detalle)">
+                                                    Quitar
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    }
+                                    else
+                                    {
+                                        <tr>
+                                            <td>@detalle.Concepto</td>
+                                            <td>@detalle.Cantidad</td>
+                                            <td>@detalle.PrecioUnitario.ToString("N2")</td>
+                                            <td>@Subtotal(detalle).ToString("N2")</td>
+                                            <td></td>
+                                        </tr>
+                                    }
+                                }
+                                @if (mode == FormMode.Add)
+                                {
+                                    <tr>
+                                        <td><InputText @bind-Value="nuevoDetalle.Concepto" class="form-control form-control-sm" placeholder="Nuevo concepto" /></td>
+                                        <td><InputNumber @bind-Value="nuevoDetalle.Cantidad" class="form-control form-control-sm" /></td>
+                                        <td><InputNumber @bind-Value="nuevoDetalle.PrecioUnitario" class="form-control form-control-sm" /></td>
+                                        <td></td>
+                                        <td>
+                                            <button type="button" class="btn btn-sm btn-outline-primary" @onclick="AgregarDetalle">
+                                                Agregar
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                        @if (validationErrors.ContainsKey("Detalle"))
+                        {
+                            <div class="text-danger small mb-2">@validationErrors["Detalle"]</div>
+                        }
+
+                        <h5 class="text-end">TOTAL: $ @currentFactura.Detalles.Sum(Subtotal).ToString("N2")</h5>
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                @errorMessage
+                            </div>
+                        }
+
+                        <div class="modal-footer">
+                            @if (mode == FormMode.Add)
+                            {
+                                <button type="button" class="btn btn-secondary" @onclick="Close">Cancelar</button>
+                                <button type="submit" class="btn btn-primary" disabled="@saving">
+                                    @if (saving)
+                                    {
+                                        <span class="spinner-border spinner-border-sm me-2"></span>
+                                    }
+                                    Emitir Factura
+                                </button>
+                            }
+                            else
+                            {
+                                <button type="button" class="btn btn-secondary" @onclick="Close">Cerrar</button>
+                                @if (currentFactura.EstadoFactura != "Cancelada")
+                                {
+                                    <button type="button" class="btn btn-danger" disabled="@saving" @onclick="ConfirmAnular">
+                                        @if (saving)
+                                        {
+                                            <span class="spinner-border spinner-border-sm me-2"></span>
+                                        }
+                                        Anular Factura
+                                    </button>
+                                }
+                            }
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public EventCallback OnFacturaChanged { get; set; }
+
+    private bool showModal = false;
+    private FormMode mode = FormMode.Add;
+    private FacturaDTO currentFactura = new FacturaDTO();
+    private TurnoDTO currentTurno = new TurnoDTO();
+    private DetalleFacturaDTO nuevoDetalle = new DetalleFacturaDTO();
+    private bool saving = false;
+    private string errorMessage = string.Empty;
+    private Dictionary<string, string> validationErrors = new Dictionary<string, string>();
+    private string turnoTexto = string.Empty;
+    private string pacienteTexto = string.Empty;
+    private string obraSocialTexto = string.Empty;
+    private string profesionalTexto = string.Empty;
+    private string especialidadNombre = string.Empty;
+
+    public enum FormMode
+    {
+        Add,
+        Consulta
+    }
+
+    public async Task ShowAddModal(TurnoDTO turno)
+    {
+        mode = FormMode.Add;
+        currentTurno = turno;
+        ClearValidationErrors();
+        await LoadDatosTurno();
+        currentFactura = new FacturaDTO { TurnoId = turno.Id, MetodoPago = "Efectivo" };
+        currentFactura.Detalles.Add(new DetalleFacturaDTO { Concepto = $"Consulta Médica - {especialidadNombre}", Cantidad = 1, PrecioUnitario = 0.00m });
+        nuevoDetalle = new DetalleFacturaDTO { Cantidad = 1 };
+        showModal = true;
+        StateHasChanged();
+    }
+
+    public async Task ShowConsultaModal(TurnoDTO turno)
+    {
+        mode = FormMode.Consulta;
+        currentTurno = turno;
+        ClearValidationErrors();
+        await LoadDatosTurno();
+        await LoadFactura(turno.FacturaId!.Value);
+        showModal = true;
+        StateHasChanged();
+    }
+
+    private void AgregarDetalle()
+    {
+        validationErrors.Remove("Detalle");
+
+        if (string.IsNullOrWhiteSpace(nuevoDetalle.Concepto))
+        {
+            validationErrors["Detalle"] = "Ingrese el concepto o descripción del ítem a agregar.";
+            return;
+        }
+
+        if (nuevoDetalle.Concepto.Trim().Length > 200)
+        {
+            validationErrors["Detalle"] = "El concepto no puede superar los 200 caracteres.";
+            return;
+        }
+
+        if (nuevoDetalle.Cantidad <= 0)
+        {
+            validationErrors["Detalle"] = "La cantidad debe ser mayor que cero.";
+            return;
+        }
+
+        if (nuevoDetalle.PrecioUnitario <= 0)
+        {
+            validationErrors["Detalle"] = "El precio unitario del nuevo ítem debe ser mayor que cero ($0,00).";
+            return;
+        }
+
+        currentFactura.Detalles.Add(new DetalleFacturaDTO
+        {
+            Concepto = nuevoDetalle.Concepto.Trim(),
+            Cantidad = nuevoDetalle.Cantidad,
+            PrecioUnitario = decimal.Round(nuevoDetalle.PrecioUnitario, 2)
+        });
+
+        nuevoDetalle = new DetalleFacturaDTO { Cantidad = 1 };
+    }
+
+    private void QuitarDetalle(DetalleFacturaDTO detalle)
+    {
+        validationErrors.Remove("Detalle");
+
+        if (currentFactura.Detalles.Count <= 1)
+        {
+            validationErrors["Detalle"] = "La factura debe conservar al menos un renglón en el detalle. Puede editar su concepto o importe directamente en la fila.";
+            return;
+        }
+
+        currentFactura.Detalles.Remove(detalle);
+    }
+
+    private decimal Subtotal(DetalleFacturaDTO detalle)
+        => mode == FormMode.Add ? detalle.Cantidad * detalle.PrecioUnitario : detalle.Subtotal;
+
+    private async Task HandleValidSubmit()
+    {
+        if (mode != FormMode.Add || !ValidateFactura())
+            return;
+
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm",
+            $"¿Confirmar la emisión de la factura para el Turno N° {currentTurno.Id}?\n\n" +
+            $"• Renglones de detalle: {currentFactura.Detalles.Count}\n" +
+            $"• Método de Pago: {MetodoPagoTexto(currentFactura.MetodoPago)}\n" +
+            $"• Monto Total: $ {currentFactura.Detalles.Sum(Subtotal):N2}");
+
+        if (!confirm)
+            return;
+
+        try
+        {
+            saving = true;
+            errorMessage = string.Empty;
+
+            await FacturaApiClient.CreateAsync(new FacturaCreateDTO
+            {
+                TurnoId = currentTurno.Id,
+                MetodoPago = currentFactura.MetodoPago,
+                Detalles = currentFactura.Detalles.Select(d => new DetalleFacturaCreateDTO
+                {
+                    Concepto = d.Concepto.Trim(),
+                    Cantidad = d.Cantidad,
+                    PrecioUnitario = decimal.Round(d.PrecioUnitario, 2)
+                }).ToList()
+            });
+
+            await OnFacturaChanged.InvokeAsync();
+            Close();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private async Task ConfirmAnular()
+    {
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm",
+            $"¿Está seguro de que desea ANULAR la Factura N° {currentFactura.Id:D5}?\n\n" +
+            $"• La factura pasará a estado 'Cancelada'.\n" +
+            $"• El Turno N° {currentFactura.TurnoId} volverá a quedar Pendiente de Facturar para que pueda emitir un nuevo comprobante.");
+
+        if (!confirm)
+            return;
+
+        try
+        {
+            saving = true;
+            errorMessage = string.Empty;
+
+            await FacturaApiClient.AnularAsync(currentFactura.Id);
+
+            await OnFacturaChanged.InvokeAsync();
+            Close();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private bool ValidateFactura()
+    {
+        ClearValidationErrors();
+        bool isValid = true;
+
+        if (currentFactura.Detalles.Count == 0)
+        {
+            validationErrors["Detalle"] = "La factura debe tener al menos un renglón de detalle.";
+            isValid = false;
+        }
+
+        for (int i = 0; isValid && i < currentFactura.Detalles.Count; i++)
+        {
+            var item = currentFactura.Detalles[i];
+            if (string.IsNullOrWhiteSpace(item.Concepto))
+            {
+                validationErrors["Detalle"] = $"El renglón #{i + 1} tiene el concepto vacío.";
+                isValid = false;
+            }
+            else if (item.Concepto.Trim().Length > 200)
+            {
+                validationErrors["Detalle"] = $"El concepto del renglón #{i + 1} no puede superar los 200 caracteres.";
+                isValid = false;
+            }
+            else if (item.Cantidad <= 0)
+            {
+                validationErrors["Detalle"] = $"La cantidad del renglón '{item.Concepto}' debe ser mayor que cero.";
+                isValid = false;
+            }
+            else if (item.PrecioUnitario <= 0)
+            {
+                validationErrors["Detalle"] = $"Debe ingresar un Precio Unitario mayor a $0,00 para el renglón '{item.Concepto}'.";
+                isValid = false;
+            }
+        }
+
+        StateHasChanged();
+        return isValid;
+    }
+
+    private string MetodoPagoTexto(string metodoPago) => metodoPago switch
+    {
+        "TarjetaDebito" => "Tarjeta de Débito",
+        "TarjetaCredito" => "Tarjeta de Crédito",
+        "TransferenciaBancaria" => "Transferencia Bancaria",
+        _ => metodoPago
+    };
+
+    private void ClearValidationErrors()
+    {
+        validationErrors.Clear();
+        errorMessage = string.Empty;
+    }
+
+    private async Task LoadDatosTurno()
+    {
+        try
+        {
+            var paciente = currentTurno.PacienteId.HasValue ? await PacienteApiClient.GetAsync(currentTurno.PacienteId.Value) : null;
+            var profesional = await ProfesionalApiClient.GetAsync(currentTurno.ProfesionalId);
+            var especialidad = await EspecialidadApiClient.GetAsync(profesional.EspecialidadId);
+
+            especialidadNombre = especialidad?.Nombre ?? string.Empty;
+            turnoTexto = $"#{currentTurno.Id} - {currentTurno.FechaHoraInicio:dd/MM/yyyy} ({currentTurno.FechaHoraInicio:HH:mm} - {currentTurno.FechaHoraFin:HH:mm}) - {currentTurno.EstadoTurno}";
+            pacienteTexto = paciente != null ? $"{paciente.Apellido}, {paciente.Nombre} (DNI: {paciente.NroDocumento})" : "— Sin Paciente —";
+            obraSocialTexto = paciente != null && !string.IsNullOrWhiteSpace(paciente.ObraSocial) ? paciente.ObraSocial : "Particular / Sin Obra Social";
+            profesionalTexto = $"{profesional.Apellido}, {profesional.Nombre} ({especialidadNombre})";
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar el turno: {ex.Message}";
+        }
+    }
+
+    private async Task LoadFactura(int id)
+    {
+        try
+        {
+            currentFactura = await FacturaApiClient.GetAsync(id);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar la factura: {ex.Message}";
+        }
+    }
+
+    private void Close()
+    {
+        showModal = false;
+        ClearValidationErrors();
+        StateHasChanged();
+    }
+}
