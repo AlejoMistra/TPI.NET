@@ -1,0 +1,210 @@
+@page "/pacientes"
+@using DTOs
+@using API.Clients
+@using Blazor.Server.Components
+@inject IJSRuntime JSRuntime
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>Pacientes</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h3>Pacientes</h3>
+            
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @errorMessage
+                    <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                </div>
+            }
+            
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @successMessage
+                    <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+                </div>
+            }
+
+            @if (canAdd)
+            {
+                <div class="mb-3">
+                    <button class="btn btn-primary" @onclick="OpenAddModal">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+            }
+
+            @if (loading)
+            {
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Id</th>
+                                <th>Nombre</th>
+                                <th>Apellido</th>
+                                <th>N° Doc</th>
+                                <th>Fecha Nac.</th>
+                                <th>Obra Social</th>
+                                <th>Teléfono</th>
+                                <th>Email</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (pacientes != null && pacientes.Any())
+                            {
+                                @foreach (var paciente in pacientes)
+                                {
+                                    <tr>
+                                        <td>@paciente.Id</td>
+                                        <td>@paciente.Nombre</td>
+                                        <td>@paciente.Apellido</td>
+                                        <td>@paciente.NroDocumento</td>
+                                        <td>@paciente.FechaNacimiento.ToString("dd/MM/yyyy")</td>
+                                        <td>@(string.IsNullOrWhiteSpace(paciente.ObraSocial) ? "Particular" : paciente.ObraSocial)</td>
+                                        <td>@paciente.Telefono</td>
+                                        <td>@paciente.Email</td>
+                                        <td>
+                                            @if (canUpdate)
+                                            {
+                                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => OpenEditModal(paciente)">
+                                                    <i class="fas fa-edit"></i> Editar
+                                                </button>
+                                            }
+                                            @if (canDelete)
+                                            {
+                                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmDelete(paciente)">
+                                                    <i class="fas fa-trash"></i> Eliminar
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<PacienteModal @ref="pacienteModal" OnPacienteChanged="LoadPacientes" />
+
+@code {
+    private List<PacienteDTO>? pacientes;
+    private bool loading = true;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+    private PacienteModal pacienteModal = null!;
+    
+    // Permisos de autorización
+    private bool canRead = false;
+    private bool canAdd = false;
+    private bool canUpdate = false;
+    private bool canDelete = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Verificar autenticación antes de cargar datos
+            var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            if (!isAuthenticated)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            // Verificar permisos
+            await LoadPermissions();
+            
+            // Solo cargar datos si tiene permiso de lectura
+            if (canRead)
+            {
+                await LoadPacientes();
+            }
+            else
+            {
+                errorMessage = "No tiene permisos para ver pacientes.";
+            }
+            
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task LoadPermissions()
+    {
+        canRead = await AuthService.HasPermissionAsync("Administrativo");
+        canAdd = await AuthService.HasPermissionAsync("Administrativo");
+        canUpdate = await AuthService.HasPermissionAsync("Administrativo");
+        canDelete = await AuthService.HasPermissionAsync("Administrativo");
+    }
+
+    private async Task LoadPacientes()
+    {
+        try
+        {
+            loading = true;
+            pacientes = (await PacienteApiClient.GetAllAsync())?.ToList();
+            successMessage = string.Empty; // Clear success message when reloading
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar pacientes: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private async Task OpenAddModal()
+    {
+        await pacienteModal.ShowAddModal();
+    }
+
+    private async Task OpenEditModal(PacienteDTO paciente)
+    {
+        await pacienteModal.ShowEditModal(paciente);
+    }
+
+    private async Task ConfirmDelete(PacienteDTO paciente)
+    {
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", 
+            $"¿Está seguro que desea eliminar el paciente {paciente.Nombre} {paciente.Apellido} ({paciente.NroDocumento})?");
+        
+        if (confirm)
+        {
+            await DeletePaciente(paciente.Id);
+        }
+    }
+
+    private async Task DeletePaciente(int id)
+    {
+        try
+        {
+            await PacienteApiClient.DeleteAsync(id);
+            successMessage = "Paciente eliminado exitosamente.";
+            await LoadPacientes();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al eliminar paciente: {ex.Message}";
+        }
+    }
+}
