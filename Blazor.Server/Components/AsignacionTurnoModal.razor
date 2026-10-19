@@ -1,0 +1,260 @@
+@using DTOs
+@using API.Clients
+@inject IJSRuntime JSRuntime
+
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        @if (mode == FormMode.Add)
+                        {
+                            <text>Asignar Turno a Paciente</text>
+                        }
+                        else
+                        {
+                            <text>Editar Asignación - Turno N° @currentTurno.Id</text>
+                        }
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="currentTurno" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+
+                        @if (mode == FormMode.Update)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Turno</label>
+                                <input type="text" class="form-control" value="@TurnoTexto(currentTurno)" readonly />
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Turno *</label>
+                                <InputSelect @bind-Value="currentTurno.Id" class="form-select">
+                                    <option value="0">Seleccionar Turno</option>
+                                    @if (turnosLibres != null)
+                                    {
+                                        @foreach (var turno in turnosLibres)
+                                        {
+                                            <option value="@turno.Id">@TurnoTexto(turno)</option>
+                                        }
+                                    }
+                                </InputSelect>
+                                @if (validationErrors.ContainsKey("Turno"))
+                                {
+                                    <div class="text-danger small">@validationErrors["Turno"]</div>
+                                }
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label class="form-label">Paciente *</label>
+                            <InputSelect @bind-Value="currentTurno.PacienteId" class="form-select">
+                                <option value="0">Seleccionar Paciente</option>
+                                @if (pacientes != null)
+                                {
+                                    @foreach (var paciente in pacientes)
+                                    {
+                                        <option value="@paciente.Id">@paciente.Apellido, @paciente.Nombre (DNI: @paciente.NroDocumento)</option>
+                                    }
+                                }
+                            </InputSelect>
+                            @if (validationErrors.ContainsKey("Paciente"))
+                            {
+                                <div class="text-danger small">@validationErrors["Paciente"]</div>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Motivo</label>
+                            <InputText @bind-Value="currentTurno.Motivo" class="form-control" />
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Observaciones</label>
+                            <InputText @bind-Value="currentTurno.Observaciones" class="form-control" />
+                        </div>
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                @errorMessage
+                            </div>
+                        }
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="Close">Cancelar</button>
+                            <button type="submit" class="btn btn-primary" disabled="@saving">
+                                @if (saving)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                }
+                                @(mode == FormMode.Add ? "Asignar" : "Actualizar")
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public EventCallback OnTurnoChanged { get; set; }
+
+    private bool showModal = false;
+    private FormMode mode = FormMode.Add;
+    private TurnoDTO currentTurno = new TurnoDTO();
+    private bool saving = false;
+    private string errorMessage = string.Empty;
+    private Dictionary<string, string> validationErrors = new Dictionary<string, string>();
+    private List<PacienteDTO>? pacientes;
+    private List<ProfesionalDTO>? profesionales;
+    private List<TurnoDTO>? turnosLibres;
+
+    public enum FormMode
+    {
+        Add,
+        Update
+    }
+
+    public async Task ShowAddModal()
+    {
+        mode = FormMode.Add;
+        currentTurno = new TurnoDTO();
+        await LoadPacientes();
+        await LoadTurnosLibres();
+        ClearValidationErrors();
+        showModal = true;
+        StateHasChanged();
+    }
+
+    public async Task ShowEditModal(TurnoDTO turno)
+    {
+        mode = FormMode.Update;
+        currentTurno = new TurnoDTO
+        {
+            Id = turno.Id,
+            FechaHoraInicio = turno.FechaHoraInicio,
+            FechaHoraFin = turno.FechaHoraFin,
+            Motivo = turno.Motivo,
+            EstadoTurno = turno.EstadoTurno,
+            Observaciones = turno.Observaciones,
+            FacturaId = turno.FacturaId,
+            ProfesionalId = turno.ProfesionalId,
+            PacienteId = turno.PacienteId,
+            FechaHoraLlegada = turno.FechaHoraLlegada
+        };
+        await LoadPacientes();
+        await LoadTurnosLibres();
+        ClearValidationErrors();
+        showModal = true;
+        StateHasChanged();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (!ValidateTurno())
+            return;
+
+        try
+        {
+            saving = true;
+            errorMessage = string.Empty;
+
+            if (mode == FormMode.Add || currentTurno.EstadoTurno == "Libre")
+            {
+                await TurnoApiClient.AsignarAsync(currentTurno.Id, currentTurno.PacienteId!.Value, currentTurno.Motivo, currentTurno.Observaciones);
+            }
+            else
+            {
+                await TurnoApiClient.UpdateAsync(currentTurno);
+            }
+
+            await OnTurnoChanged.InvokeAsync();
+            Close();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private bool ValidateTurno()
+    {
+        ClearValidationErrors();
+        bool isValid = true;
+
+        if (mode == FormMode.Add && currentTurno.Id <= 0)
+        {
+            validationErrors["Turno"] = "Debe seleccionar un turno disponible";
+            isValid = false;
+        }
+
+        if (currentTurno.PacienteId == null || currentTurno.PacienteId <= 0)
+        {
+            validationErrors["Paciente"] = "Debe seleccionar un paciente";
+            isValid = false;
+        }
+
+        StateHasChanged();
+        return isValid;
+    }
+
+    private void ClearValidationErrors()
+    {
+        validationErrors.Clear();
+        errorMessage = string.Empty;
+    }
+
+    private async Task LoadPacientes()
+    {
+        try
+        {
+            pacientes = (await PacienteApiClient.GetAllAsync())?.ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar pacientes: {ex.Message}";
+        }
+    }
+
+    private async Task LoadTurnosLibres()
+    {
+        try
+        {
+            profesionales = (await ProfesionalApiClient.GetAllAsync())?.ToList();
+            turnosLibres = (await TurnoApiClient.GetAllAsync())?
+                .Where(t => t.EstadoTurno == "Libre" && t.FechaHoraInicio >= DateTime.Now)
+                .OrderBy(t => t.FechaHoraInicio)
+                .ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar turnos: {ex.Message}";
+        }
+    }
+
+    private string TurnoTexto(TurnoDTO turno)
+    {
+        var profesional = profesionales?.FirstOrDefault(p => p.Id == turno.ProfesionalId);
+        var profesionalNombre = profesional != null ? $"{profesional.Apellido}, {profesional.Nombre}" : $"ID {turno.ProfesionalId}";
+        return $"N° {turno.Id} - {turno.FechaHoraInicio:dd/MM/yyyy HH:mm} - {profesionalNombre}";
+    }
+
+    private void Close()
+    {
+        showModal = false;
+        ClearValidationErrors();
+        StateHasChanged();
+    }
+}
