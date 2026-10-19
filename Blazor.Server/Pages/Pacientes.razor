@@ -56,7 +56,7 @@
                                 <th>Nombre</th>
                                 <th>Apellido</th>
                                 <th>N° Doc</th>
-                                <th>Fecha Nac.</th>
+                                <th>Fecha Nac. / Edad</th>
                                 <th>Obra Social</th>
                                 <th>Teléfono</th>
                                 <th>Email</th>
@@ -73,7 +73,7 @@
                                         <td>@paciente.Nombre</td>
                                         <td>@paciente.Apellido</td>
                                         <td>@paciente.NroDocumento</td>
-                                        <td>@paciente.FechaNacimiento.ToString("dd/MM/yyyy")</td>
+                                        <td>@FormatearFechaNacimientoYEdad(paciente.FechaNacimiento)</td>
                                         <td>@(string.IsNullOrWhiteSpace(paciente.ObraSocial) ? "Particular" : paciente.ObraSocial)</td>
                                         <td>@paciente.Telefono</td>
                                         <td>@paciente.Email</td>
@@ -171,6 +171,19 @@
         {
             loading = false;
         }
+    }
+
+    private string FormatearFechaNacimientoYEdad(DateTime fechaNacimiento)
+    {
+        if (fechaNacimiento <= new DateTime(1900, 1, 1) || fechaNacimiento > DateTime.Today)
+            return "—";
+
+        var hoy = DateTime.Today;
+        int edad = hoy.Year - fechaNacimiento.Year;
+        if (fechaNacimiento.Date > hoy.AddYears(-edad))
+            edad--;
+
+        return $"{fechaNacimiento:dd/MM/yyyy} ({edad} años)";
     }
 
     private async Task OpenAddModal()
