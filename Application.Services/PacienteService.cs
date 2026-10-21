@@ -1,3 +1,4 @@
+using System.Net.Mail;
 using Data;
 using Domain.Model;
 using DTOs;
@@ -6,6 +7,7 @@ namespace Application.Services
 {
     public class PacienteService : IPacienteService
     {
+        private static readonly DateTime MinFechaNacimiento = new DateTime(1900, 1, 1);
         private readonly IPacienteRepository _pacienteRepository;
 
         public PacienteService(IPacienteRepository pacienteRepository)
@@ -30,7 +32,11 @@ namespace Application.Services
 
         public async Task<PacienteDTO> AddAsync(PacienteDTO dto)
         {
-            ValidarDatosPaciente(dto);
+            ValidarDatosPaciente(dto, out var tipoDocNormalizado);
+
+            var nroDoc = dto.NroDocumento.Trim();
+            if (await _pacienteRepository.DocumentoExistsAsync(nroDoc))
+                throw new ArgumentException("Ya existe un paciente registrado con el número de documento ingresado.", nameof(dto.NroDocumento));
 
             if (!string.IsNullOrWhiteSpace(dto.Email))
             {
@@ -42,12 +48,12 @@ namespace Application.Services
             var paciente = new Paciente(
                 nombre: dto.Nombre.Trim(),
                 apellido: dto.Apellido.Trim(),
-                tipoDocumento: string.IsNullOrWhiteSpace(dto.TipoDocumento) ? "DNI" : dto.TipoDocumento.Trim(),
-                nroDocumento: dto.NroDocumento.Trim(),
-                fechaNacimiento: dto.FechaNacimiento,
+                tipoDocumento: tipoDocNormalizado,
+                nroDocumento: nroDoc,
+                fechaNacimiento: dto.FechaNacimiento.Date,
                 obraSocial: dto.ObraSocial?.Trim() ?? string.Empty,
-                telefono: dto.Telefono?.Trim(),
-                email: dto.Email?.Trim()
+                telefono: string.IsNullOrWhiteSpace(dto.Telefono) ? null : dto.Telefono.Trim(),
+                email: string.IsNullOrWhiteSpace(dto.Email) ? null : dto.Email.Trim()
             );
 
             await _pacienteRepository.AddAsync(paciente);
@@ -56,10 +62,17 @@ namespace Application.Services
 
         public async Task<PacienteDTO?> UpdateAsync(PacienteDTO dto)
         {
+            if (dto is null)
+                throw new ArgumentNullException(nameof(dto), "Los datos del paciente son requeridos.");
+
             if (dto.Id <= 0)
                 throw new ArgumentException("El ID del paciente no es válido.", nameof(dto.Id));
 
-            ValidarDatosPaciente(dto);
+            ValidarDatosPaciente(dto, out var tipoDocNormalizado);
+
+            var nroDoc = dto.NroDocumento.Trim();
+            if (await _pacienteRepository.DocumentoExistsAsync(nroDoc, dto.Id))
+                throw new ArgumentException("Ya existe otro paciente registrado con el número de documento ingresado.", nameof(dto.NroDocumento));
 
             if (!string.IsNullOrWhiteSpace(dto.Email))
             {
@@ -71,12 +84,12 @@ namespace Application.Services
             var paciente = new Paciente(
                 nombre: dto.Nombre.Trim(),
                 apellido: dto.Apellido.Trim(),
-                tipoDocumento: string.IsNullOrWhiteSpace(dto.TipoDocumento) ? "DNI" : dto.TipoDocumento.Trim(),
-                nroDocumento: dto.NroDocumento.Trim(),
-                fechaNacimiento: dto.FechaNacimiento,
+                tipoDocumento: tipoDocNormalizado,
+                nroDocumento: nroDoc,
+                fechaNacimiento: dto.FechaNacimiento.Date,
                 obraSocial: dto.ObraSocial?.Trim() ?? string.Empty,
-                telefono: dto.Telefono?.Trim(),
-                email: dto.Email?.Trim()
+                telefono: string.IsNullOrWhiteSpace(dto.Telefono) ? null : dto.Telefono.Trim(),
+                email: string.IsNullOrWhiteSpace(dto.Email) ? null : dto.Email.Trim()
             );
             paciente.SetId(dto.Id);
 
@@ -89,19 +102,64 @@ namespace Application.Services
             if (id <= 0)
                 throw new ArgumentException("El ID del paciente no es válido.", nameof(id));
 
+            if (await _pacienteRepository.HasTurnosAsync(id))
+                throw new InvalidOperationException("No se puede eliminar el paciente porque tiene turnos asociados.");
+
             return await _pacienteRepository.DeleteAsync(id);
         }
 
-        private static void ValidarDatosPaciente(PacienteDTO dto)
+        private static void ValidarDatosPaciente(PacienteDTO dto, out string tipoDocNormalizado)
         {
+            if (dto is null)
+                throw new ArgumentNullException(nameof(dto), "Los datos del paciente son requeridos.");
+
             if (string.IsNullOrWhiteSpace(dto.Nombre))
                 throw new ArgumentException("El nombre del paciente es obligatorio.", nameof(dto.Nombre));
+
+            if (dto.Nombre.Trim().Length > 100)
+                throw new ArgumentException("El nombre del paciente no puede superar los 100 caracteres.", nameof(dto.Nombre));
 
             if (string.IsNullOrWhiteSpace(dto.Apellido))
                 throw new ArgumentException("El apellido del paciente es obligatorio.", nameof(dto.Apellido));
 
+            if (dto.Apellido.Trim().Length > 100)
+                throw new ArgumentException("El apellido del paciente no puede superar los 100 caracteres.", nameof(dto.Apellido));
+
+            var rawTipoDoc = string.IsNullOrWhiteSpace(dto.TipoDocumento) ? "DNI" : dto.TipoDocumento.Trim();
+            if (rawTipoDoc.Length > 20 || !Enum.TryParse<Persona.TipoDocumentoEnum>(rawTipoDoc, ignoreCase: true, out var tipoDocEnum) || !Enum.IsDefined(typeof(Persona.TipoDocumentoEnum), tipoDocEnum))
+                throw new ArgumentException("El tipo de documento no es válido. Valores permitidos: DNI, Pasaporte, Otro.", nameof(dto.TipoDocumento));
+
+            tipoDocNormalizado = tipoDocEnum.ToString();
+
             if (string.IsNullOrWhiteSpace(dto.NroDocumento))
                 throw new ArgumentException("El número de documento es obligatorio.", nameof(dto.NroDocumento));
+
+            var nroDoc = dto.NroDocumento.Trim();
+            if (nroDoc.Length > 20)
+                throw new ArgumentException("El número de documento no puede superar los 20 caracteres.", nameof(dto.NroDocumento));
+
+            if (tipoDocEnum == Persona.TipoDocumentoEnum.DNI && (nroDoc.Length < 7 || nroDoc.Length > 8 || !nroDoc.All(char.IsDigit)))
+                throw new ArgumentException("Para tipo de documento DNI, el número debe contener entre 7 y 8 dígitos numéricos.", nameof(dto.NroDocumento));
+
+            var fechaNac = dto.FechaNacimiento.Date;
+            if (fechaNac < MinFechaNacimiento || fechaNac > DateTime.Today)
+                throw new ArgumentException($"La fecha de nacimiento debe ser una fecha válida entre {MinFechaNacimiento:dd/MM/yyyy} y hoy.", nameof(dto.FechaNacimiento));
+
+            if (!string.IsNullOrWhiteSpace(dto.Email))
+            {
+                var email = dto.Email.Trim();
+                if (email.Length > 100)
+                    throw new ArgumentException("El correo electrónico no puede superar los 100 caracteres.", nameof(dto.Email));
+
+                if (!MailAddress.TryCreate(email, out _))
+                    throw new ArgumentException("El formato del correo electrónico no es válido.", nameof(dto.Email));
+            }
+
+            if (!string.IsNullOrWhiteSpace(dto.Telefono) && dto.Telefono.Trim().Length > 20)
+                throw new ArgumentException("El teléfono no puede superar los 20 caracteres.", nameof(dto.Telefono));
+
+            if (!string.IsNullOrWhiteSpace(dto.ObraSocial) && dto.ObraSocial.Trim().Length > 100)
+                throw new ArgumentException("La obra social no puede superar los 100 caracteres.", nameof(dto.ObraSocial));
         }
 
         private static PacienteDTO MapToDTO(Paciente p) => new PacienteDTO

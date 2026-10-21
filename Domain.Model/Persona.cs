@@ -31,6 +31,11 @@ namespace Domain.Model
             Apellido = apellido;
         }
 
+        public void SetTipoDocumento(string tipoDocumento)
+        {
+            TipoDocumento = tipoDocumento;
+        }
+
         public void SetNroDocumento(string nroDocumento)
         {
             NroDocumento = nroDocumento;
