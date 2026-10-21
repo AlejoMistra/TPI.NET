@@ -731,22 +731,6 @@ namespace WindowsForms
             }, this, "Error al registrar atención");
         }
 
-        private void TurnosDataGridView_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
-        {
-            if (e.RowIndex < 0 || e.RowIndex >= turnosDataGridView.Rows.Count) return;
-            var rowItem = turnosDataGridView.Rows[e.RowIndex].DataBoundItem as AgendaGridRow;
-            if (rowItem == null) return;
-
-            // Resaltar turnos Asignados cuyo horario ya expiró para que el administrativo los marque como Ausente
-            if (string.Equals(rowItem.Estado, "Asignado", StringComparison.OrdinalIgnoreCase) &&
-                rowItem.FechaHoraInicio < DateTime.Now &&
-                e.CellStyle != null)
-            {
-                e.CellStyle.BackColor = Color.FromArgb(255, 235, 235);
-                e.CellStyle.ForeColor = Color.DarkRed;
-            }
-        }
-
         private void TurnosDataGridView_CellToolTipTextNeeded(object? sender, DataGridViewCellToolTipTextNeededEventArgs e)
         {
             if (e.RowIndex < 0 || e.RowIndex >= turnosDataGridView.Rows.Count) return;

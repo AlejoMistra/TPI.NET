@@ -244,7 +244,6 @@ namespace WindowsForms
             turnosDataGridView.Size = new Size(994, 513);
             turnosDataGridView.TabIndex = 1;
             turnosDataGridView.CellContentClick += TurnosDataGridView_CellContentClick;
-            turnosDataGridView.CellFormatting += TurnosDataGridView_CellFormatting;
             turnosDataGridView.CellMouseDown += TurnosDataGridView_CellMouseDown;
             turnosDataGridView.CellToolTipTextNeeded += TurnosDataGridView_CellToolTipTextNeeded;
             turnosDataGridView.DataBindingComplete += TurnosDataGridView_DataBindingComplete;
