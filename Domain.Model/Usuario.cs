@@ -90,6 +90,11 @@ namespace Domain.Model
             this.Rol = rol;
         }
 
+        public void SetPersonaId(int? personaId)
+        {
+            PersonaId = personaId;
+        }
+
         public void SetActivo(bool activo)
         {
             Activo = activo;
