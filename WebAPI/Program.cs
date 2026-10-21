@@ -94,6 +94,42 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 // usuarios son Administrativo; quedan separadas para poder diferenciarlas despues.
 builder.Services.AddAuthorization(options =>
 {
+    // Políticas para Especialidades
+    options.AddPolicy("EspecialidadesLeer", policy => policy.RequireRole("Administrativo", "Profesional"));
+    options.AddPolicy("EspecialidadesAgregar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("EspecialidadesActualizar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("EspecialidadesEliminar", policy => policy.RequireRole("Administrativo"));
+
+    // Políticas para Profesionales
+    options.AddPolicy("ProfesionalesLeer", policy => policy.RequireRole("Administrativo", "Profesional"));
+    options.AddPolicy("ProfesionalesAgregar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("ProfesionalesActualizar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("ProfesionalesEliminar", policy => policy.RequireRole("Administrativo"));
+
+    // Políticas para Pacientes
+    options.AddPolicy("PacientesLeer", policy => policy.RequireRole("Administrativo", "Profesional"));
+    options.AddPolicy("PacientesAgregar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("PacientesActualizar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("PacientesEliminar", policy => policy.RequireRole("Administrativo"));
+
+    // Políticas para Turnos
+    options.AddPolicy("TurnosLeer", policy => policy.RequireRole("Administrativo", "Profesional"));
+    options.AddPolicy("TurnosAgregar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("TurnosActualizar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("TurnosEliminar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("TurnosAtender", policy => policy.RequireRole("Administrativo", "Profesional"));
+
+    // Políticas para Historias Clínicas
+    options.AddPolicy("HistoriasClinicasLeer", policy => policy.RequireRole("Administrativo", "Profesional"));
+    options.AddPolicy("HistoriasClinicasAgregar", policy => policy.RequireRole("Profesional"));
+    options.AddPolicy("HistoriasClinicasActualizar", policy => policy.RequireRole("Profesional"));
+
+    // Políticas para Facturas
+    options.AddPolicy("FacturasLeer", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("FacturasAgregar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("FacturasActualizar", policy => policy.RequireRole("Administrativo"));
+
+    // Políticas para Usuarios
     options.AddPolicy("UsuariosLeer", policy => policy.RequireRole("Administrativo"));
     options.AddPolicy("UsuariosAgregar", policy => policy.RequireRole("Administrativo"));
     options.AddPolicy("UsuariosActualizar", policy => policy.RequireRole("Administrativo"));

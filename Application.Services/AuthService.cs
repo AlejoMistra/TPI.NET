@@ -60,6 +60,10 @@ namespace Application.Services
                 new Claim(ClaimTypes.Role, usuario.Rol.ToString())
             };
 
+            // Persona vinculada al usuario (el profesional, para filtrar su agenda)
+            if (usuario.PersonaId.HasValue)
+                claims.Add(new Claim("PersonaId", usuario.PersonaId.Value.ToString()));
+
 
             var token = new JwtSecurityToken(
                 issuer: issuer,

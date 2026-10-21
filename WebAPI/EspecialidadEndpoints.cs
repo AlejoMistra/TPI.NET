@@ -16,7 +16,8 @@ namespace WebAPI
             .WithName("CreateEspecialidad")
             .Produces<EspecialidadDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("EspecialidadesAgregar");
 
             // GET: /especialidades
             app.MapGet("/especialidades", async (IEspecialidadService especialidadService) =>
@@ -26,7 +27,8 @@ namespace WebAPI
             })
             .WithName("GetAllEspecialidades")
             .Produces<List<EspecialidadDTO>>(StatusCodes.Status200OK)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("EspecialidadesLeer");
 
             // GET: /especialidades/{id}
             app.MapGet("/especialidades/{id:int}", async (int id, IEspecialidadService especialidadService) =>
@@ -41,7 +43,8 @@ namespace WebAPI
             .Produces<EspecialidadDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("EspecialidadesLeer");
 
             // PUT: /especialidades/{id}
             app.MapPut("/especialidades/{id:int}", async (int id, EspecialidadDTO especialidadDto, IEspecialidadService especialidadService) =>
@@ -56,7 +59,8 @@ namespace WebAPI
             .Produces<EspecialidadDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("EspecialidadesActualizar");
 
             // DELETE: /especialidades/{id}
             app.MapDelete("/especialidades/{id:int}", async (int id, IEspecialidadService especialidadService) =>
@@ -72,7 +76,8 @@ namespace WebAPI
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status409Conflict)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("EspecialidadesEliminar");
         }
     }
 }
