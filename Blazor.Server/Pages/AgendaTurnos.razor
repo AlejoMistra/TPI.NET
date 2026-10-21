@@ -1,6 +1,7 @@
 @page "/agenda"
 @using DTOs
 @using API.Clients
+@using Blazor.Server.Components
 @inject IJSRuntime JSRuntime
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
@@ -17,6 +18,23 @@
                 <div class="alert alert-danger alert-dismissible fade show" role="alert">
                     @errorMessage
                     <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @successMessage
+                    <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+                </div>
+            }
+
+            @if (canAdd)
+            {
+                <div class="mb-3">
+                    <button class="btn btn-primary" @onclick="OpenAddModal">
+                        <i class="fas fa-plus"></i> Nuevo Turno
+                    </button>
                 </div>
             }
 
@@ -58,9 +76,45 @@
                                         <td>@PacienteNombre(turno)</td>
                                         <td>@turno.EstadoTurno</td>
                                         <td>
-                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => VerDetalle(turno)">
+                                            <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => VerDetalle(turno)">
                                                 Ver Detalle
                                             </button>
+                                            @if (canUpdate)
+                                            {
+                                                @if (turno.EstadoTurno == "Libre" || turno.EstadoTurno == "Asignado")
+                                                {
+                                                    <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => OpenEditModal(turno)">
+                                                        Asignar
+                                                    </button>
+                                                }
+                                                @if (turno.EstadoTurno == "Asignado")
+                                                {
+                                                    <button class="btn btn-sm btn-outline-success me-1" @onclick="() => RegistrarLlegada(turno)">
+                                                        Llegada
+                                                    </button>
+                                                }
+                                                @if (turno.EstadoTurno == "Presente")
+                                                {
+                                                    <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => ConfirmRevertirLlegada(turno)">
+                                                        Revertir Llegada
+                                                    </button>
+                                                    <button class="btn btn-sm btn-outline-success me-1" @onclick="() => ConfirmAtender(turno)">
+                                                        Atender
+                                                    </button>
+                                                }
+                                                @if (turno.EstadoTurno == "Asignado" || turno.EstadoTurno == "Presente")
+                                                {
+                                                    <button class="btn btn-sm btn-outline-warning me-1" @onclick="() => ConfirmMarcarAusente(turno)">
+                                                        Ausente
+                                                    </button>
+                                                }
+                                                @if (turno.EstadoTurno == "Asignado" && !turno.FacturaId.HasValue)
+                                                {
+                                                    <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmLiberar(turno)">
+                                                        Liberar
+                                                    </button>
+                                                }
+                                            }
                                         </td>
                                     </tr>
                                 }
@@ -73,15 +127,21 @@
     </div>
 </div>
 
+<AsignacionTurnoModal @ref="asignacionTurnoModal" OnTurnoChanged="LoadTurnos" />
+
 @code {
     private List<TurnoDTO>? turnos;
     private List<ProfesionalDTO>? profesionales;
     private List<PacienteDTO>? pacientes;
     private bool loading = true;
     private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+    private AsignacionTurnoModal asignacionTurnoModal = null!;
 
     // Permisos de autorización
     private bool canRead = false;
+    private bool canAdd = false;
+    private bool canUpdate = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -116,6 +176,8 @@
     private async Task LoadPermissions()
     {
         canRead = await AuthService.HasPermissionAsync("Administrativo");
+        canAdd = await AuthService.HasPermissionAsync("Administrativo");
+        canUpdate = await AuthService.HasPermissionAsync("Administrativo");
     }
 
     private async Task LoadTurnos()
@@ -158,5 +220,133 @@
             $"Paciente: {PacienteNombre(turno)}\n" +
             $"Estado: {turno.EstadoTurno}\n" +
             $"Motivo: {turno.Motivo}");
+    }
+
+    private async Task OpenAddModal()
+    {
+        await asignacionTurnoModal.ShowAddModal();
+    }
+
+    private async Task OpenEditModal(TurnoDTO turno)
+    {
+        await asignacionTurnoModal.ShowEditModal(turno);
+    }
+
+    private async Task RegistrarLlegada(TurnoDTO turno)
+    {
+        try
+        {
+            await TurnoApiClient.RegistrarLlegadaAsync(turno.Id);
+            successMessage = $"Llegada registrada para {PacienteNombre(turno)}. El turno N° {turno.Id} pasó a estado 'Presente'.";
+            await LoadTurnos();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al registrar llegada: {ex.Message}";
+        }
+    }
+
+    private async Task ConfirmRevertirLlegada(TurnoDTO turno)
+    {
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm",
+            $"¿Confirmar que desea revertir la llegada de {PacienteNombre(turno)} para el turno N° {turno.Id}?\n\nEl turno volverá a estado Asignado y se limpiará la hora de llegada registrada.");
+
+        if (confirm)
+        {
+            await RevertirLlegada(turno.Id);
+        }
+    }
+
+    private async Task RevertirLlegada(int id)
+    {
+        try
+        {
+            await TurnoApiClient.RevertirLlegadaAsync(id);
+            successMessage = $"Llegada revertida para el turno N° {id}. El estado volvió a 'Asignado'.";
+            await LoadTurnos();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al revertir llegada: {ex.Message}";
+        }
+    }
+
+    private async Task ConfirmMarcarAusente(TurnoDTO turno)
+    {
+        var detalle = turno.EstadoTurno == "Presente"
+            ? $"El paciente {PacienteNombre(turno)} se anunció pero se retiró de la sala de espera sin ser atendido."
+            : $"El paciente {PacienteNombre(turno)} no se presentó al turno.";
+
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm",
+            $"¿Confirmar que se marca como 'Ausente' al turno N° {turno.Id}?\n\n{detalle}\n\nEsta acción es irreversible (estado final).");
+
+        if (confirm)
+        {
+            await MarcarAusente(turno.Id);
+        }
+    }
+
+    private async Task MarcarAusente(int id)
+    {
+        try
+        {
+            await TurnoApiClient.MarcarAusenteAsync(id);
+            successMessage = $"Turno N° {id} marcado como 'Ausente'.";
+            await LoadTurnos();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al registrar ausencia: {ex.Message}";
+        }
+    }
+
+    private async Task ConfirmAtender(TurnoDTO turno)
+    {
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm",
+            $"¿Confirmar el inicio de la atención clínica para el turno N° {turno.Id} ({PacienteNombre(turno)})?\n\nEsta acción pasará el turno al estado 'Atendido' y es irreversible (estado final).");
+
+        if (confirm)
+        {
+            await Atender(turno.Id);
+        }
+    }
+
+    private async Task Atender(int id)
+    {
+        try
+        {
+            await TurnoApiClient.AtenderAsync(id);
+            successMessage = $"Turno N° {id} marcado como 'Atendido'.";
+            await LoadTurnos();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al registrar atención: {ex.Message}";
+        }
+    }
+
+    private async Task ConfirmLiberar(TurnoDTO turno)
+    {
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm",
+            $"¿Desea liberar el turno N° {turno.Id} de {PacienteNombre(turno)}?\n\nEl paciente será removido y el turno volverá a estar disponible (Libre).");
+
+        if (confirm)
+        {
+            await LiberarTurno(turno.Id);
+        }
+    }
+
+    private async Task LiberarTurno(int id)
+    {
+        try
+        {
+            await TurnoApiClient.LiberarAsync(id);
+            successMessage = $"Turno N° {id} liberado exitosamente. Ahora se encuentra en estado Libre.";
+            await LoadTurnos();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al liberar turno: {ex.Message}";
+        }
     }
 }
