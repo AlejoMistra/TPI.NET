@@ -26,6 +26,11 @@
                 </NavLink>
             </div>
         }
+        @if (canReadFacturacion)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="facturacion">
+                    <span class="oi oi-people" aria-hidden="true"></span> Facturación
         @if (canReadPacientes)
         {
             <div class="nav-item px-3">
@@ -64,6 +69,7 @@
 @code {
     private bool collapseNavMenu = true;
     private bool canReadAgenda = false;
+    private bool canReadFacturacion = false;
     private bool canReadPacientes = false;
     private bool canReadTurnos = false;
     private bool canReadProfesionales = false;
@@ -85,6 +91,7 @@
         if (isAuthenticated)
         {
             canReadAgenda = await AuthService.HasPermissionAsync("Administrativo");
+            canReadFacturacion = await AuthService.HasPermissionAsync("Administrativo");
             canReadPacientes = await AuthService.HasPermissionAsync("Administrativo");
             canReadTurnos = await AuthService.HasPermissionAsync("Administrativo");
             canReadProfesionales = await AuthService.HasPermissionAsync("Administrativo");
@@ -93,6 +100,7 @@
         else
         {
             canReadAgenda = false;
+            canReadFacturacion = false;
             canReadPacientes = false;
             canReadTurnos = false;
             canReadProfesionales = false;
