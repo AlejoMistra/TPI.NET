@@ -1,6 +1,6 @@
 namespace WindowsForms
 {
-    partial class PacienteDetalleModalForm
+    partial class HistoriaClinicaModalForm
     {
         private System.ComponentModel.IContainer components = null;
 
@@ -18,7 +18,6 @@ namespace WindowsForms
         private void InitializeComponent()
         {
             mainTableLayoutPanel = new TableLayoutPanel();
-            bannerLabel = new Label();
             datosPacienteGroupBox = new GroupBox();
             pacienteTableLayoutPanel = new TableLayoutPanel();
             pacienteTitleLabel = new Label();
@@ -49,10 +48,12 @@ namespace WindowsForms
             turnosPacienteDataGridView = new DataGridView();
             historiaClinicaGroupBox = new GroupBox();
             historiaClinicaLayoutPanel = new TableLayoutPanel();
+            accionesRegistrosLayoutPanel = new TableLayoutPanel();
             filtroRegistrosPanel = new FlowLayoutPanel();
             tipoRegistroFiltroLabel = new Label();
             tipoRegistroFiltroComboBox = new ComboBox();
             limpiarFiltroRegistrosLinkLabel = new LinkLabel();
+            nuevoRegistroButton = new Button();
             registrosDataGridView = new DataGridView();
             footerPanel = new TableLayoutPanel();
             hintLabel = new Label();
@@ -67,6 +68,7 @@ namespace WindowsForms
             ((System.ComponentModel.ISupportInitialize)turnosPacienteDataGridView).BeginInit();
             historiaClinicaGroupBox.SuspendLayout();
             historiaClinicaLayoutPanel.SuspendLayout();
+            accionesRegistrosLayoutPanel.SuspendLayout();
             filtroRegistrosPanel.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)registrosDataGridView).BeginInit();
             footerPanel.SuspendLayout();
@@ -77,7 +79,6 @@ namespace WindowsForms
             // 
             mainTableLayoutPanel.ColumnCount = 1;
             mainTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            mainTableLayoutPanel.Controls.Add(bannerLabel, 0, 0);
             mainTableLayoutPanel.Controls.Add(datosPacienteGroupBox, 0, 1);
             mainTableLayoutPanel.Controls.Add(turnosGroupBox, 0, 2);
             mainTableLayoutPanel.Controls.Add(historiaClinicaGroupBox, 0, 3);
@@ -95,21 +96,6 @@ namespace WindowsForms
             mainTableLayoutPanel.Size = new Size(940, 680);
             mainTableLayoutPanel.TabIndex = 0;
             // 
-            // bannerLabel
-            // 
-            bannerLabel.BackColor = Color.FromArgb(235, 243, 255);
-            bannerLabel.Dock = DockStyle.Fill;
-            bannerLabel.Font = new Font("Segoe UI", 9.5F);
-            bannerLabel.ForeColor = Color.FromArgb(0, 102, 204);
-            bannerLabel.Location = new Point(13, 13);
-            bannerLabel.Margin = new Padding(3, 3, 3, 5);
-            bannerLabel.Name = "bannerLabel";
-            bannerLabel.Padding = new Padding(8, 0, 8, 0);
-            bannerLabel.Size = new Size(914, 26);
-            bannerLabel.TabIndex = 0;
-            bannerLabel.Text = "Ficha de Paciente e Historia Clínica: consulta integral de datos personales, turnos y registros clínicos.";
-            bannerLabel.TextAlign = ContentAlignment.MiddleLeft;
-            // 
             // datosPacienteGroupBox
             // 
             datosPacienteGroupBox.Controls.Add(pacienteTableLayoutPanel);
@@ -119,7 +105,7 @@ namespace WindowsForms
             datosPacienteGroupBox.Size = new Size(914, 112);
             datosPacienteGroupBox.TabIndex = 1;
             datosPacienteGroupBox.TabStop = false;
-            datosPacienteGroupBox.Text = "Información del Paciente y Cabecera de Historia Clínica";
+            datosPacienteGroupBox.Text = "Información del Paciente";
             // 
             // pacienteTableLayoutPanel
             // 
@@ -128,7 +114,7 @@ namespace WindowsForms
             pacienteTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 36F));
             pacienteTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120F));
             pacienteTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 32F));
-            pacienteTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 120F));
+            pacienteTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Absolute, 125F));
             pacienteTableLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 32F));
             pacienteTableLayoutPanel.Controls.Add(pacienteTitleLabel, 0, 0);
             pacienteTableLayoutPanel.Controls.Add(pacienteValueLabel, 1, 0);
@@ -185,7 +171,7 @@ namespace WindowsForms
             documentoTitleLabel.Anchor = AnchorStyles.Left;
             documentoTitleLabel.AutoSize = true;
             documentoTitleLabel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            documentoTitleLabel.Location = new Point(318, 8);
+            documentoTitleLabel.Location = new Point(316, 8);
             documentoTitleLabel.Name = "documentoTitleLabel";
             documentoTitleLabel.Size = new Size(76, 15);
             documentoTitleLabel.TabIndex = 2;
@@ -195,7 +181,7 @@ namespace WindowsForms
             // 
             documentoValueLabel.Anchor = AnchorStyles.Left;
             documentoValueLabel.AutoSize = true;
-            documentoValueLabel.Location = new Point(438, 8);
+            documentoValueLabel.Location = new Point(436, 8);
             documentoValueLabel.Name = "documentoValueLabel";
             documentoValueLabel.Size = new Size(19, 15);
             documentoValueLabel.TabIndex = 3;
@@ -206,7 +192,7 @@ namespace WindowsForms
             fechaNacimientoTitleLabel.Anchor = AnchorStyles.Left;
             fechaNacimientoTitleLabel.AutoSize = true;
             fechaNacimientoTitleLabel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            fechaNacimientoTitleLabel.Location = new Point(611, 8);
+            fechaNacimientoTitleLabel.Location = new Point(608, 8);
             fechaNacimientoTitleLabel.Name = "fechaNacimientoTitleLabel";
             fechaNacimientoTitleLabel.Size = new Size(100, 15);
             fechaNacimientoTitleLabel.TabIndex = 4;
@@ -216,7 +202,7 @@ namespace WindowsForms
             // 
             fechaNacimientoValueLabel.Anchor = AnchorStyles.Left;
             fechaNacimientoValueLabel.AutoSize = true;
-            fechaNacimientoValueLabel.Location = new Point(731, 8);
+            fechaNacimientoValueLabel.Location = new Point(733, 8);
             fechaNacimientoValueLabel.Name = "fechaNacimientoValueLabel";
             fechaNacimientoValueLabel.Size = new Size(19, 15);
             fechaNacimientoValueLabel.TabIndex = 5;
@@ -248,7 +234,7 @@ namespace WindowsForms
             telefonoTitleLabel.Anchor = AnchorStyles.Left;
             telefonoTitleLabel.AutoSize = true;
             telefonoTitleLabel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            telefonoTitleLabel.Location = new Point(318, 36);
+            telefonoTitleLabel.Location = new Point(316, 36);
             telefonoTitleLabel.Name = "telefonoTitleLabel";
             telefonoTitleLabel.Size = new Size(59, 15);
             telefonoTitleLabel.TabIndex = 8;
@@ -258,7 +244,7 @@ namespace WindowsForms
             // 
             telefonoValueLabel.Anchor = AnchorStyles.Left;
             telefonoValueLabel.AutoSize = true;
-            telefonoValueLabel.Location = new Point(438, 36);
+            telefonoValueLabel.Location = new Point(436, 36);
             telefonoValueLabel.Name = "telefonoValueLabel";
             telefonoValueLabel.Size = new Size(19, 15);
             telefonoValueLabel.TabIndex = 9;
@@ -269,7 +255,7 @@ namespace WindowsForms
             emailTitleLabel.Anchor = AnchorStyles.Left;
             emailTitleLabel.AutoSize = true;
             emailTitleLabel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            emailTitleLabel.Location = new Point(611, 36);
+            emailTitleLabel.Location = new Point(608, 36);
             emailTitleLabel.Name = "emailTitleLabel";
             emailTitleLabel.Size = new Size(113, 15);
             emailTitleLabel.TabIndex = 10;
@@ -279,7 +265,7 @@ namespace WindowsForms
             // 
             emailValueLabel.Anchor = AnchorStyles.Left;
             emailValueLabel.AutoSize = true;
-            emailValueLabel.Location = new Point(731, 36);
+            emailValueLabel.Location = new Point(733, 36);
             emailValueLabel.Name = "emailValueLabel";
             emailValueLabel.Size = new Size(19, 15);
             emailValueLabel.TabIndex = 11;
@@ -311,7 +297,7 @@ namespace WindowsForms
             grupoSanguineoTitleLabel.Anchor = AnchorStyles.Left;
             grupoSanguineoTitleLabel.AutoSize = true;
             grupoSanguineoTitleLabel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            grupoSanguineoTitleLabel.Location = new Point(318, 65);
+            grupoSanguineoTitleLabel.Location = new Point(316, 65);
             grupoSanguineoTitleLabel.Name = "grupoSanguineoTitleLabel";
             grupoSanguineoTitleLabel.Size = new Size(106, 15);
             grupoSanguineoTitleLabel.TabIndex = 14;
@@ -323,7 +309,7 @@ namespace WindowsForms
             grupoSanguineoValueLabel.AutoSize = true;
             grupoSanguineoValueLabel.Font = new Font("Segoe UI", 9.5F, FontStyle.Bold);
             grupoSanguineoValueLabel.ForeColor = Color.FromArgb(0, 102, 204);
-            grupoSanguineoValueLabel.Location = new Point(438, 64);
+            grupoSanguineoValueLabel.Location = new Point(436, 64);
             grupoSanguineoValueLabel.Name = "grupoSanguineoValueLabel";
             grupoSanguineoValueLabel.Size = new Size(21, 17);
             grupoSanguineoValueLabel.TabIndex = 15;
@@ -334,7 +320,7 @@ namespace WindowsForms
             totalRegistrosTitleLabel.Anchor = AnchorStyles.Left;
             totalRegistrosTitleLabel.AutoSize = true;
             totalRegistrosTitleLabel.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
-            totalRegistrosTitleLabel.Location = new Point(611, 65);
+            totalRegistrosTitleLabel.Location = new Point(608, 65);
             totalRegistrosTitleLabel.Name = "totalRegistrosTitleLabel";
             totalRegistrosTitleLabel.Size = new Size(106, 15);
             totalRegistrosTitleLabel.TabIndex = 16;
@@ -344,7 +330,7 @@ namespace WindowsForms
             // 
             totalRegistrosValueLabel.Anchor = AnchorStyles.Left;
             totalRegistrosValueLabel.AutoSize = true;
-            totalRegistrosValueLabel.Location = new Point(731, 65);
+            totalRegistrosValueLabel.Location = new Point(733, 65);
             totalRegistrosValueLabel.Name = "totalRegistrosValueLabel";
             totalRegistrosValueLabel.Size = new Size(19, 15);
             totalRegistrosValueLabel.TabIndex = 17;
@@ -359,7 +345,7 @@ namespace WindowsForms
             turnosGroupBox.Size = new Size(914, 209);
             turnosGroupBox.TabIndex = 2;
             turnosGroupBox.TabStop = false;
-            turnosGroupBox.Text = "Turnos del Paciente (Últimas Atenciones y Turnos Asignados)";
+            turnosGroupBox.Text = "Turnos del Paciente";
             // 
             // turnosLayoutPanel
             // 
@@ -470,13 +456,13 @@ namespace WindowsForms
             historiaClinicaGroupBox.Size = new Size(914, 239);
             historiaClinicaGroupBox.TabIndex = 3;
             historiaClinicaGroupBox.TabStop = false;
-            historiaClinicaGroupBox.Text = "Historia Clínica — Registros Clínicos";
+            historiaClinicaGroupBox.Text = "Registros Clínicos";
             // 
             // historiaClinicaLayoutPanel
             // 
             historiaClinicaLayoutPanel.ColumnCount = 1;
             historiaClinicaLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
-            historiaClinicaLayoutPanel.Controls.Add(filtroRegistrosPanel, 0, 0);
+            historiaClinicaLayoutPanel.Controls.Add(accionesRegistrosLayoutPanel, 0, 0);
             historiaClinicaLayoutPanel.Controls.Add(registrosDataGridView, 0, 1);
             historiaClinicaLayoutPanel.Dock = DockStyle.Fill;
             historiaClinicaLayoutPanel.Location = new Point(3, 19);
@@ -487,6 +473,22 @@ namespace WindowsForms
             historiaClinicaLayoutPanel.Size = new Size(908, 217);
             historiaClinicaLayoutPanel.TabIndex = 0;
             // 
+            // accionesRegistrosLayoutPanel
+            // 
+            accionesRegistrosLayoutPanel.ColumnCount = 2;
+            accionesRegistrosLayoutPanel.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
+            accionesRegistrosLayoutPanel.ColumnStyles.Add(new ColumnStyle());
+            accionesRegistrosLayoutPanel.Controls.Add(filtroRegistrosPanel, 0, 0);
+            accionesRegistrosLayoutPanel.Controls.Add(nuevoRegistroButton, 1, 0);
+            accionesRegistrosLayoutPanel.Dock = DockStyle.Fill;
+            accionesRegistrosLayoutPanel.Location = new Point(3, 2);
+            accionesRegistrosLayoutPanel.Margin = new Padding(3, 2, 3, 2);
+            accionesRegistrosLayoutPanel.Name = "accionesRegistrosLayoutPanel";
+            accionesRegistrosLayoutPanel.RowCount = 1;
+            accionesRegistrosLayoutPanel.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
+            accionesRegistrosLayoutPanel.Size = new Size(902, 30);
+            accionesRegistrosLayoutPanel.TabIndex = 0;
+            // 
             // filtroRegistrosPanel
             // 
             filtroRegistrosPanel.Controls.Add(tipoRegistroFiltroLabel);
@@ -496,7 +498,7 @@ namespace WindowsForms
             filtroRegistrosPanel.Location = new Point(3, 2);
             filtroRegistrosPanel.Margin = new Padding(3, 2, 3, 2);
             filtroRegistrosPanel.Name = "filtroRegistrosPanel";
-            filtroRegistrosPanel.Size = new Size(902, 30);
+            filtroRegistrosPanel.Size = new Size(703, 26);
             filtroRegistrosPanel.TabIndex = 0;
             filtroRegistrosPanel.WrapContents = false;
             // 
@@ -530,6 +532,23 @@ namespace WindowsForms
             limpiarFiltroRegistrosLinkLabel.TabIndex = 2;
             limpiarFiltroRegistrosLinkLabel.TabStop = true;
             limpiarFiltroRegistrosLinkLabel.Text = "Ver todos";
+            // 
+            // nuevoRegistroButton
+            // 
+            nuevoRegistroButton.Anchor = AnchorStyles.Right;
+            nuevoRegistroButton.BackColor = Color.FromArgb(0, 102, 204);
+            nuevoRegistroButton.Cursor = Cursors.Hand;
+            nuevoRegistroButton.FlatAppearance.BorderSize = 0;
+            nuevoRegistroButton.FlatStyle = FlatStyle.Flat;
+            nuevoRegistroButton.Font = new Font("Segoe UI", 9F, FontStyle.Bold);
+            nuevoRegistroButton.ForeColor = Color.White;
+            nuevoRegistroButton.Location = new Point(712, 1);
+            nuevoRegistroButton.Margin = new Padding(3, 1, 3, 1);
+            nuevoRegistroButton.Name = "nuevoRegistroButton";
+            nuevoRegistroButton.Size = new Size(187, 28);
+            nuevoRegistroButton.TabIndex = 1;
+            nuevoRegistroButton.Text = "+ Nuevo Registro Clínico";
+            nuevoRegistroButton.UseVisualStyleBackColor = false;
             // 
             // registrosDataGridView
             // 
@@ -602,9 +621,9 @@ namespace WindowsForms
             ClientSize = new Size(940, 680);
             Controls.Add(mainTableLayoutPanel);
             MinimumSize = new Size(840, 600);
-            Name = "PacienteDetalleModalForm";
+            Name = "HistoriaClinicaModalForm";
             StartPosition = FormStartPosition.CenterParent;
-            Text = "Detalle del Paciente e Historia Clínica";
+            Text = "Historia Clínica";
             mainTableLayoutPanel.ResumeLayout(false);
             datosPacienteGroupBox.ResumeLayout(false);
             pacienteTableLayoutPanel.ResumeLayout(false);
@@ -616,6 +635,7 @@ namespace WindowsForms
             ((System.ComponentModel.ISupportInitialize)turnosPacienteDataGridView).EndInit();
             historiaClinicaGroupBox.ResumeLayout(false);
             historiaClinicaLayoutPanel.ResumeLayout(false);
+            accionesRegistrosLayoutPanel.ResumeLayout(false);
             filtroRegistrosPanel.ResumeLayout(false);
             filtroRegistrosPanel.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)registrosDataGridView).EndInit();
@@ -628,7 +648,6 @@ namespace WindowsForms
         #endregion
 
         private TableLayoutPanel mainTableLayoutPanel = null!;
-        private Label bannerLabel = null!;
         private GroupBox datosPacienteGroupBox = null!;
         private TableLayoutPanel pacienteTableLayoutPanel = null!;
         private Label pacienteTitleLabel = null!;
@@ -659,10 +678,12 @@ namespace WindowsForms
         private DataGridView turnosPacienteDataGridView = null!;
         private GroupBox historiaClinicaGroupBox = null!;
         private TableLayoutPanel historiaClinicaLayoutPanel = null!;
+        private TableLayoutPanel accionesRegistrosLayoutPanel = null!;
         private FlowLayoutPanel filtroRegistrosPanel = null!;
         private Label tipoRegistroFiltroLabel = null!;
         private ComboBox tipoRegistroFiltroComboBox = null!;
         private LinkLabel limpiarFiltroRegistrosLinkLabel = null!;
+        private Button nuevoRegistroButton = null!;
         private DataGridView registrosDataGridView = null!;
         private TableLayoutPanel footerPanel = null!;
         private Label hintLabel = null!;

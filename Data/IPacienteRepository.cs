@@ -10,5 +10,7 @@ namespace Data
     Task<IEnumerable<Paciente>> GetAllAsync();
     Task<bool> DeleteAsync(int id);
     Task<bool> EmailExistsAsync(string email, int? excludeId = null);
+    Task<bool> DocumentoExistsAsync(string nroDocumento, int? excludeId = null);
+    Task<bool> HasTurnosAsync(int pacienteId);
   }
 }

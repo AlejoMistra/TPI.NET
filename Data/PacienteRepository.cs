@@ -14,13 +14,24 @@ namespace Data
 
         public async Task AddAsync(Paciente paciente)
         {
-            await _context.Pacientes.AddAsync(paciente);
-            await _context.SaveChangesAsync();
+            using var transaction = await _context.Database.BeginTransactionAsync();
+            try
+            {
+                await _context.Pacientes.AddAsync(paciente);
+                await _context.SaveChangesAsync();
 
-            // Asegurar que cada paciente nuevo tenga su historia clínica inicializada
-            var historiaClinica = new HistoriaClinica(paciente.Id, TypeGrupoSanguineo.NO_ESPECIFICADO);
-            await _context.HistoriasClinicas.AddAsync(historiaClinica);
-            await _context.SaveChangesAsync();
+                // Asegurar que cada paciente nuevo tenga su historia clínica inicializada en la misma transacción
+                var historiaClinica = new HistoriaClinica(paciente.Id, TypeGrupoSanguineo.NO_ESPECIFICADO);
+                await _context.HistoriasClinicas.AddAsync(historiaClinica);
+                await _context.SaveChangesAsync();
+
+                await transaction.CommitAsync();
+            }
+            catch
+            {
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task<bool> UpdateAsync(Paciente paciente)
@@ -31,6 +42,7 @@ namespace Data
 
             existing.SetNombre(paciente.Nombre);
             existing.SetApellido(paciente.Apellido);
+            existing.SetTipoDocumento(paciente.TipoDocumento);
             existing.SetNroDocumento(paciente.NroDocumento);
             existing.SetTelefono(paciente.Telefono);
             existing.SetEmail(paciente.Email);
@@ -65,6 +77,16 @@ namespace Data
         public async Task<bool> EmailExistsAsync(string email, int? excludeId = null)
         {
             return await _context.Pacientes.AnyAsync(p => p.Email == email && (excludeId == null || p.Id != excludeId));
+        }
+
+        public async Task<bool> DocumentoExistsAsync(string nroDocumento, int? excludeId = null)
+        {
+            return await _context.Pacientes.AnyAsync(p => p.NroDocumento == nroDocumento && (excludeId == null || p.Id != excludeId));
+        }
+
+        public async Task<bool> HasTurnosAsync(int pacienteId)
+        {
+            return await _context.Turnos.AnyAsync(t => t.PacienteId == pacienteId);
         }
     }
 }

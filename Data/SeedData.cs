@@ -103,10 +103,10 @@ namespace Data
 
             var pacientes = new List<Paciente>
             {
-                new Paciente("Ana",     "García",   "DNI", "30111222"),
-                new Paciente("Carlos",  "López",    "DNI", "30222333"),
-                new Paciente("Sofía",   "Martínez", "DNI", "30333444"),
-                new Paciente("Diego",   "Ramírez",  "DNI", "30444555"),
+                new Paciente("Ana",    "García",   "DNI", "30111222", new DateTime(1985, 4, 12),  "OSDE",        "011-5555-1001", "ana.garcia@email.com"),
+                new Paciente("Carlos", "López",    "DNI", "30222333", new DateTime(1978, 9, 25),  "Swiss Medical", "011-5555-1002", "carlos.lopez@email.com"),
+                new Paciente("Sofía",  "Martínez", "DNI", "30333444", new DateTime(1992, 11, 3),  "Galeno",      "011-5555-1003", "sofia.martinez@email.com"),
+                new Paciente("Diego",  "Ramírez",  "DNI", "30444555", new DateTime(1990, 6, 18),  "IAPOS",       "011-5555-1004", "diego.ramirez@email.com"),
             };
 
             context.Pacientes.AddRange(pacientes);

@@ -36,7 +36,7 @@ namespace WindowsForms
             metodoPagoComboBox.DataSource = metodos;
             metodoPagoComboBox.DisplayMember = nameof(MetodoPagoOption.Display);
             metodoPagoComboBox.ValueMember = nameof(MetodoPagoOption.Value);
-            metodoPagoComboBox.SelectedIndex = 0;
+            metodoPagoComboBox.SelectedIndex = 2;
 
             ConfigurarGrillaDetalles();
 

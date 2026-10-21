@@ -5,7 +5,7 @@ using WindowsForms.Helpers;
 
 namespace WindowsForms
 {
-    public partial class PacienteDetalleModalForm : Form
+    public partial class HistoriaClinicaModalForm : Form
     {
         private readonly int _pacienteId;
         private PacienteDTO? _paciente;
@@ -18,7 +18,7 @@ namespace WindowsForms
         private int _selectedTurnoRowIndex = -1;
         private int _selectedRegistroRowIndex = -1;
 
-        public PacienteDetalleModalForm(int pacienteId)
+        public HistoriaClinicaModalForm(int pacienteId)
         {
             _pacienteId = pacienteId;
             InitializeComponent();
@@ -31,8 +31,9 @@ namespace WindowsForms
             ConfigurarGrillaTurnos();
             ConfigurarGrillaRegistros();
 
-            this.Load += PacienteDetalleModalForm_Load;
+            this.Load += HistoriaClinicaModalForm_Load;
             this.Shown += (s, e) => LimpiarSeleccionGrillas();
+            nuevoRegistroButton.Click += NuevoRegistroButton_Click;
             cerrarButton.Click += (s, e) =>
             {
                 this.DialogResult = DialogResult.Cancel;
@@ -40,7 +41,7 @@ namespace WindowsForms
             };
 
             this.KeyPreview = true;
-            this.KeyDown += PacienteDetalleModalForm_KeyDown;
+            this.KeyDown += HistoriaClinicaModalForm_KeyDown;
         }
 
         private void ConfigurarFiltroRegistros()
@@ -275,7 +276,7 @@ namespace WindowsForms
         // CARGA ASINCRÓNICA DE DATOS
         // ==========================================
 
-        private async void PacienteDetalleModalForm_Load(object? sender, EventArgs e)
+        private async void HistoriaClinicaModalForm_Load(object? sender, EventArgs e)
         {
             bool ok = await UiErrorHandler.ExecuteAsync(async () =>
             {
@@ -336,7 +337,7 @@ namespace WindowsForms
                     ? _historiaClinica.FechaCreacion.ToLocalTime()
                     : _historiaClinica.FechaCreacion;
 
-                nroHcValueLabel.Text = $"#{_historiaClinica.Id:D5} (Apertura: {fechaLocal:dd/MM/yyyy})";
+                nroHcValueLabel.Text = $"#{_historiaClinica.Id:D5} (Desde: {fechaLocal:dd/MM/yyyy})";
                 grupoSanguineoValueLabel.Text = FormatearGrupoSanguineo(_historiaClinica.GrupoSanguineo);
                 totalRegistrosValueLabel.Text = $"{_historiaClinica.Registros.Count} registro(s)";
             }
@@ -402,7 +403,7 @@ namespace WindowsForms
                 .ThenBy(t => t.FechaHoraInicio)
                 .FirstOrDefault();
 
-            if (proximoAsignado != null)
+            if (proximoAsignado != null)    //FIXME: Al mostrarse el label no esta centrado correctamente
             {
                 proximoTurnoValueLabel.Text = $"{proximoAsignado.Fecha} ({proximoAsignado.Horario}) — {proximoAsignado.ProfesionalNombre} [{proximoAsignado.Estado}]";
                 proximoTurnoValueLabel.ForeColor = Color.FromArgb(0, 102, 204);
@@ -413,7 +414,7 @@ namespace WindowsForms
                 proximoTurnoValueLabel.ForeColor = SystemColors.ControlDarkDark;
             }
 
-            turnosGroupBox.Text = $"Turnos del Paciente ({_turnosPaciente.Count}) — Últimas Atenciones y Turnos Asignados";
+            turnosGroupBox.Text = $"Turnos del Paciente ({_turnosPaciente.Count})";
             turnosPacienteDataGridView.DataSource = _turnosPaciente;
             LimpiarSeleccionTurnos();
         }
@@ -651,6 +652,65 @@ namespace WindowsForms
                 MessageBoxIcon.Information);
         }
 
+        private async void NuevoRegistroButton_Click(object? sender, EventArgs e)
+        {
+            if (_paciente == null) return;
+
+            // Identificar si hay un turno seleccionado en la grilla que esté en estado 'Atendido'
+            TurnoPacienteGridRow? turnoPreseleccionado = null;
+            if (_selectedTurnoRowIndex >= 0 && _selectedTurnoRowIndex < turnosPacienteDataGridView.Rows.Count)
+            {
+                var rowItem = turnosPacienteDataGridView.Rows[_selectedTurnoRowIndex].DataBoundItem as TurnoPacienteGridRow;
+                if (rowItem != null && string.Equals(rowItem.Estado, "Atendido", StringComparison.OrdinalIgnoreCase))
+                {
+                    turnoPreseleccionado = rowItem;
+                }
+            }
+
+            using var modal = new NuevoRegistroClinicoModalForm(
+                _paciente,
+                _historiaClinica,
+                _profesionales,
+                _turnosPaciente,
+                turnoPreseleccionado);
+
+            if (modal.ShowDialog(this) == DialogResult.OK)
+            {
+                // Recargar historia clínica y registros tras guardar
+                await UiErrorHandler.ExecuteAsync(async () =>
+                {
+                    _historiaClinica = await HistoriaClinicaApiClient.GetByPacienteIdAsync(_pacienteId);
+
+                    if (_historiaClinica != null)
+                    {
+                        var fechaLocal = _historiaClinica.FechaCreacion.Kind == DateTimeKind.Utc
+                            ? _historiaClinica.FechaCreacion.ToLocalTime()
+                            : _historiaClinica.FechaCreacion;
+
+                        nroHcValueLabel.Text = $"#{_historiaClinica.Id:D5} (Apertura: {fechaLocal:dd/MM/yyyy})";
+                        grupoSanguineoValueLabel.Text = FormatearGrupoSanguineo(_historiaClinica.GrupoSanguineo);
+                        totalRegistrosValueLabel.Text = $"{_historiaClinica.Registros.Count} registro(s)";
+                    }
+
+                    var todosLosTurnos = _turnosPaciente.Select(tp => new TurnoDTO
+                    {
+                        Id = tp.Id,
+                        FechaHoraInicio = tp.FechaHoraInicio,
+                        FechaHoraFin = tp.FechaHoraFin,
+                        ProfesionalId = tp.ProfesionalId,
+                        PacienteId = _pacienteId,
+                        EstadoTurno = tp.Estado,
+                        Motivo = tp.Motivo,
+                        Observaciones = tp.Observaciones,
+                        FechaHoraLlegada = tp.FechaHoraLlegada,
+                        FacturaId = tp.FacturaId
+                    }).ToList();
+
+                    PoblarRegistrosClinicos(todosLosTurnos);
+                }, this, "Error al actualizar los registros clínicos");
+            }
+        }
+
         private void TurnosPacienteDataGridView_CellFormatting(object? sender, DataGridViewCellFormattingEventArgs e)
         {
             if (e.RowIndex < 0 || e.RowIndex >= turnosPacienteDataGridView.Rows.Count) return;
@@ -688,7 +748,7 @@ namespace WindowsForms
             }
         }
 
-        private void PacienteDetalleModalForm_KeyDown(object? sender, KeyEventArgs e)
+        private void HistoriaClinicaModalForm_KeyDown(object? sender, KeyEventArgs e)
         {
             if (e.KeyCode == Keys.Escape)
             {

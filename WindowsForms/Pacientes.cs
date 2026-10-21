@@ -15,7 +15,8 @@ namespace WindowsForms
         private int _selectedPacienteRowIndex = -1;
 
         private ContextMenuStrip _pacientesContextMenu = null!;
-        private ToolStripMenuItem _verDetalleMenuItem = null!;
+        private ToolStripMenuItem _editarMenuItem = null!;
+        private ToolStripMenuItem _historiaClinicaMenuItem = null!;
 
         public Pacientes()
         {
@@ -137,9 +138,18 @@ namespace WindowsForms
 
             pacientesDataGridView.Columns.Add(new DataGridViewButtonColumn
             {
-                Name = "detalleColumn",
+                Name = "editarColumn",
                 HeaderText = "",
-                Text = "Ver Detalle",
+                Text = "Editar",
+                UseColumnTextForButtonValue = true,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells
+            });
+
+            pacientesDataGridView.Columns.Add(new DataGridViewButtonColumn
+            {
+                Name = "historiaClinicaColumn",
+                HeaderText = "",
+                Text = "Historia Clínica",
                 UseColumnTextForButtonValue = true,
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells
             });
@@ -272,7 +282,7 @@ namespace WindowsForms
                     TipoDocumento = string.IsNullOrWhiteSpace(p.TipoDocumento) ? "DNI" : p.TipoDocumento,
                     NroDocumento = p.NroDocumento,
                     FechaNacimiento = p.FechaNacimiento,
-                    FechaNacimientoTexto = PacienteDetalleModalForm.FormatearFechaNacimientoYEdad(p.FechaNacimiento),
+                    FechaNacimientoTexto = HistoriaClinicaModalForm.FormatearFechaNacimientoYEdad(p.FechaNacimiento),
                     ObraSocialTexto = string.IsNullOrWhiteSpace(p.ObraSocial) ? "Particular" : p.ObraSocial.Trim(),
                     TelefonoTexto = string.IsNullOrWhiteSpace(p.Telefono) ? "—" : p.Telefono.Trim(),
                     EmailTexto = string.IsNullOrWhiteSpace(p.Email) ? "—" : p.Email.Trim(),
@@ -427,20 +437,27 @@ namespace WindowsForms
         }
 
         // ==========================================
-        // MENÚ CONTEXTUAL Y ACCIONES DE DETALLE
+        // MENÚ CONTEXTUAL Y ACCIONES DE DETALLE Y EDICIÓN
         // ==========================================
 
         private void ConfigurarContextMenu()
         {
             _pacientesContextMenu = new ContextMenuStrip();
 
-            _verDetalleMenuItem = new ToolStripMenuItem("Ver detalle e Historia Clínica...", null, (s, e) =>
+            _editarMenuItem = new ToolStripMenuItem("Editar paciente...", null, (s, e) =>
             {
                 var row = GetSelectedRow();
-                if (row != null) AbrirModalDetallePaciente(row.Id);
+                if (row != null) AbrirModalEditarPaciente(row.Id);
             });
 
-            _pacientesContextMenu.Items.Add(_verDetalleMenuItem);
+            _historiaClinicaMenuItem = new ToolStripMenuItem("Ver Historia Clínica...", null, (s, e) =>
+            {
+                var row = GetSelectedRow();
+                if (row != null) AbrirModalHistoriaClinica(row.Id);
+            });
+
+            _pacientesContextMenu.Items.Add(_editarMenuItem);
+            _pacientesContextMenu.Items.Add(_historiaClinicaMenuItem);
             _pacientesContextMenu.Opening += PacientesContextMenu_Opening;
             pacientesDataGridView.ContextMenuStrip = _pacientesContextMenu;
         }
@@ -453,7 +470,8 @@ namespace WindowsForms
                 e.Cancel = true;
                 return;
             }
-            _verDetalleMenuItem.Enabled = true;
+            _editarMenuItem.Enabled = true;
+            _historiaClinicaMenuItem.Enabled = true;
         }
 
         private PacienteGridRow? GetSelectedRow()
@@ -485,7 +503,7 @@ namespace WindowsForms
         {
             if (e.RowIndex < 0) return;
 
-            if (e.ColumnIndex >= 0 && pacientesDataGridView.Columns[e.ColumnIndex].Name == "detalleColumn")
+            if (e.ColumnIndex >= 0 && (pacientesDataGridView.Columns[e.ColumnIndex].Name == "editarColumn" || pacientesDataGridView.Columns[e.ColumnIndex].Name == "historiaClinicaColumn"))
             {
                 _selectedPacienteRowIndex = e.RowIndex;
                 return;
@@ -511,31 +529,47 @@ namespace WindowsForms
             if (e.RowIndex < 0) return;
 
             var grid = (DataGridView)sender!;
-            if (grid.Columns[e.ColumnIndex].Name == "detalleColumn")
+            if (grid.Rows[e.RowIndex].DataBoundItem is PacienteGridRow rowItem)
             {
-                if (grid.Rows[e.RowIndex].DataBoundItem is PacienteGridRow rowItem)
+                if (grid.Columns[e.ColumnIndex].Name == "editarColumn")
                 {
-                    AbrirModalDetallePaciente(rowItem.Id);
+                    AbrirModalEditarPaciente(rowItem.Id);
+                }
+                else if (grid.Columns[e.ColumnIndex].Name == "historiaClinicaColumn")
+                {
+                    AbrirModalHistoriaClinica(rowItem.Id);
                 }
             }
         }
 
         private void PacientesDataGridView_CellDoubleClick(object? sender, DataGridViewCellEventArgs e)
         {
-            if (e.RowIndex < 0) return;
+            // Doble clic deshabilitado: se requiere pulsar explícitamente el botón correspondiente ('Editar' o 'Historia Clínica').
+        }
 
-            if (pacientesDataGridView.Rows[e.RowIndex].DataBoundItem is PacienteGridRow rowItem)
+        private async void AbrirModalEditarPaciente(int pacienteId)
+        {
+            // TODO: Permisos - Esta acción será exclusiva del rol Administrativo cuando se implemente roles y permisos.
+            var obrasSociales = busquedaObraSocialComboBox.Items.Cast<object>()
+                .Select(item => item?.ToString() ?? string.Empty)
+                .Where(os => !string.IsNullOrWhiteSpace(os) && !string.Equals(os, "Todas", StringComparison.OrdinalIgnoreCase))
+                .ToList();
+
+            using var modal = new EditarPacienteModalForm(pacienteId, obrasSociales);
+            if (modal.ShowDialog() == DialogResult.OK)
             {
-                AbrirModalDetallePaciente(rowItem.Id);
+                await UiErrorHandler.ExecuteAsync(async () =>
+                {
+                    await CargarDatosPacientesYTurnosAsync();
+                }, this, "Error al actualizar los datos en la grilla de pacientes");
             }
         }
 
-        private static void AbrirModalDetallePaciente(int pacienteId)
+        private static void AbrirModalHistoriaClinica(int pacienteId)
         {
-            using (var modal = new PacienteDetalleModalForm(pacienteId))
-            {
-                modal.ShowDialog();
-            }
+            // TODO: Permisos - Esta acción será exclusiva del rol Profesional cuando se implemente roles y permisos.
+            using var modal = new HistoriaClinicaModalForm(pacienteId);
+            modal.ShowDialog();
         }
 
         // ==========================================
