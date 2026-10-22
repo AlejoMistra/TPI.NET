@@ -479,18 +479,56 @@ namespace Data
             const string adminUsername = "admin";
             const string adminEmail = "admin@tpi.com";
 
-            // Username y Email tienen indice unico: si cualquiera de los dos ya esta
-            // tomado el insert falla, asi que el guard mira los dos.
-            if (await context.Usuarios.AnyAsync(u => u.Username == adminUsername || u.Email == adminEmail))
+            // Seed de Administrador
+            if (!await context.Usuarios.AnyAsync(u => u.Username == adminUsername || u.Email == adminEmail))
             {
-                logger.LogInformation("Usuarios: ya existe un usuario con username '{Username}' o email '{Email}', se omite el seed.", adminUsername, adminEmail);
-                return;
+                var admin = new Usuario(0, adminUsername, adminEmail, "admin123", DateTime.Now, Usuario.Roles.Administrativo, true);
+                context.Usuarios.Add(admin);
+                await context.SaveChangesAsync();
+                logger.LogInformation("Usuarios: usuario '{Username}' insertado.", adminUsername);
+            }
+            else
+            {
+                logger.LogInformation("Usuarios: ya existe un usuario con username '{Username}' o email '{Email}', se omite el seed de admin.", adminUsername, adminEmail);
             }
 
-            var admin = new Usuario(0, adminUsername, adminEmail, "admin123", DateTime.Now, Usuario.Roles.Administrativo, true);
-            context.Usuarios.Add(admin);
-            await context.SaveChangesAsync();
-            logger.LogInformation("Usuarios: usuario '{Username}' insertado.", adminUsername);
+            // Seed de Usuarios para cada Profesional registrado
+            var profesionales = await context.Profesionales.ToListAsync();
+            foreach (var prof in profesionales)
+            {
+                var username = !string.IsNullOrWhiteSpace(prof.Email) && prof.Email.Contains('@')
+                    ? prof.Email.Split('@')[0]
+                    : $"{prof.Nombre.ToLower()}.{prof.Apellido.ToLower()}";
+
+                if (username.Length < 5)
+                {
+                    username = $"{prof.Nombre.ToLower()}.{prof.Apellido.ToLower()}";
+                }
+
+                var email = !string.IsNullOrWhiteSpace(prof.Email)
+                    ? prof.Email
+                    : $"{username}@clinica.med.ar";
+
+                if (await context.Usuarios.AnyAsync(u => u.PersonaId == prof.Id || u.Username == username || u.Email == email))
+                {
+                    logger.LogInformation("Usuarios: ya existe usuario para el profesional Id {ProfId} ('{Username}'), se omite.", prof.Id, username);
+                    continue;
+                }
+
+                var usuarioProf = new Usuario(
+                    id: 0,
+                    username: username,
+                    email: email,
+                    password: "profesional123",
+                    fechaCreacion: DateTime.Now,
+                    rol: Usuario.Roles.Profesional,
+                    activo: prof.Estado == Profesional.EstadoProfesional.Activo,
+                    personaId: prof.Id);
+
+                context.Usuarios.Add(usuarioProf);
+                await context.SaveChangesAsync();
+                logger.LogInformation("Usuarios: usuario profesional '{Username}' (PersonaId: {PersonaId}) insertado.", username, prof.Id);
+            }
         }
     }
 }

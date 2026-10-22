@@ -120,7 +120,7 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("TurnosAtender", policy => policy.RequireRole("Administrativo", "Profesional"));
 
     // Políticas para Historias Clínicas
-    options.AddPolicy("HistoriasClinicasLeer", policy => policy.RequireRole("Administrativo", "Profesional"));
+    options.AddPolicy("HistoriasClinicasLeer", policy => policy.RequireRole("Profesional"));
     options.AddPolicy("HistoriasClinicasAgregar", policy => policy.RequireRole("Profesional"));
     options.AddPolicy("HistoriasClinicasActualizar", policy => policy.RequireRole("Profesional"));
 
