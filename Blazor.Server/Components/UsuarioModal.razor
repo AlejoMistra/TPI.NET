@@ -1,0 +1,294 @@
+@using DTOs
+@using API.Clients
+@using System.Text.RegularExpressions
+@inject IJSRuntime JSRuntime
+
+@if (showModal)
+{
+    <div class="modal fade show d-block" tabindex="-1" style="background-color: rgba(0,0,0,0.5);">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">
+                        @if (mode == FormMode.Add)
+                        {
+                            <text>Agregar</text>
+                        }
+                        else
+                        {
+                            <text>Editar</text>
+                        }
+                    </h5>
+                    <button type="button" class="btn-close" @onclick="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <EditForm Model="currentUsuario" OnValidSubmit="HandleValidSubmit">
+                        <DataAnnotationsValidator />
+                        
+                        @if (mode == FormMode.Update)
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Id</label>
+                                <input type="text" class="form-control" value="@currentUsuario.Id" readonly />
+                            </div>
+                        }
+
+                        <div class="mb-3">
+                            <label class="form-label">Usuario *</label>
+                            <InputText @bind-Value="currentUsuario.Username" class="form-control" />
+                            @if (validationErrors.ContainsKey("Username"))
+                            {
+                                <div class="text-danger small">@validationErrors["Username"]</div>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Email *</label>
+                            <InputText @bind-Value="currentUsuario.Email" class="form-control" />
+                            @if (validationErrors.ContainsKey("Email"))
+                            {
+                                <div class="text-danger small">@validationErrors["Email"]</div>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">@(mode == FormMode.Add ? "Contraseña *" : "Contraseña (dejar vacía para no cambiarla)")</label>
+                            <InputText type="password" @bind-Value="currentUsuario.Password" class="form-control" />
+                            @if (validationErrors.ContainsKey("Password"))
+                            {
+                                <div class="text-danger small">@validationErrors["Password"]</div>
+                            }
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Rol</label>
+                            <InputSelect @bind-Value="currentUsuario.Rol" class="form-select">
+                                <option value="Administrativo">Administrativo</option>
+                                <option value="Profesional">Profesional</option>
+                            </InputSelect>
+                        </div>
+
+                        @if (currentUsuario.Rol == "Profesional")
+                        {
+                            <div class="mb-3">
+                                <label class="form-label">Profesional *</label>
+                                <InputSelect @bind-Value="currentUsuario.PersonaId" class="form-select">
+                                    <option value="0">Seleccionar Profesional</option>
+                                    @if (profesionales != null)
+                                    {
+                                        @foreach (var profesional in profesionales)
+                                        {
+                                            <option value="@profesional.Id">@profesional.Apellido, @profesional.Nombre</option>
+                                        }
+                                    }
+                                </InputSelect>
+                                @if (validationErrors.ContainsKey("Profesional"))
+                                {
+                                    <div class="text-danger small">@validationErrors["Profesional"]</div>
+                                }
+                            </div>
+                        }
+
+                        @if (mode == FormMode.Update)
+                        {
+                            <div class="mb-3 form-check">
+                                <InputCheckbox @bind-Value="currentUsuario.Activo" class="form-check-input" id="usuarioActivo" />
+                                <label class="form-check-label" for="usuarioActivo">Activo</label>
+                            </div>
+
+                            <div class="mb-3">
+                                <label class="form-label">Fecha Creación</label>
+                                <input type="text" class="form-control" value="@fechaCreacion.ToString("dd/MM/yyyy HH:mm")" readonly />
+                            </div>
+                        }
+
+                        @if (!string.IsNullOrEmpty(errorMessage))
+                        {
+                            <div class="alert alert-danger">
+                                @errorMessage
+                            </div>
+                        }
+
+                        <div class="modal-footer">
+                            <button type="button" class="btn btn-secondary" @onclick="Close">Cancelar</button>
+                            <button type="submit" class="btn btn-primary" disabled="@saving">
+                                @if (saving)
+                                {
+                                    <span class="spinner-border spinner-border-sm me-2"></span>
+                                }
+                                @(mode == FormMode.Add ? "Agregar" : "Actualizar")
+                            </button>
+                        </div>
+                    </EditForm>
+                </div>
+            </div>
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter] public EventCallback OnUsuarioChanged { get; set; }
+    
+    private bool showModal = false;
+    private FormMode mode = FormMode.Add;
+    private UsuarioUpdateDTO currentUsuario = new UsuarioUpdateDTO();
+    private DateTime fechaCreacion;
+    private bool saving = false;
+    private string errorMessage = string.Empty;
+    private Dictionary<string, string> validationErrors = new Dictionary<string, string>();
+    private List<ProfesionalDTO>? profesionales;
+
+    public enum FormMode
+    {
+        Add,
+        Update
+    }
+
+    public async Task ShowAddModal()
+    {
+        mode = FormMode.Add;
+        currentUsuario = new UsuarioUpdateDTO { Rol = "Administrativo" };
+        await LoadProfesionales();
+        ClearValidationErrors();
+        showModal = true;
+        StateHasChanged();
+    }
+
+    public async Task ShowEditModal(UsuarioDTO usuario)
+    {
+        mode = FormMode.Update;
+        currentUsuario = new UsuarioUpdateDTO
+        {
+            Id = usuario.Id,
+            Username = usuario.Username,
+            Email = usuario.Email,
+            Activo = usuario.Activo,
+            Rol = usuario.Rol,
+            PersonaId = usuario.PersonaId
+        };
+        fechaCreacion = usuario.FechaCreacion;
+        await LoadProfesionales();
+        ClearValidationErrors();
+        showModal = true;
+        StateHasChanged();
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (!ValidateUsuario())
+            return;
+
+        try
+        {
+            saving = true;
+            errorMessage = string.Empty;
+
+            if (mode == FormMode.Add)
+            {
+                await UsuarioApiClient.AddAsync(new UsuarioCreateDTO
+                {
+                    Username = currentUsuario.Username,
+                    Email = currentUsuario.Email,
+                    Password = currentUsuario.Password ?? string.Empty,
+                    Rol = currentUsuario.Rol,
+                    PersonaId = currentUsuario.PersonaId
+                });
+            }
+            else
+            {
+                await UsuarioApiClient.UpdateAsync(currentUsuario);
+            }
+
+            await OnUsuarioChanged.InvokeAsync();
+            Close();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = ex.Message;
+        }
+        finally
+        {
+            saving = false;
+        }
+    }
+
+    private bool ValidateUsuario()
+    {
+        ClearValidationErrors();
+        bool isValid = true;
+
+        if (string.IsNullOrWhiteSpace(currentUsuario.Username))
+        {
+            validationErrors["Username"] = "El Usuario es requerido";
+            isValid = false;
+        }
+        else if (currentUsuario.Username.Trim().Length < 5)
+        {
+            validationErrors["Username"] = "El Usuario debe tener al menos 5 caracteres";
+            isValid = false;
+        }
+
+        if (string.IsNullOrWhiteSpace(currentUsuario.Email))
+        {
+            validationErrors["Email"] = "El Email es requerido";
+            isValid = false;
+        }
+        else if (!IsValidEmail(currentUsuario.Email))
+        {
+            validationErrors["Email"] = "El formato del Email no es válido";
+            isValid = false;
+        }
+
+        if (mode == FormMode.Add && string.IsNullOrWhiteSpace(currentUsuario.Password))
+        {
+            validationErrors["Password"] = "La Contraseña es requerida";
+            isValid = false;
+        }
+        else if (!string.IsNullOrWhiteSpace(currentUsuario.Password) && currentUsuario.Password.Length < 6)
+        {
+            validationErrors["Password"] = "La Contraseña debe tener al menos 6 caracteres";
+            isValid = false;
+        }
+
+        if (currentUsuario.Rol == "Profesional" && (currentUsuario.PersonaId == null || currentUsuario.PersonaId <= 0))
+        {
+            validationErrors["Profesional"] = "Debe seleccionar un profesional";
+            isValid = false;
+        }
+
+        StateHasChanged();
+        return isValid;
+    }
+
+    private bool IsValidEmail(string email)
+    {
+        if (string.IsNullOrWhiteSpace(email))
+            return false;
+        return Regex.IsMatch(email, @"^[^@\s]+@[^@\s]+\.[^@\s]+$");
+    }
+
+    private void ClearValidationErrors()
+    {
+        validationErrors.Clear();
+        errorMessage = string.Empty;
+    }
+
+    private async Task LoadProfesionales()
+    {
+        try
+        {
+            profesionales = (await ProfesionalApiClient.GetAllAsync())?.ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar profesionales: {ex.Message}";
+        }
+    }
+
+    private void Close()
+    {
+        showModal = false;
+        ClearValidationErrors();
+        StateHasChanged();
+    }
+}

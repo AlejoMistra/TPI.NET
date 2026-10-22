@@ -1,0 +1,216 @@
+@page "/usuarios"
+@using DTOs
+@using API.Clients
+@using Blazor.Server.Components
+@inject IJSRuntime JSRuntime
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>Usuarios</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h3>Usuarios</h3>
+            
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @errorMessage
+                    <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                </div>
+            }
+            
+            @if (!string.IsNullOrEmpty(successMessage))
+            {
+                <div class="alert alert-success alert-dismissible fade show" role="alert">
+                    @successMessage
+                    <button type="button" class="btn-close" @onclick="() => successMessage = string.Empty"></button>
+                </div>
+            }
+
+            @if (canAdd)
+            {
+                <div class="mb-3">
+                    <button class="btn btn-primary" @onclick="OpenAddModal">
+                        <i class="fas fa-plus"></i> Agregar
+                    </button>
+                </div>
+            }
+
+            @if (loading)
+            {
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else
+            {
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Id</th>
+                                <th>Usuario</th>
+                                <th>Email</th>
+                                <th>Rol</th>
+                                <th>Profesional</th>
+                                <th>Fecha Creación</th>
+                                <th>Activo</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (usuarios != null && usuarios.Any())
+                            {
+                                @foreach (var usuario in usuarios)
+                                {
+                                    <tr>
+                                        <td>@usuario.Id</td>
+                                        <td>@usuario.Username</td>
+                                        <td>@usuario.Email</td>
+                                        <td>@usuario.Rol</td>
+                                        <td>@ProfesionalNombre(usuario)</td>
+                                        <td>@usuario.FechaCreacion.ToString("dd/MM/yyyy HH:mm:ss")</td>
+                                        <td>@(usuario.Activo ? "Sí" : "No")</td>
+                                        <td>
+                                            @if (canUpdate)
+                                            {
+                                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => OpenEditModal(usuario)">
+                                                    <i class="fas fa-edit"></i> Editar
+                                                </button>
+                                            }
+                                            @if (canDelete)
+                                            {
+                                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmDelete(usuario)">
+                                                    <i class="fas fa-trash"></i> Eliminar
+                                                </button>
+                                            }
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<UsuarioModal @ref="usuarioModal" OnUsuarioChanged="LoadUsuarios" />
+
+@code {
+    private List<UsuarioDTO>? usuarios;
+    private List<ProfesionalDTO>? profesionales;
+    private bool loading = true;
+    private string errorMessage = string.Empty;
+    private string successMessage = string.Empty;
+    private UsuarioModal usuarioModal = null!;
+    
+    // Permisos de autorización
+    private bool canRead = false;
+    private bool canAdd = false;
+    private bool canUpdate = false;
+    private bool canDelete = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Verificar autenticación antes de cargar datos
+            var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            if (!isAuthenticated)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            // Verificar permisos
+            await LoadPermissions();
+            
+            // Solo cargar datos si tiene permiso de lectura
+            if (canRead)
+            {
+                await LoadUsuarios();
+            }
+            else
+            {
+                errorMessage = "No tiene permisos para ver usuarios.";
+            }
+            
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task LoadPermissions()
+    {
+        canRead = await AuthService.HasPermissionAsync("Administrativo");
+        canAdd = await AuthService.HasPermissionAsync("Administrativo");
+        canUpdate = await AuthService.HasPermissionAsync("Administrativo");
+        canDelete = await AuthService.HasPermissionAsync("Administrativo");
+    }
+
+    private async Task LoadUsuarios()
+    {
+        try
+        {
+            loading = true;
+            profesionales = (await ProfesionalApiClient.GetAllAsync())?.ToList();
+            usuarios = (await UsuarioApiClient.GetAllAsync())?.ToList();
+            successMessage = string.Empty; // Clear success message when reloading
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar usuarios: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private string ProfesionalNombre(UsuarioDTO usuario)
+    {
+        var profesional = profesionales?.FirstOrDefault(p => p.Id == usuario.PersonaId);
+        return profesional != null ? $"{profesional.Apellido}, {profesional.Nombre}" : "—";
+    }
+
+    private async Task OpenAddModal()
+    {
+        await usuarioModal.ShowAddModal();
+    }
+
+    private async Task OpenEditModal(UsuarioDTO usuario)
+    {
+        await usuarioModal.ShowEditModal(usuario);
+    }
+
+    private async Task ConfirmDelete(UsuarioDTO usuario)
+    {
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", 
+            $"¿Está seguro que desea eliminar el usuario {usuario.Username} ({usuario.Email})?");
+        
+        if (confirm)
+        {
+            await DeleteUsuario(usuario.Id);
+        }
+    }
+
+    private async Task DeleteUsuario(int id)
+    {
+        try
+        {
+            await UsuarioApiClient.DeleteAsync(id);
+            successMessage = "Usuario eliminado exitosamente.";
+            await LoadUsuarios();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al eliminar usuario: {ex.Message}";
+        }
+    }
+}
