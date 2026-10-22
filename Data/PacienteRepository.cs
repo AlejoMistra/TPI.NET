@@ -14,24 +14,30 @@ namespace Data
 
         public async Task AddAsync(Paciente paciente)
         {
-            using var transaction = await _context.Database.BeginTransactionAsync();
-            try
+            // La conexión usa reintentos automáticos (EnableRetryOnFailure): una transacción
+            // manual tiene que ejecutarse dentro de la estrategia de ejecución del contexto
+            var strategy = _context.Database.CreateExecutionStrategy();
+            await strategy.ExecuteAsync(async () =>
             {
-                await _context.Pacientes.AddAsync(paciente);
-                await _context.SaveChangesAsync();
+                using var transaction = await _context.Database.BeginTransactionAsync();
+                try
+                {
+                    await _context.Pacientes.AddAsync(paciente);
+                    await _context.SaveChangesAsync();
 
-                // Asegurar que cada paciente nuevo tenga su historia clínica inicializada en la misma transacción
-                var historiaClinica = new HistoriaClinica(paciente.Id, TypeGrupoSanguineo.NO_ESPECIFICADO);
-                await _context.HistoriasClinicas.AddAsync(historiaClinica);
-                await _context.SaveChangesAsync();
+                    // Asegurar que cada paciente nuevo tenga su historia clínica inicializada en la misma transacción
+                    var historiaClinica = new HistoriaClinica(paciente.Id, TypeGrupoSanguineo.NO_ESPECIFICADO);
+                    await _context.HistoriasClinicas.AddAsync(historiaClinica);
+                    await _context.SaveChangesAsync();
 
-                await transaction.CommitAsync();
-            }
-            catch
-            {
-                await transaction.RollbackAsync();
-                throw;
-            }
+                    await transaction.CommitAsync();
+                }
+                catch
+                {
+                    await transaction.RollbackAsync();
+                    throw;
+                }
+            });
         }
 
         public async Task<bool> UpdateAsync(Paciente paciente)
