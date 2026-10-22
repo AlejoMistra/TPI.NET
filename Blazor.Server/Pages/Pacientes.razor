@@ -86,10 +86,13 @@
                                             }
                                             @if (canDelete)
                                             {
-                                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmDelete(paciente)">
+                                                <button class="btn btn-sm btn-outline-danger me-1" @onclick="() => ConfirmDelete(paciente)">
                                                     <i class="fas fa-trash"></i> Eliminar
                                                 </button>
                                             }
+                                            <button class="btn btn-sm btn-outline-success" @onclick="@(() => Navigation.NavigateTo($"/historia-clinica/{paciente.Id}"))">
+                                                Historia Clínica
+                                            </button>
                                         </td>
                                     </tr>
                                 }

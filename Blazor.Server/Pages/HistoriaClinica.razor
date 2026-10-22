@@ -1,0 +1,264 @@
+@page "/historia-clinica/{PacienteId:int}"
+@using DTOs
+@using API.Clients
+@using Blazor.Server.Components
+@inject IJSRuntime JSRuntime
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>Historia Clínica</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h3>Historia Clínica</h3>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @errorMessage
+                    <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                </div>
+            }
+
+            <div class="mb-3">
+                <button class="btn btn-secondary me-1" @onclick="Volver">
+                    Volver a Pacientes
+                </button>
+                @if (canAdd && paciente != null)
+                {
+                    <button class="btn btn-primary" @onclick="OpenAddModal">
+                        <i class="fas fa-plus"></i> Nuevo Registro
+                    </button>
+                }
+            </div>
+
+            @if (loading)
+            {
+                <div class="d-flex justify-content-center">
+                    <div class="spinner-border" role="status">
+                        <span class="visually-hidden">Cargando...</span>
+                    </div>
+                </div>
+            }
+            else if (paciente != null)
+            {
+                <table class="table table-sm">
+                    <tbody>
+                        <tr>
+                            <th>Paciente</th>
+                            <td>@paciente.Apellido, @paciente.Nombre (#@paciente.Id)</td>
+                            <th>N° Historia Clínica</th>
+                            <td>@(historiaClinica != null ? $"#{historiaClinica.Id:D5} (Desde: {historiaClinica.FechaCreacion:dd/MM/yyyy})" : "Sin historia clínica")</td>
+                        </tr>
+                        <tr>
+                            <th>Documento</th>
+                            <td>@(string.IsNullOrWhiteSpace(paciente.TipoDocumento) ? "DNI" : paciente.TipoDocumento) @paciente.NroDocumento</td>
+                            <th>Grupo Sanguíneo</th>
+                            <td>@FormatearGrupoSanguineo(historiaClinica?.GrupoSanguineo)</td>
+                        </tr>
+                        <tr>
+                            <th>Obra Social</th>
+                            <td>@(string.IsNullOrWhiteSpace(paciente.ObraSocial) ? "Particular" : paciente.ObraSocial)</td>
+                            <th>Registros</th>
+                            <td>@(historiaClinica?.Registros.Count ?? 0) registro(s)</td>
+                        </tr>
+                    </tbody>
+                </table>
+
+                <div class="table-responsive">
+                    <table class="table table-striped table-hover">
+                        <thead class="table-dark">
+                            <tr>
+                                <th>Fecha / Hora</th>
+                                <th>Tipo</th>
+                                <th>Profesional</th>
+                                <th>Especialidad</th>
+                                <th>Turno Origen</th>
+                                <th>Descripción Clínica</th>
+                                <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (registros != null && registros.Any())
+                            {
+                                @foreach (var registro in registros)
+                                {
+                                    <tr>
+                                        <td>@registro.Fecha.ToString("dd/MM/yyyy HH:mm")</td>
+                                        <td>@FormatearTipoRegistro(registro.Tipo)</td>
+                                        <td>@ProfesionalNombre(registro.ProfesionalId)</td>
+                                        <td>@EspecialidadNombre(registro.ProfesionalId)</td>
+                                        <td>@TurnoOrigenTexto(registro.TurnoId)</td>
+                                        <td>@registro.Descripcion</td>
+                                        <td>
+                                            <button class="btn btn-sm btn-outline-primary" @onclick="() => VerDetalle(registro)">
+                                                Ver
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<RegistroClinicoModal @ref="registroClinicoModal" OnRegistroChanged="LoadHistoriaClinica" />
+
+@code {
+    [Parameter] public int PacienteId { get; set; }
+
+    private PacienteDTO? paciente;
+    private HistoriaClinicaDTO? historiaClinica;
+    private List<RegistroClinicoDTO>? registros;
+    private List<TurnoDTO>? turnos;
+    private List<ProfesionalDTO>? profesionales;
+    private List<EspecialidadDTO>? especialidades;
+    private bool loading = true;
+    private string errorMessage = string.Empty;
+    private RegistroClinicoModal registroClinicoModal = null!;
+
+    // Permisos de autorización
+    private bool canRead = false;
+    private bool canAdd = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Verificar autenticación antes de cargar datos
+            var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            if (!isAuthenticated)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            // Verificar permisos
+            await LoadPermissions();
+
+            // Solo cargar datos si tiene permiso de lectura
+            if (canRead)
+            {
+                await LoadHistoriaClinica();
+            }
+            else
+            {
+                loading = false;
+                errorMessage = "No tiene permisos para ver la historia clínica.";
+            }
+
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task LoadPermissions()
+    {
+        // Historia clínica: el Administrativo solo la consulta; el Profesional además carga registros
+        canRead = await AuthService.HasPermissionAsync("Administrativo") || await AuthService.HasPermissionAsync("Profesional");
+        canAdd = await AuthService.HasPermissionAsync("Profesional");
+    }
+
+    private async Task LoadHistoriaClinica()
+    {
+        try
+        {
+            loading = true;
+            paciente = await PacienteApiClient.GetAsync(PacienteId);
+            if (paciente == null)
+            {
+                errorMessage = "No se encontró el paciente seleccionado.";
+                return;
+            }
+
+            especialidades = (await EspecialidadApiClient.GetAllAsync())?.ToList();
+            profesionales = (await ProfesionalApiClient.GetAllAsync())?.ToList();
+            turnos = (await TurnoApiClient.GetAllAsync())?.Where(t => t.PacienteId == PacienteId).ToList();
+            historiaClinica = await HistoriaClinicaApiClient.GetByPacienteIdAsync(PacienteId);
+            registros = historiaClinica?.Registros.OrderByDescending(r => r.Fecha).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar la historia clínica: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private string ProfesionalNombre(int profesionalId)
+    {
+        var profesional = profesionales?.FirstOrDefault(p => p.Id == profesionalId);
+        return profesional != null ? $"{profesional.Apellido}, {profesional.Nombre}" : $"ID {profesionalId}";
+    }
+
+    private string EspecialidadNombre(int profesionalId)
+    {
+        var profesional = profesionales?.FirstOrDefault(p => p.Id == profesionalId);
+        return especialidades?.FirstOrDefault(e => e.Id == profesional?.EspecialidadId)?.Nombre ?? "—";
+    }
+
+    private string TurnoOrigenTexto(int? turnoId)
+    {
+        if (!turnoId.HasValue)
+            return "General";
+
+        var turno = turnos?.FirstOrDefault(t => t.Id == turnoId.Value);
+        return turno != null ? $"Turno #{turno.Id} ({turno.FechaHoraInicio:dd/MM/yyyy})" : $"Turno #{turnoId.Value}";
+    }
+
+    private static string FormatearTipoRegistro(string tipo) => tipo switch
+    {
+        "NotaClinica" => "Nota Clínica",
+        "Diagnostico" => "Diagnóstico",
+        "Evolucion" => "Evolución",
+        _ => tipo
+    };
+
+    private static string FormatearGrupoSanguineo(string? grupo)
+    {
+        if (string.IsNullOrWhiteSpace(grupo))
+            return "No especificado";
+
+        return grupo.ToUpperInvariant() switch
+        {
+            "A_POSITIVO" => "A+",
+            "A_NEGATIVO" => "A-",
+            "B_POSITIVO" => "B+",
+            "B_NEGATIVO" => "B-",
+            "AB_POSITIVO" => "AB+",
+            "AB_NEGATIVO" => "AB-",
+            "O_POSITIVO" => "O+",
+            "O_NEGATIVO" => "O-",
+            "NO_ESPECIFICADO" => "No especificado",
+            _ => grupo
+        };
+    }
+
+    private async Task VerDetalle(RegistroClinicoDTO registro)
+    {
+        await JSRuntime.InvokeVoidAsync("alert",
+            $"Registro Clínico #{registro.Id}\n\n" +
+            $"Fecha / Hora: {registro.Fecha:dd/MM/yyyy HH:mm}\n" +
+            $"Tipo: {FormatearTipoRegistro(registro.Tipo)}\n" +
+            $"Profesional: {ProfesionalNombre(registro.ProfesionalId)} ({EspecialidadNombre(registro.ProfesionalId)})\n" +
+            $"Origen: {TurnoOrigenTexto(registro.TurnoId)}\n\n" +
+            $"Descripción:\n{registro.Descripcion}");
+    }
+
+    private async Task OpenAddModal()
+    {
+        await registroClinicoModal.ShowAddModal(paciente!, historiaClinica, turnos ?? new(), profesionales ?? new());
+    }
+
+    private void Volver()
+    {
+        Navigation.NavigateTo("/pacientes");
+    }
+}
