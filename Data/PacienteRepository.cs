@@ -66,7 +66,7 @@ namespace Data
 
         public async Task<IEnumerable<Paciente>> GetAllAsync()
         {
-            return await _context.Pacientes.ToListAsync();
+            return await _context.Pacientes.AsNoTracking().ToListAsync();
         }
 
         public async Task<bool> DeleteAsync(int id)

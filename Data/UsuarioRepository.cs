@@ -1,4 +1,4 @@
-﻿using Domain.Model;
+using Domain.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data
@@ -33,18 +33,22 @@ namespace Data
         public async Task<Usuario?> GetAsync(int id)
         {
             return await _context.Usuarios
+                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
 
         public async Task<Usuario?> GetByUsernameAsync(string username)
         {
             return await _context.Usuarios
+                .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Username == username && u.Activo);
         }
 
         public async Task<IEnumerable<Usuario>> GetAllAsync()
         {
-            return await _context.Usuarios.ToListAsync();
+            return await _context.Usuarios
+                .AsNoTracking()
+                .ToListAsync();
         }
 
         public async Task<bool> UpdateAsync(Usuario usuario)

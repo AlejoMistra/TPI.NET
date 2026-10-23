@@ -14,7 +14,7 @@ namespace Data
 
     public async Task<IEnumerable<Turno>> GetAllAsync()
     {
-      return await _context.Turnos.ToListAsync();
+      return await _context.Turnos.AsNoTracking().ToListAsync();
     }
 
     public async Task<Turno?> GetByIdAsync(int id)

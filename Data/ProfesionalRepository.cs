@@ -21,6 +21,7 @@ namespace Data
         public async Task<Profesional?> GetByIdAsync(int id)
         {
             return await _context.Profesionales
+                .AsNoTracking()
                 .Include(p => p.Especialidad)
                 .FirstOrDefaultAsync(p => p.Id == id);
         }
@@ -28,6 +29,7 @@ namespace Data
         public async Task<IEnumerable<Profesional>> GetAllAsync()
         {
             return await _context.Profesionales
+                .AsNoTracking()
                 .Include(p => p.Especialidad)
                 .ToListAsync();
         }
