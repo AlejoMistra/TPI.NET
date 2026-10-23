@@ -90,9 +90,12 @@
                                                     <i class="fas fa-trash"></i> Eliminar
                                                 </button>
                                             }
-                                            <button class="btn btn-sm btn-outline-success" @onclick="@(() => Navigation.NavigateTo($"/historia-clinica/{paciente.Id}"))">
-                                                Historia Clínica
-                                            </button>
+                                            @if (canReadHistoria)
+                                            {
+                                                <button class="btn btn-sm btn-outline-success" @onclick="@(() => Navigation.NavigateTo($"/historia-clinica/{paciente.Id}"))">
+                                                    Historia Clínica
+                                                </button>
+                                            }
                                         </td>
                                     </tr>
                                 }
@@ -119,6 +122,7 @@
     private bool canAdd = false;
     private bool canUpdate = false;
     private bool canDelete = false;
+    private bool canReadHistoria = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -152,10 +156,11 @@
 
     private async Task LoadPermissions()
     {
-        canRead = await AuthService.HasPermissionAsync("Administrativo");
-        canAdd = await AuthService.HasPermissionAsync("Administrativo");
-        canUpdate = await AuthService.HasPermissionAsync("Administrativo");
-        canDelete = await AuthService.HasPermissionAsync("Administrativo");
+        canRead = await AuthService.HasPermissionAsync("pacientes.leer");
+        canAdd = await AuthService.HasPermissionAsync("pacientes.agregar");
+        canUpdate = await AuthService.HasPermissionAsync("pacientes.actualizar");
+        canDelete = await AuthService.HasPermissionAsync("pacientes.eliminar");
+        canReadHistoria = await AuthService.HasPermissionAsync("historiasclinicas.leer");
     }
 
     private async Task LoadPacientes()

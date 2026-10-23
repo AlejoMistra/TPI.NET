@@ -79,7 +79,8 @@
                                         <td>
                                             @if (canUpdate)
                                             {
-                                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => OpenEditModal(turno)">
+                                                <button class="btn btn-sm btn-outline-primary me-1"
+                                                        @onclick="() => OpenEditModal(turno)">
                                                     <i class="fas fa-edit"></i> Editar
                                                 </button>
                                             }
@@ -149,10 +150,10 @@
 
     private async Task LoadPermissions()
     {
-        canRead = await AuthService.HasPermissionAsync("Administrativo");
-        canAdd = await AuthService.HasPermissionAsync("Administrativo");
-        canUpdate = await AuthService.HasPermissionAsync("Administrativo");
-        canDelete = await AuthService.HasPermissionAsync("Administrativo");
+        canRead = await AuthService.HasPermissionAsync("datosmaestros.leer");
+        canAdd = await AuthService.HasPermissionAsync("turnos.agregar");
+        canUpdate = await AuthService.HasPermissionAsync("turnos.actualizar");
+        canDelete = await AuthService.HasPermissionAsync("turnos.eliminar");
     }
 
     private async Task LoadTurnos()
@@ -186,7 +187,7 @@
 
     private async Task ConfirmDelete(TurnoDTO turno)
     {
-        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", 
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm",
             $"¿Está seguro que desea eliminar el turno {turno.Id} ({turno.FechaHoraInicio:dd/MM/yyyy HH:mm})?");
         
         if (confirm)
