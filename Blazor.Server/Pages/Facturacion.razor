@@ -61,7 +61,8 @@
                                         <td>@EspecialidadNombre(turno)</td>
                                         <td>@ProfesionalNombre(turno)</td>
                                         <td>@turno.EstadoTurno</td>
-                                        <td>@(turno.FacturaId.HasValue ? $"Facturado (#{turno.FacturaId.Value:D5})" : "Pendiente")</td>
+                                        <td>@(turno.FacturaId.HasValue ? $"Facturado (#{turno.FacturaId.Value:D5})" : "Pendiente")
+                                        </td>
                                         <td>@MontoTotalTexto(turno)</td>
                                         <td>
                                             @if (canAdd && !turno.FacturaId.HasValue)
@@ -72,7 +73,8 @@
                                             }
                                             @if (canUpdate && turno.FacturaId.HasValue)
                                             {
-                                                <button class="btn btn-sm btn-outline-success" @onclick="() => OpenConsultaModal(turno)">
+                                                <button class="btn btn-sm btn-outline-success"
+                                                        @onclick="() => OpenConsultaModal(turno)">
                                                     Ver Factura
                                                 </button>
                                             }
@@ -137,9 +139,9 @@
 
     private async Task LoadPermissions()
     {
-        canRead = await AuthService.HasPermissionAsync("Administrativo");
-        canAdd = await AuthService.HasPermissionAsync("Administrativo");
-        canUpdate = await AuthService.HasPermissionAsync("Administrativo");
+        canRead = await AuthService.HasPermissionAsync("facturas.leer");
+        canAdd = await AuthService.HasPermissionAsync("facturas.agregar");
+        canUpdate = await AuthService.HasPermissionAsync("facturas.actualizar");
     }
 
     private async Task LoadTurnos()
