@@ -175,6 +175,7 @@ namespace WindowsForms
         {
             await UiErrorHandler.ExecuteAsync(async () =>
             {
+                await ConfigurePermissionsAsync();
                 await CargarEspecialidadesAsync();
                 await CargarProfesionalesAsync();
                 await CargarDatosPacientesYTurnosAsync();
@@ -185,6 +186,26 @@ namespace WindowsForms
                     BeginInvoke(new Action(LimpiarSeleccionPacientes));
                 }
             }, this, "Error al cargar el listado de pacientes");
+        }
+
+        private async Task ConfigurePermissionsAsync()
+        {
+            var authService = AuthServiceProvider.Instance;
+            bool canUpdate = await authService.HasPermissionAsync("pacientes.actualizar");
+            bool canViewHC = await authService.HasPermissionAsync("historiasclinicas.leer");
+
+            if (pacientesDataGridView.Columns.Contains("editarColumn"))
+            {
+                pacientesDataGridView.Columns["editarColumn"].Visible = canUpdate;
+            }
+
+            if (pacientesDataGridView.Columns.Contains("historiaClinicaColumn"))
+            {
+                pacientesDataGridView.Columns["historiaClinicaColumn"].Visible = canViewHC;
+            }
+
+            _editarMenuItem.Visible = canUpdate;
+            _historiaClinicaMenuItem.Visible = canViewHC;
         }
 
         private async Task CargarEspecialidadesAsync()
@@ -470,8 +491,15 @@ namespace WindowsForms
                 e.Cancel = true;
                 return;
             }
-            _editarMenuItem.Enabled = true;
-            _historiaClinicaMenuItem.Enabled = true;
+
+            if (!_editarMenuItem.Visible && !_historiaClinicaMenuItem.Visible)
+            {
+                e.Cancel = true;
+                return;
+            }
+
+            _editarMenuItem.Enabled = _editarMenuItem.Visible;
+            _historiaClinicaMenuItem.Enabled = _historiaClinicaMenuItem.Visible;
         }
 
         private PacienteGridRow? GetSelectedRow()
@@ -549,7 +577,14 @@ namespace WindowsForms
 
         private async void AbrirModalEditarPaciente(int pacienteId)
         {
-            // TODO: Permisos - Esta acción será exclusiva del rol Administrativo cuando se implemente roles y permisos.
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("pacientes.actualizar"))
+            {
+                MessageBox.Show("No tiene permisos para editar pacientes.", "Acceso Denegado",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             var obrasSociales = busquedaObraSocialComboBox.Items.Cast<object>()
                 .Select(item => item?.ToString() ?? string.Empty)
                 .Where(os => !string.IsNullOrWhiteSpace(os) && !string.Equals(os, "Todas", StringComparison.OrdinalIgnoreCase))
@@ -565,9 +600,16 @@ namespace WindowsForms
             }
         }
 
-        private static void AbrirModalHistoriaClinica(int pacienteId)
+        private static async void AbrirModalHistoriaClinica(int pacienteId)
         {
-            // TODO: Permisos - Esta acción será exclusiva del rol Profesional cuando se implemente roles y permisos.
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("historiasclinicas.leer"))
+            {
+                MessageBox.Show("No tiene permisos para acceder a la historia clínica.", "Acceso Denegado",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             using var modal = new HistoriaClinicaModalForm(pacienteId);
             modal.ShowDialog();
         }

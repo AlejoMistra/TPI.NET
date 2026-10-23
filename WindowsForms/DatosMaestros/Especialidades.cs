@@ -75,7 +75,31 @@ namespace WindowsForms.DatosMaestros
 
         private async void Especialidades_Load(object? sender, EventArgs e)
         {
+            await ConfigureButtonPermissions();
             await CargarEspecialidadesAsync();
+        }
+
+        private async System.Threading.Tasks.Task ConfigureButtonPermissions()
+        {
+            var authService = AuthServiceProvider.Instance;
+            bool canAdd = await authService.HasPermissionAsync("especialidades.agregar");
+            bool canUpdate = await authService.HasPermissionAsync("especialidades.actualizar");
+            bool canDelete = await authService.HasPermissionAsync("especialidades.eliminar");
+
+            agregarEspecialidadButton.Visible = canAdd;
+            agregarEspecialidadButton.Tag = canAdd;
+            guardarEspecialidadButton.Visible = canAdd || canUpdate;
+            guardarEspecialidadButton.Tag = canAdd || canUpdate;
+
+            if (especialidadesDataGridView.Columns.Contains("editarColumn"))
+            {
+                especialidadesDataGridView.Columns["editarColumn"].Visible = canUpdate;
+            }
+
+            if (especialidadesDataGridView.Columns.Contains("eliminarColumn"))
+            {
+                especialidadesDataGridView.Columns["eliminarColumn"].Visible = canDelete;
+            }
         }
 
         private async System.Threading.Tasks.Task CargarEspecialidadesAsync()

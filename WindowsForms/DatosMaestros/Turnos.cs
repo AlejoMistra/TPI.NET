@@ -163,10 +163,34 @@ namespace WindowsForms.DatosMaestros
         {
             await UiErrorHandler.ExecuteAsync(async () =>
             {
+                await ConfigureButtonPermissions();
                 await CargarEspecialidadesAsync();
                 await CargarProfesionalesAsync();
                 await CargarTurnosAsync();
             }, this, "Error al inicializar datos de turnos");
+        }
+
+        private async Task ConfigureButtonPermissions()
+        {
+            var authService = AuthServiceProvider.Instance;
+            bool canAdd = await authService.HasPermissionAsync("turnos.agregar");
+            bool canUpdate = await authService.HasPermissionAsync("turnos.actualizar");
+            bool canDelete = await authService.HasPermissionAsync("turnos.eliminar");
+
+            agregarTurnoButton.Visible = canAdd;
+            agregarTurnoButton.Tag = canAdd;
+            guardarTurnoButton.Visible = canAdd || canUpdate;
+            guardarTurnoButton.Tag = canAdd || canUpdate;
+
+            if (turnosDataGridView.Columns.Contains("accionesColumn"))
+            {
+                turnosDataGridView.Columns["accionesColumn"].Visible = canUpdate;
+            }
+
+            if (turnosDataGridView.Columns.Contains("eliminarColumn"))
+            {
+                turnosDataGridView.Columns["eliminarColumn"].Visible = canDelete;
+            }
         }
 
         private async Task CargarEspecialidadesAsync()
