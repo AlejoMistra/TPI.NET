@@ -1,33 +1,44 @@
 using Application.Services;
 using DTOs;
+using System.Security.Claims;
 
 namespace WebAPI
 {
     public static class TurnoEndpoints
     {
+        // Un Profesional solo puede ver y atender sus propios turnos
+        private static bool EsTurnoDeOtroProfesional(ClaimsPrincipal user, int profesionalId)
+            => user.IsInRole("Profesional") && user.FindFirstValue("PersonaId") != profesionalId.ToString();
+
         public static void MapTurnoEndpoints(this WebApplication app)
         {
             // GET: /turnos
-            app.MapGet("/turnos", async (ITurnoService turnoService) =>
+            app.MapGet("/turnos", async (ClaimsPrincipal user, ITurnoService turnoService) =>
             {
                 var turnos = await turnoService.GetAllAsync();
-                return Results.Ok(turnos);
+                return Results.Ok(turnos.Where(t => !EsTurnoDeOtroProfesional(user, t.ProfesionalId)));
             })
             .WithName("GetAllTurnos")
             .Produces<List<TurnoDTO>>(StatusCodes.Status200OK)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("TurnosLeer");
 
             // GET: /turnos/{id:int}
-            app.MapGet("/turnos/{id:int}", async (int id, ITurnoService turnoService) =>
+            app.MapGet("/turnos/{id:int}", async (int id, ClaimsPrincipal user, ITurnoService turnoService) =>
             {
                 var turno = await turnoService.GetByIdAsync(id);
+                if (turno is not null && EsTurnoDeOtroProfesional(user, turno.ProfesionalId))
+                    return Results.Forbid();
+
                 return turno is not null ? Results.Ok(turno) : Results.NotFound();
             })
             .WithName("GetTurnoById")
             .Produces<TurnoDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("TurnosLeer");
 
             // POST: /turnos
             app.MapPost("/turnos", async (TurnoDTO turnoDto, ITurnoService turnoService) =>
@@ -39,7 +50,8 @@ namespace WebAPI
             .Produces<TurnoDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status409Conflict)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("TurnosAgregar");
 
             // PUT: /turnos/{id:int}
             app.MapPut("/turnos/{id:int}", async (int id, TurnoDTO turnoDto, ITurnoService turnoService) =>
@@ -55,7 +67,8 @@ namespace WebAPI
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status409Conflict)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("TurnosActualizar");
 
             // DELETE: /turnos/{id:int}
             app.MapDelete("/turnos/{id:int}", async (int id, ITurnoService turnoService) =>
@@ -67,7 +80,8 @@ namespace WebAPI
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("TurnosEliminar");
 
             // POST: /turnos/{id:int}/asignar
             app.MapPost("/turnos/{id:int}/asignar", async (int id, AsignarTurnoRequestDTO request, ITurnoService turnoService) =>
@@ -79,7 +93,8 @@ namespace WebAPI
             .Produces<TurnoDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("TurnosActualizar");
 
             // POST: /turnos/{id:int}/liberar
             app.MapPost("/turnos/{id:int}/liberar", async (int id, ITurnoService turnoService) =>
@@ -91,7 +106,8 @@ namespace WebAPI
             .Produces<TurnoDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("TurnosActualizar");
 
             // POST: /turnos/{id:int}/revertir-llegada
             app.MapPost("/turnos/{id:int}/revertir-llegada", async (int id, ITurnoService turnoService) =>
@@ -103,7 +119,8 @@ namespace WebAPI
             .Produces<TurnoDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("TurnosActualizar");
 
             // POST: /turnos/{id:int}/llegada
             app.MapPost("/turnos/{id:int}/llegada", async (int id, ITurnoService turnoService) =>
@@ -115,7 +132,8 @@ namespace WebAPI
             .Produces<TurnoDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("TurnosActualizar");
 
             // POST: /turnos/{id:int}/ausente
             app.MapPost("/turnos/{id:int}/ausente", async (int id, ITurnoService turnoService) =>
@@ -127,19 +145,26 @@ namespace WebAPI
             .Produces<TurnoDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("TurnosActualizar");
 
             // POST: /turnos/{id:int}/atender
-            app.MapPost("/turnos/{id:int}/atender", async (int id, ITurnoService turnoService) =>
+            app.MapPost("/turnos/{id:int}/atender", async (int id, ClaimsPrincipal user, ITurnoService turnoService) =>
             {
+                var existente = await turnoService.GetByIdAsync(id);
+                if (existente is not null && EsTurnoDeOtroProfesional(user, existente.ProfesionalId))
+                    return Results.Forbid();
+
                 var turno = await turnoService.AtenderAsync(id);
                 return Results.Ok(turno);
             })
             .WithName("AtenderTurno")
             .Produces<TurnoDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
+            .Produces(StatusCodes.Status403Forbidden)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("TurnosAtender");
         }
     }
 }

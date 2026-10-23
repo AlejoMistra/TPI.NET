@@ -15,7 +15,8 @@ namespace WebAPI
             })
             .WithName("GetAllPacientes")
             .Produces<List<PacienteDTO>>(StatusCodes.Status200OK)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("PacientesLeer");
 
             // GET: /pacientes/{id:int}
             app.MapGet("/pacientes/{id:int}", async (int id, IPacienteService pacienteService) =>
@@ -27,7 +28,8 @@ namespace WebAPI
             .Produces<PacienteDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("PacientesLeer");
 
             // POST: /pacientes
             app.MapPost("/pacientes", async (PacienteDTO pacienteDto, IPacienteService pacienteService) =>
@@ -38,7 +40,8 @@ namespace WebAPI
             .WithName("CreatePaciente")
             .Produces<PacienteDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("PacientesAgregar");
 
             // PUT: /pacientes/{id:int}
             app.MapPut("/pacientes/{id:int}", async (int id, PacienteDTO pacienteDto, IPacienteService pacienteService) =>
@@ -53,7 +56,8 @@ namespace WebAPI
             .Produces<PacienteDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("PacientesActualizar");
 
             // DELETE: /pacientes/{id:int}
             app.MapDelete("/pacientes/{id:int}", async (int id, IPacienteService pacienteService) =>
@@ -66,7 +70,8 @@ namespace WebAPI
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status409Conflict)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("PacientesEliminar");
         }
     }
 }

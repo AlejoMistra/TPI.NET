@@ -15,7 +15,8 @@ namespace WebAPI
             .WithName("AddProfesional")
             .Produces<ProfesionalDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("ProfesionalesAgregar");
 
             app.MapGet("/profesionales", async (IProfesionalService profesionalService) =>
             {
@@ -24,7 +25,8 @@ namespace WebAPI
             })
             .WithName("GetAllProfesionales")
             .Produces<List<ProfesionalDTO>>(StatusCodes.Status200OK)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("ProfesionalesLeer");
 
             app.MapGet("/profesionales/{id:int}", async (int id, IProfesionalService profesionalService) =>
             {
@@ -38,7 +40,8 @@ namespace WebAPI
             .Produces<ProfesionalDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("ProfesionalesLeer");
 
             app.MapPut("/profesionales/{id:int}", async (int id, ProfesionalDTO profesional, IProfesionalService profesionalService) =>
             {
@@ -52,7 +55,8 @@ namespace WebAPI
             .Produces<ProfesionalDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("ProfesionalesActualizar");
 
             app.MapDelete("/profesionales/{id:int}", async (int id, IProfesionalService profesionalService) =>
             {
@@ -66,7 +70,8 @@ namespace WebAPI
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status204NoContent)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("ProfesionalesEliminar");
         }
     }
 }

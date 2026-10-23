@@ -28,7 +28,7 @@ namespace Domain.Model
         public int? PersonaId { get; private set; }
         public Persona? Persona { get; private set; }
 
-        public Usuario(int id, string username, string email, string password, DateTime fechaCreacion, Roles rol, bool activo)
+        public Usuario(int id, string username, string email, string password, DateTime fechaCreacion, Roles rol, bool activo, int? personaId = null)
         {
             SetId(id);
             SetUsername(username);
@@ -37,6 +37,7 @@ namespace Domain.Model
             SetFechaCreacion(fechaCreacion);
             SetRol(rol);
             SetActivo(activo);
+            SetPersonaId(personaId);
         }
 
         private Usuario() { }
@@ -92,6 +93,9 @@ namespace Domain.Model
 
         public void SetPersonaId(int? personaId)
         {
+            if (personaId.HasValue && personaId.Value <= 0)
+                throw new ArgumentException("El PersonaId debe ser mayor que 0.", nameof(personaId));
+
             PersonaId = personaId;
         }
 

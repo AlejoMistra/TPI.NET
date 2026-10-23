@@ -15,7 +15,8 @@ namespace WebAPI
             })
             .WithName("GetAllFacturas")
             .Produces<List<FacturaDTO>>(StatusCodes.Status200OK)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("FacturasLeer");
 
             // GET: /facturas/{id:int}
             app.MapGet("/facturas/{id:int}", async (int id, IFacturaService facturaService) =>
@@ -27,7 +28,8 @@ namespace WebAPI
             .Produces<FacturaDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("FacturasLeer");
 
             // GET: /facturas/turno/{turnoId:int}
             app.MapGet("/facturas/turno/{turnoId:int}", async (int turnoId, IFacturaService facturaService) =>
@@ -39,7 +41,8 @@ namespace WebAPI
             .Produces<FacturaDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("FacturasLeer");
 
             // POST: /facturas
             app.MapPost("/facturas", async (FacturaCreateDTO dto, IFacturaService facturaService) =>
@@ -52,7 +55,8 @@ namespace WebAPI
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status409Conflict)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("FacturasAgregar");
 
             // POST: /facturas/{id:int}/anular
             app.MapPost("/facturas/{id:int}/anular", async (int id, IFacturaService facturaService) =>
@@ -65,7 +69,8 @@ namespace WebAPI
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status409Conflict)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("FacturasActualizar");
         }
     }
 }

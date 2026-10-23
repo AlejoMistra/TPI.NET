@@ -17,7 +17,8 @@ namespace WebAPI
             .Produces<HistoriaClinicaDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("HistoriasClinicasLeer");
 
             // GET: /historias-clinicas/paciente/{pacienteId}
             app.MapGet("/historias-clinicas/paciente/{pacienteId:int}", async (int pacienteId, IHistoriaClinicaService service) =>
@@ -29,7 +30,8 @@ namespace WebAPI
             .Produces<HistoriaClinicaDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("HistoriasClinicasLeer");
 
             // POST: /historias-clinicas
             app.MapPost("/historias-clinicas", async (HistoriaClinicaCreateDTO dto, IHistoriaClinicaService service) =>
@@ -41,7 +43,8 @@ namespace WebAPI
             .Produces<HistoriaClinicaDTO>(StatusCodes.Status201Created)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status409Conflict)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("HistoriasClinicasAgregar");
 
             // PUT: /historias-clinicas/{id}/grupo-sanguineo
             app.MapPut("/historias-clinicas/{id:int}/grupo-sanguineo", async (int id, HistoriaClinicaUpdateGrupoDTO dto, IHistoriaClinicaService service) =>
@@ -53,7 +56,8 @@ namespace WebAPI
             .Produces<HistoriaClinicaDTO>(StatusCodes.Status200OK)
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("HistoriasClinicasActualizar");
 
             // POST: /historias-clinicas/{id}/registros
             app.MapPost("/historias-clinicas/{id:int}/registros", async (int id, RegistroClinicoCreateDTO dto, IHistoriaClinicaService service) =>
@@ -66,7 +70,8 @@ namespace WebAPI
             .Produces(StatusCodes.Status400BadRequest)
             .Produces(StatusCodes.Status404NotFound)
             .Produces(StatusCodes.Status409Conflict)
-            .WithOpenApi();
+            .WithOpenApi()
+            .RequireAuthorization("HistoriasClinicasAgregar");
         }
     }
 }
