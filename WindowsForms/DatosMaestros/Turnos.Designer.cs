@@ -42,33 +42,10 @@ namespace WindowsForms.DatosMaestros
             limpiarFiltrosLinkLabel = new LinkLabel();
             agregarTurnoButton = new Button();
             turnosDataGridView = new DataGridView();
-            formGroupBox = new GroupBox();
-            tableLayoutPanel3 = new TableLayoutPanel();
-            numeroTurnoLabel = new Label();
-            numeroTurnoTextBox = new TextBox();
-            profesionalLabel = new Label();
-            profesionalComboBox = new ComboBox();
-            especialidadLabel = new Label();
-            especialidadComboBox = new ComboBox();
-            fechaTurnoLabel = new Label();
-            fechaTurnoDateTimePicker = new DateTimePicker();
-            horaInicioLabel = new Label();
-            horaInicioDateTimePicker = new DateTimePicker();
-            horaFinLabel = new Label();
-            horaFinDateTimePicker = new DateTimePicker();
-            estadoLabel = new Label();
-            estadoComboBox = new ComboBox();
-            obligatorioLabel = new Label();
-            tableLayoutPanel4 = new TableLayoutPanel();
-            guardarTurnoButton = new Button();
-            cancelarButton = new Button();
             tableLayoutPanel1.SuspendLayout();
             busquedaGroupBox.SuspendLayout();
             tableLayoutPanel2.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)turnosDataGridView).BeginInit();
-            formGroupBox.SuspendLayout();
-            tableLayoutPanel3.SuspendLayout();
-            tableLayoutPanel4.SuspendLayout();
             SuspendLayout();
             // 
             // tableLayoutPanel1
@@ -79,14 +56,12 @@ namespace WindowsForms.DatosMaestros
             tableLayoutPanel1.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100F));
             tableLayoutPanel1.Controls.Add(busquedaGroupBox, 0, 0);
             tableLayoutPanel1.Controls.Add(turnosDataGridView, 0, 1);
-            tableLayoutPanel1.Controls.Add(formGroupBox, 0, 2);
             tableLayoutPanel1.Dock = DockStyle.Fill;
             tableLayoutPanel1.Location = new Point(0, 0);
             tableLayoutPanel1.Name = "tableLayoutPanel1";
-            tableLayoutPanel1.RowCount = 3;
+            tableLayoutPanel1.RowCount = 2;
             tableLayoutPanel1.RowStyles.Add(new RowStyle());
             tableLayoutPanel1.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanel1.RowStyles.Add(new RowStyle());
             tableLayoutPanel1.Size = new Size(1000, 561);
             tableLayoutPanel1.TabIndex = 0;
             // 
@@ -135,9 +110,9 @@ namespace WindowsForms.DatosMaestros
             busquedaProfesionalLabel.AutoSize = true;
             busquedaProfesionalLabel.Location = new Point(3, 0);
             busquedaProfesionalLabel.Name = "busquedaProfesionalLabel";
-            busquedaProfesionalLabel.Size = new Size(66, 15);
+            busquedaProfesionalLabel.Size = new Size(69, 15);
             busquedaProfesionalLabel.TabIndex = 0;
-            busquedaProfesionalLabel.Text = "Profesional";
+            busquedaProfesionalLabel.Text = "Profesional:";
             // 
             // busquedaProfesionalComboBox
             // 
@@ -155,9 +130,9 @@ namespace WindowsForms.DatosMaestros
             busquedaEspecialidadLabel.AutoSize = true;
             busquedaEspecialidadLabel.Location = new Point(189, 0);
             busquedaEspecialidadLabel.Name = "busquedaEspecialidadLabel";
-            busquedaEspecialidadLabel.Size = new Size(72, 15);
+            busquedaEspecialidadLabel.Size = new Size(75, 15);
             busquedaEspecialidadLabel.TabIndex = 2;
-            busquedaEspecialidadLabel.Text = "Especialidad";
+            busquedaEspecialidadLabel.Text = "Especialidad:";
             // 
             // busquedaEspecialidadComboBox
             // 
@@ -166,37 +141,37 @@ namespace WindowsForms.DatosMaestros
             busquedaEspecialidadComboBox.FormattingEnabled = true;
             busquedaEspecialidadComboBox.Location = new Point(189, 18);
             busquedaEspecialidadComboBox.Name = "busquedaEspecialidadComboBox";
-            busquedaEspecialidadComboBox.Size = new Size(160, 23);
+            busquedaEspecialidadComboBox.Size = new Size(170, 23);
             busquedaEspecialidadComboBox.TabIndex = 2;
             busquedaEspecialidadComboBox.SelectedValueChanged += FiltrarDataGridView;
             // 
             // busquedaFechaLabel
             // 
             busquedaFechaLabel.AutoSize = true;
-            busquedaFechaLabel.Location = new Point(355, 0);
+            busquedaFechaLabel.Location = new Point(365, 0);
             busquedaFechaLabel.Name = "busquedaFechaLabel";
-            busquedaFechaLabel.Size = new Size(38, 15);
-            busquedaFechaLabel.TabIndex = 3;
-            busquedaFechaLabel.Text = "Fecha";
+            busquedaFechaLabel.Size = new Size(41, 15);
+            busquedaFechaLabel.TabIndex = 4;
+            busquedaFechaLabel.Text = "Fecha:";
             // 
             // busquedaFechaDateTimePicker
             // 
+            busquedaFechaDateTimePicker.CustomFormat = "dd/MM/yyyy";
             busquedaFechaDateTimePicker.Format = DateTimePickerFormat.Short;
-            busquedaFechaDateTimePicker.Location = new Point(355, 18);
+            busquedaFechaDateTimePicker.Location = new Point(365, 18);
             busquedaFechaDateTimePicker.Name = "busquedaFechaDateTimePicker";
-            busquedaFechaDateTimePicker.Size = new Size(130, 23);
+            busquedaFechaDateTimePicker.Size = new Size(120, 23);
             busquedaFechaDateTimePicker.TabIndex = 3;
             busquedaFechaDateTimePicker.ValueChanged += FiltrarDataGridView;
-            busquedaFechaDateTimePicker.BindingContextChanged += FiltrarDataGridView;
             // 
             // busquedaEstadoLabel
             // 
             busquedaEstadoLabel.AutoSize = true;
             busquedaEstadoLabel.Location = new Point(491, 0);
             busquedaEstadoLabel.Name = "busquedaEstadoLabel";
-            busquedaEstadoLabel.Size = new Size(42, 15);
-            busquedaEstadoLabel.TabIndex = 4;
-            busquedaEstadoLabel.Text = "Estado";
+            busquedaEstadoLabel.Size = new Size(45, 15);
+            busquedaEstadoLabel.TabIndex = 6;
+            busquedaEstadoLabel.Text = "Estado:";
             // 
             // busquedaEstadoComboBox
             // 
@@ -213,7 +188,7 @@ namespace WindowsForms.DatosMaestros
             // 
             limpiarFiltrosLinkLabel.Anchor = AnchorStyles.None;
             limpiarFiltrosLinkLabel.AutoSize = true;
-            limpiarFiltrosLinkLabel.Location = new Point(617, 26);
+            limpiarFiltrosLinkLabel.Location = new Point(617, 22);
             limpiarFiltrosLinkLabel.Name = "limpiarFiltrosLinkLabel";
             limpiarFiltrosLinkLabel.Size = new Size(80, 15);
             limpiarFiltrosLinkLabel.TabIndex = 6;
@@ -247,247 +222,8 @@ namespace WindowsForms.DatosMaestros
             turnosDataGridView.Location = new Point(3, 84);
             turnosDataGridView.Name = "turnosDataGridView";
             turnosDataGridView.RowHeadersVisible = false;
-            turnosDataGridView.Size = new Size(994, 329);
+            turnosDataGridView.Size = new Size(994, 474);
             turnosDataGridView.TabIndex = 1;
-            // 
-            // formGroupBox
-            // 
-            formGroupBox.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            formGroupBox.Controls.Add(tableLayoutPanel3);
-            formGroupBox.Dock = DockStyle.Fill;
-            formGroupBox.Location = new Point(3, 419);
-            formGroupBox.Name = "formGroupBox";
-            formGroupBox.Size = new Size(994, 139);
-            formGroupBox.TabIndex = 2;
-            formGroupBox.TabStop = false;
-            formGroupBox.Text = "Formulario de Alta / Edición de Turno";
-            // 
-            // tableLayoutPanel3
-            // 
-            tableLayoutPanel3.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            tableLayoutPanel3.ColumnCount = 4;
-            tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
-            tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
-            tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
-            tableLayoutPanel3.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 25F));
-            tableLayoutPanel3.Controls.Add(numeroTurnoLabel, 0, 0);
-            tableLayoutPanel3.Controls.Add(numeroTurnoTextBox, 0, 1);
-            tableLayoutPanel3.Controls.Add(profesionalLabel, 1, 0);
-            tableLayoutPanel3.Controls.Add(profesionalComboBox, 1, 1);
-            tableLayoutPanel3.Controls.Add(especialidadLabel, 2, 0);
-            tableLayoutPanel3.Controls.Add(especialidadComboBox, 2, 1);
-            tableLayoutPanel3.Controls.Add(fechaTurnoLabel, 3, 0);
-            tableLayoutPanel3.Controls.Add(fechaTurnoDateTimePicker, 3, 1);
-            tableLayoutPanel3.Controls.Add(horaInicioLabel, 0, 2);
-            tableLayoutPanel3.Controls.Add(horaInicioDateTimePicker, 0, 3);
-            tableLayoutPanel3.Controls.Add(horaFinLabel, 1, 2);
-            tableLayoutPanel3.Controls.Add(horaFinDateTimePicker, 1, 3);
-            tableLayoutPanel3.Controls.Add(estadoLabel, 2, 2);
-            tableLayoutPanel3.Controls.Add(estadoComboBox, 2, 3);
-            tableLayoutPanel3.Controls.Add(obligatorioLabel, 0, 4);
-            tableLayoutPanel3.Controls.Add(tableLayoutPanel4, 2, 4);
-            tableLayoutPanel3.Dock = DockStyle.Fill;
-            tableLayoutPanel3.Location = new Point(3, 19);
-            tableLayoutPanel3.Name = "tableLayoutPanel3";
-            tableLayoutPanel3.RowCount = 5;
-            tableLayoutPanel3.RowStyles.Add(new RowStyle());
-            tableLayoutPanel3.RowStyles.Add(new RowStyle());
-            tableLayoutPanel3.RowStyles.Add(new RowStyle());
-            tableLayoutPanel3.RowStyles.Add(new RowStyle());
-            tableLayoutPanel3.RowStyles.Add(new RowStyle());
-            tableLayoutPanel3.Size = new Size(988, 117);
-            tableLayoutPanel3.TabIndex = 0;
-            // 
-            // numeroTurnoLabel
-            // 
-            numeroTurnoLabel.AutoSize = true;
-            numeroTurnoLabel.Location = new Point(3, 0);
-            numeroTurnoLabel.Name = "numeroTurnoLabel";
-            numeroTurnoLabel.Size = new Size(149, 15);
-            numeroTurnoLabel.TabIndex = 0;
-            numeroTurnoLabel.Text = "Nro Turno (Autogenerado)";
-            // 
-            // numeroTurnoTextBox
-            // 
-            numeroTurnoTextBox.Dock = DockStyle.Fill;
-            numeroTurnoTextBox.Location = new Point(3, 18);
-            numeroTurnoTextBox.Name = "numeroTurnoTextBox";
-            numeroTurnoTextBox.ReadOnly = true;
-            numeroTurnoTextBox.Size = new Size(241, 23);
-            numeroTurnoTextBox.TabIndex = 1;
-            // 
-            // profesionalLabel
-            // 
-            profesionalLabel.AutoSize = true;
-            profesionalLabel.Location = new Point(250, 0);
-            profesionalLabel.Name = "profesionalLabel";
-            profesionalLabel.Size = new Size(74, 15);
-            profesionalLabel.TabIndex = 2;
-            profesionalLabel.Text = "Profesional *";
-            // 
-            // profesionalComboBox
-            // 
-            profesionalComboBox.AutoCompleteMode = AutoCompleteMode.Append;
-            profesionalComboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
-            profesionalComboBox.Dock = DockStyle.Fill;
-            profesionalComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            profesionalComboBox.FormattingEnabled = true;
-            profesionalComboBox.Location = new Point(250, 18);
-            profesionalComboBox.Name = "profesionalComboBox";
-            profesionalComboBox.Size = new Size(241, 23);
-            profesionalComboBox.TabIndex = 2;
-            // 
-            // especialidadLabel
-            // 
-            especialidadLabel.AutoSize = true;
-            especialidadLabel.Location = new Point(497, 0);
-            especialidadLabel.Name = "especialidadLabel";
-            especialidadLabel.Size = new Size(80, 15);
-            especialidadLabel.TabIndex = 3;
-            especialidadLabel.Text = "Especialidad *";
-            // 
-            // especialidadComboBox
-            // 
-            especialidadComboBox.AutoCompleteMode = AutoCompleteMode.Append;
-            especialidadComboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
-            especialidadComboBox.Dock = DockStyle.Fill;
-            especialidadComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            especialidadComboBox.FormattingEnabled = true;
-            especialidadComboBox.Location = new Point(497, 18);
-            especialidadComboBox.Name = "especialidadComboBox";
-            especialidadComboBox.Size = new Size(241, 23);
-            especialidadComboBox.TabIndex = 3;
-            // 
-            // fechaTurnoLabel
-            // 
-            fechaTurnoLabel.AutoSize = true;
-            fechaTurnoLabel.Location = new Point(744, 0);
-            fechaTurnoLabel.Name = "fechaTurnoLabel";
-            fechaTurnoLabel.Size = new Size(100, 15);
-            fechaTurnoLabel.TabIndex = 4;
-            fechaTurnoLabel.Text = "Fecha del Turno *";
-            // 
-            // fechaTurnoDateTimePicker
-            // 
-            fechaTurnoDateTimePicker.Dock = DockStyle.Fill;
-            fechaTurnoDateTimePicker.Format = DateTimePickerFormat.Short;
-            fechaTurnoDateTimePicker.Location = new Point(744, 18);
-            fechaTurnoDateTimePicker.Name = "fechaTurnoDateTimePicker";
-            fechaTurnoDateTimePicker.Size = new Size(241, 23);
-            fechaTurnoDateTimePicker.TabIndex = 4;
-            // 
-            // horaInicioLabel
-            // 
-            horaInicioLabel.AutoSize = true;
-            horaInicioLabel.Location = new Point(3, 44);
-            horaInicioLabel.Name = "horaInicioLabel";
-            horaInicioLabel.Size = new Size(73, 15);
-            horaInicioLabel.TabIndex = 5;
-            horaInicioLabel.Text = "Hora Inicio *";
-            // 
-            // horaInicioDateTimePicker
-            // 
-            horaInicioDateTimePicker.CustomFormat = "HH:mm";
-            horaInicioDateTimePicker.Dock = DockStyle.Fill;
-            horaInicioDateTimePicker.Format = DateTimePickerFormat.Custom;
-            horaInicioDateTimePicker.Location = new Point(3, 62);
-            horaInicioDateTimePicker.Name = "horaInicioDateTimePicker";
-            horaInicioDateTimePicker.ShowUpDown = true;
-            horaInicioDateTimePicker.Size = new Size(241, 23);
-            horaInicioDateTimePicker.TabIndex = 5;
-            // 
-            // horaFinLabel
-            // 
-            horaFinLabel.AutoSize = true;
-            horaFinLabel.Location = new Point(250, 44);
-            horaFinLabel.Name = "horaFinLabel";
-            horaFinLabel.Size = new Size(60, 15);
-            horaFinLabel.TabIndex = 6;
-            horaFinLabel.Text = "Hora Fin *";
-            // 
-            // horaFinDateTimePicker
-            // 
-            horaFinDateTimePicker.CustomFormat = "HH:mm";
-            horaFinDateTimePicker.Dock = DockStyle.Fill;
-            horaFinDateTimePicker.Format = DateTimePickerFormat.Custom;
-            horaFinDateTimePicker.Location = new Point(250, 62);
-            horaFinDateTimePicker.Name = "horaFinDateTimePicker";
-            horaFinDateTimePicker.ShowUpDown = true;
-            horaFinDateTimePicker.Size = new Size(241, 23);
-            horaFinDateTimePicker.TabIndex = 6;
-            // 
-            // estadoLabel
-            // 
-            estadoLabel.AutoSize = true;
-            estadoLabel.Location = new Point(497, 44);
-            estadoLabel.Name = "estadoLabel";
-            estadoLabel.Size = new Size(84, 15);
-            estadoLabel.TabIndex = 7;
-            estadoLabel.Text = "Estado Inicial *";
-            // 
-            // estadoComboBox
-            // 
-            estadoComboBox.AutoCompleteMode = AutoCompleteMode.Append;
-            estadoComboBox.AutoCompleteSource = AutoCompleteSource.ListItems;
-            estadoComboBox.Dock = DockStyle.Fill;
-            estadoComboBox.DropDownStyle = ComboBoxStyle.DropDownList;
-            estadoComboBox.FormattingEnabled = true;
-            estadoComboBox.Location = new Point(497, 62);
-            estadoComboBox.Name = "estadoComboBox";
-            estadoComboBox.Size = new Size(241, 23);
-            estadoComboBox.TabIndex = 7;
-            // 
-            // obligatorioLabel
-            // 
-            obligatorioLabel.Anchor = AnchorStyles.Left;
-            obligatorioLabel.AutoSize = true;
-            tableLayoutPanel3.SetColumnSpan(obligatorioLabel, 2);
-            obligatorioLabel.Location = new Point(3, 99);
-            obligatorioLabel.Name = "obligatorioLabel";
-            obligatorioLabel.Size = new Size(390, 15);
-            obligatorioLabel.TabIndex = 9;
-            obligatorioLabel.Text = "Los campos marcados con (*) son obligatorios para el registro del Turno.";
-            obligatorioLabel.TextAlign = ContentAlignment.MiddleLeft;
-            // 
-            // tableLayoutPanel4
-            // 
-            tableLayoutPanel4.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            tableLayoutPanel4.ColumnCount = 2;
-            tableLayoutPanel3.SetColumnSpan(tableLayoutPanel4, 2);
-            tableLayoutPanel4.ColumnStyles.Add(new ColumnStyle());
-            tableLayoutPanel4.ColumnStyles.Add(new ColumnStyle());
-            tableLayoutPanel4.Controls.Add(guardarTurnoButton, 0, 0);
-            tableLayoutPanel4.Controls.Add(cancelarButton, 1, 0);
-            tableLayoutPanel4.Dock = DockStyle.Right;
-            tableLayoutPanel4.Location = new Point(691, 91);
-            tableLayoutPanel4.Name = "tableLayoutPanel4";
-            tableLayoutPanel4.RightToLeft = RightToLeft.Yes;
-            tableLayoutPanel4.RowCount = 1;
-            tableLayoutPanel4.RowStyles.Add(new RowStyle(SizeType.Percent, 100F));
-            tableLayoutPanel4.Size = new Size(294, 31);
-            tableLayoutPanel4.TabIndex = 10;
-            // 
-            // guardarTurnoButton
-            // 
-            guardarTurnoButton.Location = new Point(166, 3);
-            guardarTurnoButton.Name = "guardarTurnoButton";
-            guardarTurnoButton.RightToLeft = RightToLeft.No;
-            guardarTurnoButton.Size = new Size(125, 25);
-            guardarTurnoButton.TabIndex = 11;
-            guardarTurnoButton.Text = "Guardar Turno";
-            guardarTurnoButton.UseVisualStyleBackColor = true;
-            guardarTurnoButton.Click += GuardarTurnoButton_Click;
-            // 
-            // cancelarButton
-            // 
-            cancelarButton.Location = new Point(5, 3);
-            cancelarButton.Name = "cancelarButton";
-            cancelarButton.RightToLeft = RightToLeft.No;
-            cancelarButton.Size = new Size(155, 25);
-            cancelarButton.TabIndex = 12;
-            cancelarButton.Text = "Cancelar / Limpiar campos";
-            cancelarButton.UseVisualStyleBackColor = true;
-            cancelarButton.Click += CancelarButton_Click;
             // 
             // Turnos
             // 
@@ -501,10 +237,6 @@ namespace WindowsForms.DatosMaestros
             tableLayoutPanel2.ResumeLayout(false);
             tableLayoutPanel2.PerformLayout();
             ((System.ComponentModel.ISupportInitialize)turnosDataGridView).EndInit();
-            formGroupBox.ResumeLayout(false);
-            tableLayoutPanel3.ResumeLayout(false);
-            tableLayoutPanel3.PerformLayout();
-            tableLayoutPanel4.ResumeLayout(false);
             ResumeLayout(false);
         }
 
@@ -524,26 +256,5 @@ namespace WindowsForms.DatosMaestros
         private LinkLabel limpiarFiltrosLinkLabel;
         private Button agregarTurnoButton;
         private DataGridView turnosDataGridView;
-        private GroupBox formGroupBox;
-        private TableLayoutPanel tableLayoutPanel3;
-        private Label numeroTurnoLabel;
-        private TextBox numeroTurnoTextBox;
-        private Label profesionalLabel;
-        private ComboBox profesionalComboBox;
-        private Label especialidadLabel;
-        private ComboBox especialidadComboBox;
-        private Label fechaTurnoLabel;
-        private DateTimePicker fechaTurnoDateTimePicker;
-        private Label horaInicioLabel;
-        private DateTimePicker horaInicioDateTimePicker;
-        private Label horaFinLabel;
-        private DateTimePicker horaFinDateTimePicker;
-        private Label estadoLabel;
-        private ComboBox estadoComboBox;
-        private Label obligatorioLabel;
-        private TableLayoutPanel tableLayoutPanel4;
-        private Button guardarTurnoButton;
-        private Button cancelarButton;
     }
 }
-
