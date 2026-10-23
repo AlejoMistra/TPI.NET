@@ -33,6 +33,7 @@ namespace WindowsForms
             pacientesToolStripMenuItem = new ToolStripMenuItem();
             facturacionToolStripMenuItem = new ToolStripMenuItem();
             datosMaestrosToolStripMenuItem = new ToolStripMenuItem();
+            cerrarSesionToolStripMenuItem = new ToolStripMenuItem();
             ContentPanel = new Panel();
             menuStrip1.SuspendLayout();
             SuspendLayout();
@@ -40,7 +41,7 @@ namespace WindowsForms
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { agendaDeTurnosToolStripMenuItem, pacientesToolStripMenuItem, facturacionToolStripMenuItem, datosMaestrosToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { agendaDeTurnosToolStripMenuItem, pacientesToolStripMenuItem, facturacionToolStripMenuItem, datosMaestrosToolStripMenuItem, cerrarSesionToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(904, 24);
@@ -76,6 +77,14 @@ namespace WindowsForms
             datosMaestrosToolStripMenuItem.Text = "Datos Maestros";
             datosMaestrosToolStripMenuItem.Click += datosMaestrosToolStripMenuItem_Click;
             // 
+            // cerrarSesionToolStripMenuItem
+            // 
+            cerrarSesionToolStripMenuItem.Alignment = ToolStripItemAlignment.Right;
+            cerrarSesionToolStripMenuItem.Name = "cerrarSesionToolStripMenuItem";
+            cerrarSesionToolStripMenuItem.Size = new Size(88, 20);
+            cerrarSesionToolStripMenuItem.Text = "Cerrar Sesión";
+            cerrarSesionToolStripMenuItem.Click += cerrarSesionToolStripMenuItem_Click;
+            // 
             // ContentPanel
             // 
             ContentPanel.Dock = DockStyle.Fill;
@@ -95,7 +104,7 @@ namespace WindowsForms
             Name = "Home";
             StartPosition = FormStartPosition.WindowsDefaultBounds;
             Text = "Sistema de Gestión Médico";
-            Load += agendaDeTurnosToolStripMenuItem_Click;
+            Load += Home_Load;
             menuStrip1.ResumeLayout(false);
             menuStrip1.PerformLayout();
             ResumeLayout(false);
@@ -109,6 +118,7 @@ namespace WindowsForms
         private ToolStripMenuItem pacientesToolStripMenuItem;
         private ToolStripMenuItem facturacionToolStripMenuItem;
         private ToolStripMenuItem datosMaestrosToolStripMenuItem;
+        private ToolStripMenuItem cerrarSesionToolStripMenuItem;
         private Panel ContentPanel;
     }
 }

@@ -22,6 +22,9 @@ namespace WindowsForms
         private ToolStripMenuItem _detalleMenuItem = null!;
         private ToolStripMenuItem _editarMenuItem = null!;
         private ToolStripMenuItem _facturarMenuItem = null!;
+        private ToolStripSeparator _sep1 = null!;
+        private ToolStripSeparator _sep2 = null!;
+        private ToolStripSeparator _sep3 = null!;
 
         public AgendaTurnos()
         {
@@ -168,11 +171,50 @@ namespace WindowsForms
         {
             await UiErrorHandler.ExecuteAsync(async () =>
             {
+                await ConfigurePermissionsAsync();
                 await CargarEspecialidadesAsync();
                 await CargarProfesionalesAsync();
                 await CargarPacientesAsync();
                 await CargarAgendaAsync();
             }, this, "Error al cargar la agenda de turnos");
+        }
+
+        private async Task ConfigurePermissionsAsync()
+        {
+            var authService = AuthServiceProvider.Instance;
+            bool canAdd = await authService.HasPermissionAsync("turnos.agregar");
+            bool canUpdate = await authService.HasPermissionAsync("turnos.actualizar");
+            bool canDelete = await authService.HasPermissionAsync("turnos.eliminar");
+            bool canAtender = await authService.HasPermissionAsync("turnos.atender");
+            bool canFacturar = await authService.HasPermissionAsync("facturas.agregar");
+
+            // Botón Nuevo Turno
+            nuevoTurnoButton.Visible = canAdd;
+            nuevoTurnoButton.Tag = canAdd;
+
+            // Columnas de grilla
+            if (turnosDataGridView.Columns.Contains("editarColumn"))
+            {
+                turnosDataGridView.Columns["editarColumn"].Visible = canUpdate;
+            }
+
+            if (turnosDataGridView.Columns.Contains("liberarColumn"))
+            {
+                turnosDataGridView.Columns["liberarColumn"].Visible = canDelete;
+            }
+
+            // Opciones del Menú Contextual
+            _llegadaMenuItem.Visible = canUpdate;
+            _revertirLlegadaMenuItem.Visible = canUpdate;
+            _ausenteMenuItem.Visible = canUpdate;
+            _atenderMenuItem.Visible = canAtender;
+            _liberarMenuItem.Visible = canDelete;
+            _editarMenuItem.Visible = canUpdate;
+            _facturarMenuItem.Visible = canFacturar;
+
+            _sep1.Visible = canUpdate && canAtender;
+            _sep2.Visible = canDelete;
+            _sep3.Visible = canFacturar;
         }
 
         private async Task CargarEspecialidadesAsync()
@@ -198,7 +240,43 @@ namespace WindowsForms
             var profesionales = await ProfesionalApiClient.GetAllAsync();
             _profesionales = profesionales.OrderBy(p => p.Apellido).ThenBy(p => p.Nombre).ToList();
 
-            PoblarComboProfesionalesBusqueda(0);
+            var authService = AuthServiceProvider.Instance;
+            bool isProfesional = await authService.IsInRoleAsync("Profesional");
+            int? personaId = await authService.GetPersonaIdAsync();
+
+            if (isProfesional && personaId.HasValue && personaId.Value > 0)
+            {
+                var miProfesional = _profesionales.FirstOrDefault(p => p.Id == personaId.Value);
+                var lista = new List<ProfesionalItem>();
+                if (miProfesional != null)
+                {
+                    lista.Add(new ProfesionalItem
+                    {
+                        Id = miProfesional.Id,
+                        DisplayName = $"{miProfesional.Apellido}, {miProfesional.Nombre}"
+                    });
+                }
+                else
+                {
+                    lista.Add(new ProfesionalItem
+                    {
+                        Id = personaId.Value,
+                        DisplayName = "Mi Agenda"
+                    });
+                }
+
+                _isUpdatingBusquedaCombos = true;
+                busquedaProfesionalComboBox.DataSource = lista;
+                busquedaProfesionalComboBox.DisplayMember = "DisplayName";
+                busquedaProfesionalComboBox.ValueMember = "Id";
+                busquedaProfesionalComboBox.SelectedValue = personaId.Value;
+                busquedaProfesionalComboBox.Enabled = false;
+                _isUpdatingBusquedaCombos = false;
+            }
+            else
+            {
+                PoblarComboProfesionalesBusqueda(0);
+            }
         }
 
         private void PoblarComboProfesionalesBusqueda(int especialidadIdFiltrar)
@@ -227,6 +305,7 @@ namespace WindowsForms
         private void BusquedaEspecialidadComboBox_SelectedIndexChanged(object? sender, EventArgs e)
         {
             if (_isUpdatingBusquedaCombos) return;
+            if (!busquedaProfesionalComboBox.Enabled) return;
 
             var especialidadId = ObtenerComboSelectedId(busquedaEspecialidadComboBox);
             var currentProfId = ObtenerComboSelectedId(busquedaProfesionalComboBox);
@@ -374,8 +453,11 @@ namespace WindowsForms
         {
             _isUpdatingBusquedaCombos = true;
             if (busquedaEspecialidadComboBox.Items.Count > 0) busquedaEspecialidadComboBox.SelectedIndex = 0;
-            PoblarComboProfesionalesBusqueda(0);
-            if (busquedaProfesionalComboBox.Items.Count > 0) busquedaProfesionalComboBox.SelectedIndex = 0;
+            if (busquedaProfesionalComboBox.Enabled)
+            {
+                PoblarComboProfesionalesBusqueda(0);
+                if (busquedaProfesionalComboBox.Items.Count > 0) busquedaProfesionalComboBox.SelectedIndex = 0;
+            }
             _isUpdatingBusquedaCombos = false;
 
             busquedaFechaDateTimePicker.Checked = false;
@@ -418,7 +500,7 @@ namespace WindowsForms
                 if (row != null) await EjecutarAtenderAsync(row);
             });
 
-            var sep1 = new ToolStripSeparator();
+            _sep1 = new ToolStripSeparator();
 
             _liberarMenuItem = new ToolStripMenuItem("Liberar turno", null, async (s, e) =>
             {
@@ -426,7 +508,7 @@ namespace WindowsForms
                 if (row != null) await EjecutarLiberarTurnoAsync(row);
             });
 
-            var sep2 = new ToolStripSeparator();
+            _sep2 = new ToolStripSeparator();
 
             _detalleMenuItem = new ToolStripMenuItem("Ver detalle", null, (s, e) =>
             {
@@ -440,7 +522,7 @@ namespace WindowsForms
                 if (row != null) await EjecutarEditarTurnoAsync(row);
             });
 
-            var sep3 = new ToolStripSeparator();
+            _sep3 = new ToolStripSeparator();
 
             _facturarMenuItem = new ToolStripMenuItem("Facturar turno...", null, async (s, e) =>
             {
@@ -454,12 +536,12 @@ namespace WindowsForms
                 _revertirLlegadaMenuItem,
                 _ausenteMenuItem,
                 _atenderMenuItem,
-                sep1,
+                _sep1,
                 _liberarMenuItem,
-                sep2,
+                _sep2,
                 _detalleMenuItem,
                 _editarMenuItem,
-                sep3,
+                _sep3,
                 _facturarMenuItem
             });
 
@@ -493,16 +575,16 @@ namespace WindowsForms
             bool esAtendido = string.Equals(estado, "Atendido", StringComparison.OrdinalIgnoreCase);
             bool esLibre = string.Equals(estado, "Libre", StringComparison.OrdinalIgnoreCase);
 
-            _llegadaMenuItem.Enabled = esAsignado;
-            _revertirLlegadaMenuItem.Enabled = esPresente;
-            _ausenteMenuItem.Enabled = esAsignado || esPresente;
-            _atenderMenuItem.Enabled = esPresente;
-            _liberarMenuItem.Enabled = esAsignado && !row.FacturaId.HasValue;
-            _editarMenuItem.Enabled = esLibre || esAsignado;
-            _detalleMenuItem.Enabled = true;
+            _llegadaMenuItem.Enabled = _llegadaMenuItem.Visible && esAsignado;
+            _revertirLlegadaMenuItem.Enabled = _revertirLlegadaMenuItem.Visible && esPresente;
+            _ausenteMenuItem.Enabled = _ausenteMenuItem.Visible && (esAsignado || esPresente);
+            _atenderMenuItem.Enabled = _atenderMenuItem.Visible && esPresente;
+            _liberarMenuItem.Enabled = _liberarMenuItem.Visible && esAsignado && !row.FacturaId.HasValue;
+            _editarMenuItem.Enabled = _editarMenuItem.Visible && (esLibre || esAsignado);
+            _detalleMenuItem.Enabled = _detalleMenuItem.Visible;
 
             bool esFacturable = esAsignado || esPresente || esAtendido;
-            _facturarMenuItem.Enabled = esFacturable;
+            _facturarMenuItem.Enabled = _facturarMenuItem.Visible && esFacturable;
             _facturarMenuItem.Text = row.FacturaId.HasValue
                 ? $"Ver factura (#{row.FacturaId.Value:D5})..."
                 : "Facturar turno...";
@@ -575,6 +657,13 @@ namespace WindowsForms
 
         private async Task EjecutarFacturarTurnoAsync(AgendaGridRow rowItem)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("facturas.agregar"))
+            {
+                MessageBox.Show("No tiene permisos para facturar turnos.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             bool esFacturable =
                 string.Equals(rowItem.Estado, "Asignado", StringComparison.OrdinalIgnoreCase) ||
                 string.Equals(rowItem.Estado, "Presente", StringComparison.OrdinalIgnoreCase) ||
@@ -597,6 +686,13 @@ namespace WindowsForms
 
         private async Task EjecutarEditarTurnoAsync(AgendaGridRow rowItem)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("turnos.actualizar"))
+            {
+                MessageBox.Show("No tiene permisos para editar o asignar turnos.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (!string.Equals(rowItem.Estado, "Libre", StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(rowItem.Estado, "Asignado", StringComparison.OrdinalIgnoreCase))
             {
@@ -616,6 +712,13 @@ namespace WindowsForms
 
         private async Task EjecutarLiberarTurnoAsync(AgendaGridRow rowItem)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("turnos.eliminar"))
+            {
+                MessageBox.Show("No tiene permisos para liberar turnos.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (!string.Equals(rowItem.Estado, "Asignado", StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show($"Solo se puede liberar un turno en estado Asignado. Estado actual: '{rowItem.Estado}'.", "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -709,6 +812,13 @@ namespace WindowsForms
 
         private async Task EjecutarAtenderAsync(AgendaGridRow rowItem)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("turnos.atender"))
+            {
+                MessageBox.Show("No tiene permisos para iniciar la atención clínica de turnos.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (!string.Equals(rowItem.Estado, "Presente", StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show($"Solo se puede atender un turno cuando el paciente está en estado Presente. Estado actual: '{rowItem.Estado}'.", "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -743,6 +853,13 @@ namespace WindowsForms
 
         private async void nuevoTurnoButton_Click(object? sender, EventArgs e)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("turnos.agregar"))
+            {
+                MessageBox.Show("No tiene permisos para crear turnos.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             using (var form = new AsignacionTurno())
             {
                 if (form.ShowDialog() == DialogResult.OK)

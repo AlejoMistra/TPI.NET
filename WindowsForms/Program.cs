@@ -38,7 +38,15 @@ namespace WindowsForms
 
                 try
                 {
-                    Application.Run(new Home());
+                    var home = new Home();
+                    Application.Run(home);
+
+                    // Si se cerró sesión, volver al login
+                    if (home.DialogResult == DialogResult.Retry || !authService.IsAuthenticatedAsync().GetAwaiter().GetResult())
+                    {
+                        continue;
+                    }
+
                     break; // La aplicación se cerró normalmente
                 }
                 catch (Exception ex) when (ex is UnauthorizedAccessException or UnauthorizedApiException)
