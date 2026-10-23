@@ -1,4 +1,4 @@
-﻿using DTOs;
+using DTOs;
 using Data;
 using Domain.Model;
 using Microsoft.Extensions.Configuration;

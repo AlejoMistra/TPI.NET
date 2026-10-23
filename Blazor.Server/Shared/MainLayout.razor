@@ -1,4 +1,4 @@
-﻿@inherits LayoutComponentBase
+@inherits LayoutComponentBase
 @using API.Clients
 @inject IAuthService AuthService
 @inject NavigationManager Navigation
@@ -12,10 +12,13 @@
     </div>
 
     <main>
-        <div class="top-row px-4 d-flex justify-content-end">
+        <div class="top-row px-4 d-flex justify-content-end align-items-center gap-3">
             @if (isAuthenticated)
             {
-                <button class="btn btn-primary btn-sm" @onclick="Logout">Cerrar Sesión</button>
+                <span class="text-secondary small">
+                    <span class="oi oi-person" aria-hidden="true"></span> @username <strong>(@role)</strong>
+                </span>
+                <button class="btn btn-outline-danger btn-sm" @onclick="Logout">Cerrar Sesión</button>
             }
         </div>
 
@@ -27,6 +30,8 @@
 
 @code {
     private bool isAuthenticated = false;
+    private string? username;
+    private string? role;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -41,6 +46,16 @@
     private async Task CheckAuthenticationState()
     {
         isAuthenticated = await AuthService.IsAuthenticatedAsync();
+        if (isAuthenticated)
+        {
+            username = await AuthService.GetUsernameAsync();
+            role = await AuthService.GetRoleAsync();
+        }
+        else
+        {
+            username = null;
+            role = null;
+        }
         StateHasChanged();
     }
 

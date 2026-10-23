@@ -149,10 +149,10 @@
 
     private async Task LoadPermissions()
     {
-        canRead = await AuthService.HasPermissionAsync("Administrativo");
-        canAdd = await AuthService.HasPermissionAsync("Administrativo");
-        canUpdate = await AuthService.HasPermissionAsync("Administrativo");
-        canDelete = await AuthService.HasPermissionAsync("Administrativo");
+        canRead = await AuthService.HasPermissionAsync("pacientes.leer");
+        canAdd = await AuthService.HasPermissionAsync("pacientes.agregar");
+        canUpdate = await AuthService.HasPermissionAsync("pacientes.actualizar");
+        canDelete = await AuthService.HasPermissionAsync("pacientes.eliminar");
     }
 
     private async Task LoadPacientes()
