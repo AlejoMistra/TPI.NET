@@ -93,20 +93,15 @@ namespace Domain.Model
 
         public void SetPersonaId(int? personaId)
         {
+            if (personaId.HasValue && personaId.Value <= 0)
+                throw new ArgumentException("El PersonaId debe ser mayor que 0.", nameof(personaId));
+
             PersonaId = personaId;
         }
 
         public void SetActivo(bool activo)
         {
             Activo = activo;
-        }
-
-        public void SetPersonaId(int? personaId)
-        {
-            if (personaId.HasValue && personaId.Value <= 0)
-                throw new ArgumentException("El PersonaId debe ser mayor que 0.", nameof(personaId));
-
-            PersonaId = personaId;
         }
 
         public bool ValidatePassword(string password)
