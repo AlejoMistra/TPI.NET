@@ -518,6 +518,13 @@ namespace WindowsForms
 
         private async Task AbrirModalFacturacionAsync(int turnoId)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("facturas.agregar"))
+            {
+                MessageBox.Show("No tiene permisos para emitir o anular facturas.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             using (var modal = new FacturaModalForm(turnoId))
             {
                 if (modal.ShowDialog() == DialogResult.OK)

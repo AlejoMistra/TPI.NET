@@ -119,9 +119,33 @@ namespace WindowsForms.DatosMaestros
         // Load
         private async void Profesionales_Load(object? sender, EventArgs e)
         {
+            await ConfigureButtonPermissions();
             await CargarEspecialidadesAsync();
             InicializarFiltroEstado();
             await CargarProfesionalesAsync();
+        }
+
+        private async Task ConfigureButtonPermissions()
+        {
+            var authService = AuthServiceProvider.Instance;
+            bool canAdd = await authService.HasPermissionAsync("profesionales.agregar");
+            bool canUpdate = await authService.HasPermissionAsync("profesionales.actualizar");
+            bool canDelete = await authService.HasPermissionAsync("profesionales.eliminar");
+
+            AgregarProfesionalButton.Visible = canAdd;
+            AgregarProfesionalButton.Tag = canAdd;
+            guardarProfesionalButton.Visible = canAdd || canUpdate;
+            guardarProfesionalButton.Tag = canAdd || canUpdate;
+
+            if (profesionalesDataGridView.Columns.Contains("accionesColumn"))
+            {
+                profesionalesDataGridView.Columns["accionesColumn"].Visible = canUpdate;
+            }
+
+            if (profesionalesDataGridView.Columns.Contains("eliminarColumn"))
+            {
+                profesionalesDataGridView.Columns["eliminarColumn"].Visible = canDelete;
+            }
         }
 
         private async Task CargarProfesionalesAsync()
