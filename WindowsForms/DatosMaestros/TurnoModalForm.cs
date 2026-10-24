@@ -43,6 +43,16 @@ namespace WindowsForms.DatosMaestros
 
         private async void TurnoModalForm_Load(object? sender, EventArgs e)
         {
+            var authService = AuthServiceProvider.Instance;
+            string requiredPerm = _turnoId.HasValue ? "turnos.actualizar" : "turnos.agregar";
+            if (!await authService.HasPermissionAsync(requiredPerm))
+            {
+                MessageBox.Show("No tiene autorización para realizar esta acción.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.DialogResult = DialogResult.Cancel;
+                this.Close();
+                return;
+            }
+
             await UiErrorHandler.ExecuteAsync(async () =>
             {
                 await InicializarDatosAsync();
@@ -234,6 +244,14 @@ namespace WindowsForms.DatosMaestros
 
         private async void GuardarButton_Click(object? sender, EventArgs e)
         {
+            var authService = AuthServiceProvider.Instance;
+            string requiredPerm = _turnoId.HasValue ? "turnos.actualizar" : "turnos.agregar";
+            if (!await authService.HasPermissionAsync(requiredPerm))
+            {
+                MessageBox.Show("No tiene autorización para realizar esta acción.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             await UiErrorHandler.ExecuteAsync(async () =>
             {
                 var profesionalId = ObtenerComboSelectedId(profesionalComboBox);

@@ -143,6 +143,15 @@ namespace WindowsForms
 
         private async void AsignacionTurno_Load(object? sender, EventArgs e)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("turnos.actualizar"))
+            {
+                MessageBox.Show("No tiene autorización para asignar o editar turnos.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.DialogResult = DialogResult.Cancel;
+                this.Close();
+                return;
+            }
+
             await UiErrorHandler.ExecuteAsync(async () =>
             {
                 await CargarEspecialidadesAsync();
@@ -640,6 +649,13 @@ namespace WindowsForms
 
         private async void ConfirmarButton_Click(object? sender, EventArgs e)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("turnos.actualizar"))
+            {
+                MessageBox.Show("No tiene autorización para asignar o editar turnos.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (_selectedTurno == null)
             {
                 MessageBox.Show("Debe seleccionar un turno disponible de la grilla.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);

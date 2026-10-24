@@ -550,13 +550,25 @@ namespace Data
                 await context.SaveChangesAsync();
             }
 
-            // Asignar permisos a Administrador
+            // Asignar permisos a Administrador (Historias Clínicas son exclusivas de Profesional)
             var todosLosPermisos = await context.Permisos.Where(p => p.Activo).ToListAsync();
             foreach (var permiso in todosLosPermisos)
             {
-                if (!grupoAdmin.Permisos.Any(p => p.Id == permiso.Id))
+                if (permiso.Categoria.Equals("historiasclinicas", StringComparison.OrdinalIgnoreCase))
                 {
-                    grupoAdmin.AgregarPermiso(permiso);
+                    // El administrativo NO debe tener autorización para ver ni registrar historias clínicas
+                    var permisoExistente = grupoAdmin.Permisos.FirstOrDefault(p => p.Id == permiso.Id);
+                    if (permisoExistente != null)
+                    {
+                        grupoAdmin.RemoverPermiso(permisoExistente);
+                    }
+                }
+                else
+                {
+                    if (!grupoAdmin.Permisos.Any(p => p.Id == permiso.Id))
+                    {
+                        grupoAdmin.AgregarPermiso(permiso);
+                    }
                 }
             }
 
@@ -566,7 +578,6 @@ namespace Data
                 "pacientes.leer",
                 "turnos.leer",
                 "turnos.atender",
-                "turnos.actualizar",
                 "historiasclinicas.leer",
                 "historiasclinicas.agregar",
                 "historiasclinicas.actualizar",
@@ -581,6 +592,14 @@ namespace Data
                     if (!grupoProfesional.Permisos.Any(p => p.Id == permiso.Id))
                     {
                         grupoProfesional.AgregarPermiso(permiso);
+                    }
+                }
+                else
+                {
+                    var permisoExistente = grupoProfesional.Permisos.FirstOrDefault(p => p.Id == permiso.Id);
+                    if (permisoExistente != null)
+                    {
+                        grupoProfesional.RemoverPermiso(permisoExistente);
                     }
                 }
             }
