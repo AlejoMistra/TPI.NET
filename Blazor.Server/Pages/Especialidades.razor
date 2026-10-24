@@ -68,13 +68,15 @@
                                         <td>
                                             @if (canUpdate)
                                             {
-                                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => OpenEditModal(especialidad)">
+                                                <button class="btn btn-sm btn-outline-primary me-1"
+                                                        @onclick="() => OpenEditModal(especialidad)">
                                                     <i class="fas fa-edit"></i> Editar
                                                 </button>
                                             }
                                             @if (canDelete)
                                             {
-                                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmDelete(especialidad)">
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        @onclick="() => ConfirmDelete(especialidad)">
                                                     <i class="fas fa-trash"></i> Eliminar
                                                 </button>
                                             }
@@ -137,10 +139,10 @@
 
     private async Task LoadPermissions()
     {
-        canRead = await AuthService.HasPermissionAsync("Administrativo");
-        canAdd = await AuthService.HasPermissionAsync("Administrativo");
-        canUpdate = await AuthService.HasPermissionAsync("Administrativo");
-        canDelete = await AuthService.HasPermissionAsync("Administrativo");
+        canRead = await AuthService.HasPermissionAsync("datosmaestros.leer");
+        canAdd = await AuthService.HasPermissionAsync("especialidades.agregar");
+        canUpdate = await AuthService.HasPermissionAsync("especialidades.actualizar");
+        canDelete = await AuthService.HasPermissionAsync("especialidades.eliminar");
     }
 
     private async Task LoadEspecialidades()
@@ -173,7 +175,7 @@
 
     private async Task ConfirmDelete(EspecialidadDTO especialidad)
     {
-        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", 
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm",
             $"¿Está seguro que desea eliminar la especialidad {especialidad.Nombre}?");
         
         if (confirm)

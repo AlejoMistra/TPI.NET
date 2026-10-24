@@ -1,6 +1,7 @@
 @using DTOs
 @using API.Clients
 @inject IJSRuntime JSRuntime
+@inject IAuthService AuthService
 
 @if (showModal)
 {
@@ -46,7 +47,7 @@
 
                         <div class="mb-3">
                             <label class="form-label">Profesional *</label>
-                            <InputSelect @bind-Value="currentRegistro.ProfesionalId" class="form-select" disabled="@(currentRegistro.TurnoId > 0)">
+                            <InputSelect @bind-Value="currentRegistro.ProfesionalId" class="form-select" disabled="@(profesionalLogueadoId.HasValue || currentRegistro.TurnoId > 0)">
                                 <option value="0">Seleccionar Profesional</option>
                                 @foreach (var profesional in profesionales)
                                 {
@@ -102,6 +103,7 @@
     private HistoriaClinicaDTO? historiaClinica;
     private List<TurnoDTO> turnosAtendidos = new();
     private List<ProfesionalDTO> profesionales = new();
+    private int? profesionalLogueadoId;
     private bool saving = false;
     private string errorMessage = string.Empty;
     private Dictionary<string, string> validationErrors = new Dictionary<string, string>();
@@ -118,7 +120,7 @@
         ("Otro", "Otro", "Otro: Registro de índole clínica general no clasificado en las categorías anteriores.")
     };
 
-    public Task ShowAddModal(PacienteDTO paciente, HistoriaClinicaDTO? historiaClinica, List<TurnoDTO> turnosPaciente, List<ProfesionalDTO> profesionales)
+    public async Task ShowAddModal(PacienteDTO paciente, HistoriaClinicaDTO? historiaClinica, List<TurnoDTO> turnosPaciente, List<ProfesionalDTO> profesionales)
     {
         this.paciente = paciente;
         this.historiaClinica = historiaClinica;
@@ -129,10 +131,17 @@
             .OrderByDescending(t => t.FechaHoraInicio)
             .ToList();
         currentRegistro = new RegistroClinicoCreateDTO { Tipo = tipos[0].Value, TurnoId = 0 };
+
+        // El registro lo firma el profesional logueado (PersonaId del token)
+        profesionalLogueadoId = await AuthService.GetPersonaIdAsync();
+        if (profesionalLogueadoId.HasValue)
+        {
+            currentRegistro.ProfesionalId = profesionalLogueadoId.Value;
+        }
+
         ClearValidationErrors();
         showModal = true;
         StateHasChanged();
-        return Task.CompletedTask;
     }
 
     // Con turno de origen, el profesional es el del turno (la API exige que coincidan)

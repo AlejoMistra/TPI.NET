@@ -82,13 +82,15 @@
                                         <td>
                                             @if (canUpdate)
                                             {
-                                                <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => OpenEditModal(profesional)">
+                                                <button class="btn btn-sm btn-outline-primary me-1"
+                                                        @onclick="() => OpenEditModal(profesional)">
                                                     <i class="fas fa-edit"></i> Editar
                                                 </button>
                                             }
                                             @if (canDelete)
                                             {
-                                                <button class="btn btn-sm btn-outline-danger" @onclick="() => ConfirmDelete(profesional)">
+                                                <button class="btn btn-sm btn-outline-danger"
+                                                        @onclick="() => ConfirmDelete(profesional)">
                                                     <i class="fas fa-trash"></i> Eliminar
                                                 </button>
                                             }
@@ -152,10 +154,10 @@
 
     private async Task LoadPermissions()
     {
-        canRead = await AuthService.HasPermissionAsync("Administrativo");
-        canAdd = await AuthService.HasPermissionAsync("Administrativo");
-        canUpdate = await AuthService.HasPermissionAsync("Administrativo");
-        canDelete = await AuthService.HasPermissionAsync("Administrativo");
+        canRead = await AuthService.HasPermissionAsync("datosmaestros.leer");
+        canAdd = await AuthService.HasPermissionAsync("profesionales.agregar");
+        canUpdate = await AuthService.HasPermissionAsync("profesionales.actualizar");
+        canDelete = await AuthService.HasPermissionAsync("profesionales.eliminar");
     }
 
     private async Task LoadProfesionales()
@@ -189,7 +191,7 @@
 
     private async Task ConfirmDelete(ProfesionalDTO profesional)
     {
-        var confirm = await JSRuntime.InvokeAsync<bool>("confirm", 
+        var confirm = await JSRuntime.InvokeAsync<bool>("confirm",
             $"¿Está seguro que desea eliminar el profesional {profesional.Nombre} {profesional.Apellido} ({profesional.Matricula})?");
         
         if (confirm)

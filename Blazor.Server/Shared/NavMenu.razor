@@ -102,13 +102,13 @@
         var isAuthenticated = await AuthService.IsAuthenticatedAsync();
         if (isAuthenticated)
         {
-            canReadAgenda = await AuthService.HasPermissionAsync("Administrativo");
-            canReadFacturacion = await AuthService.HasPermissionAsync("Administrativo");
-            canReadPacientes = await AuthService.HasPermissionAsync("Administrativo");
-            canReadTurnos = await AuthService.HasPermissionAsync("Administrativo");
-            canReadProfesionales = await AuthService.HasPermissionAsync("Administrativo");
-            canReadEspecialidades = await AuthService.HasPermissionAsync("Administrativo");
-            canReadUsuarios = await AuthService.HasPermissionAsync("Administrativo");
+            canReadAgenda = await AuthService.HasPermissionAsync("turnos.leer");
+            canReadPacientes = await AuthService.HasPermissionAsync("pacientes.leer");
+            canReadFacturacion = await AuthService.HasPermissionAsync("facturas.leer");
+            canReadTurnos = await AuthService.HasPermissionAsync("datosmaestros.leer");
+            canReadProfesionales = await AuthService.HasPermissionAsync("datosmaestros.leer");
+            canReadEspecialidades = await AuthService.HasPermissionAsync("datosmaestros.leer");
+            canReadUsuarios = await AuthService.HasPermissionAsync("usuarios.leer");
         }
         else
         {

@@ -83,28 +83,29 @@
                                             {
                                                 @if (turno.EstadoTurno == "Libre" || turno.EstadoTurno == "Asignado")
                                                 {
-                                                    <button class="btn btn-sm btn-outline-primary me-1" @onclick="() => OpenEditModal(turno)">
+                                                    <button class="btn btn-sm btn-outline-primary me-1"
+                                                            @onclick="() => OpenEditModal(turno)">
                                                         Asignar
                                                     </button>
                                                 }
                                                 @if (turno.EstadoTurno == "Asignado")
                                                 {
-                                                    <button class="btn btn-sm btn-outline-success me-1" @onclick="() => RegistrarLlegada(turno)">
+                                                    <button class="btn btn-sm btn-outline-success me-1"
+                                                            @onclick="() => RegistrarLlegada(turno)">
                                                         Llegada
                                                     </button>
                                                 }
                                                 @if (turno.EstadoTurno == "Presente")
                                                 {
-                                                    <button class="btn btn-sm btn-outline-secondary me-1" @onclick="() => ConfirmRevertirLlegada(turno)">
+                                                    <button class="btn btn-sm btn-outline-secondary me-1"
+                                                            @onclick="() => ConfirmRevertirLlegada(turno)">
                                                         Revertir Llegada
-                                                    </button>
-                                                    <button class="btn btn-sm btn-outline-success me-1" @onclick="() => ConfirmAtender(turno)">
-                                                        Atender
                                                     </button>
                                                 }
                                                 @if (turno.EstadoTurno == "Asignado" || turno.EstadoTurno == "Presente")
                                                 {
-                                                    <button class="btn btn-sm btn-outline-warning me-1" @onclick="() => ConfirmMarcarAusente(turno)">
+                                                    <button class="btn btn-sm btn-outline-warning me-1"
+                                                            @onclick="() => ConfirmMarcarAusente(turno)">
                                                         Ausente
                                                     </button>
                                                 }
@@ -114,6 +115,13 @@
                                                         Liberar
                                                     </button>
                                                 }
+                                            }
+                                            @if (canAtender && turno.EstadoTurno == "Presente")
+                                            {
+                                                <button class="btn btn-sm btn-outline-success me-1"
+                                                        @onclick="() => ConfirmAtender(turno)">
+                                                    Atender
+                                                </button>
                                             }
                                         </td>
                                     </tr>
@@ -142,6 +150,7 @@
     private bool canRead = false;
     private bool canAdd = false;
     private bool canUpdate = false;
+    private bool canAtender = false;
 
     protected override async Task OnAfterRenderAsync(bool firstRender)
     {
@@ -175,9 +184,10 @@
 
     private async Task LoadPermissions()
     {
-        canRead = await AuthService.HasPermissionAsync("Administrativo");
-        canAdd = await AuthService.HasPermissionAsync("Administrativo");
-        canUpdate = await AuthService.HasPermissionAsync("Administrativo");
+        canRead = await AuthService.HasPermissionAsync("turnos.leer");
+        canAdd = await AuthService.HasPermissionAsync("turnos.agregar");
+        canUpdate = await AuthService.HasPermissionAsync("turnos.actualizar");
+        canAtender = await AuthService.HasPermissionAsync("turnos.atender");
     }
 
     private async Task LoadTurnos()

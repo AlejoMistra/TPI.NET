@@ -159,9 +159,8 @@
 
     private async Task LoadPermissions()
     {
-        // Historia clínica: el Administrativo solo la consulta; el Profesional además carga registros
-        canRead = await AuthService.HasPermissionAsync("Administrativo") || await AuthService.HasPermissionAsync("Profesional");
-        canAdd = await AuthService.HasPermissionAsync("Profesional");
+        canRead = await AuthService.HasPermissionAsync("historiasclinicas.leer");
+        canAdd = await AuthService.HasPermissionAsync("historiasclinicas.agregar");
     }
 
     private async Task LoadHistoriaClinica()
