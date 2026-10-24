@@ -31,7 +31,7 @@ namespace API.Auth.WindowsForms
         }
 
         public async Task<bool> LoginAsync(string username, string password)
-        {            
+        {
             var request = new LoginRequest
             {
                 Username = username,
