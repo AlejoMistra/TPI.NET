@@ -99,45 +99,45 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization(options =>
 {
     // Políticas para Especialidades
-    options.AddPolicy("EspecialidadesLeer", policy => policy.RequireRole("Administrativo", "Profesional"));
-    options.AddPolicy("EspecialidadesAgregar", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("EspecialidadesActualizar", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("EspecialidadesEliminar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("EspecialidadesLeer", policy => policy.RequireClaim("permission", "especialidades.leer"));
+    options.AddPolicy("EspecialidadesAgregar", policy => policy.RequireClaim("permission", "especialidades.agregar"));
+    options.AddPolicy("EspecialidadesActualizar", policy => policy.RequireClaim("permission", "especialidades.actualizar"));
+    options.AddPolicy("EspecialidadesEliminar", policy => policy.RequireClaim("permission", "especialidades.eliminar"));
 
     // Políticas para Profesionales
-    options.AddPolicy("ProfesionalesLeer", policy => policy.RequireRole("Administrativo", "Profesional"));
-    options.AddPolicy("ProfesionalesAgregar", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("ProfesionalesActualizar", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("ProfesionalesEliminar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("ProfesionalesLeer", policy => policy.RequireClaim("permission", "profesionales.leer"));
+    options.AddPolicy("ProfesionalesAgregar", policy => policy.RequireClaim("permission", "profesionales.agregar"));
+    options.AddPolicy("ProfesionalesActualizar", policy => policy.RequireClaim("permission", "profesionales.actualizar"));
+    options.AddPolicy("ProfesionalesEliminar", policy => policy.RequireClaim("permission", "profesionales.eliminar"));
 
     // Políticas para Pacientes
-    options.AddPolicy("PacientesLeer", policy => policy.RequireRole("Administrativo", "Profesional"));
-    options.AddPolicy("PacientesAgregar", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("PacientesActualizar", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("PacientesEliminar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("PacientesLeer", policy => policy.RequireClaim("permission", "pacientes.leer"));
+    options.AddPolicy("PacientesAgregar", policy => policy.RequireClaim("permission", "pacientes.agregar"));
+    options.AddPolicy("PacientesActualizar", policy => policy.RequireClaim("permission", "pacientes.actualizar"));
+    options.AddPolicy("PacientesEliminar", policy => policy.RequireClaim("permission", "pacientes.eliminar"));
 
     // Políticas para Turnos
-    options.AddPolicy("TurnosLeer", policy => policy.RequireRole("Administrativo", "Profesional"));
-    options.AddPolicy("TurnosAgregar", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("TurnosActualizar", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("TurnosEliminar", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("TurnosAtender", policy => policy.RequireRole("Administrativo", "Profesional"));
+    options.AddPolicy("TurnosLeer", policy => policy.RequireClaim("permission", "turnos.leer"));
+    options.AddPolicy("TurnosAgregar", policy => policy.RequireClaim("permission", "turnos.agregar"));
+    options.AddPolicy("TurnosActualizar", policy => policy.RequireClaim("permission", "turnos.actualizar"));
+    options.AddPolicy("TurnosEliminar", policy => policy.RequireClaim("permission", "turnos.eliminar"));
+    options.AddPolicy("TurnosAtender", policy => policy.RequireClaim("permission", "turnos.atender"));
 
     // Políticas para Historias Clínicas
-    options.AddPolicy("HistoriasClinicasLeer", policy => policy.RequireRole("Profesional"));
-    options.AddPolicy("HistoriasClinicasAgregar", policy => policy.RequireRole("Profesional"));
-    options.AddPolicy("HistoriasClinicasActualizar", policy => policy.RequireRole("Profesional"));
+    options.AddPolicy("HistoriasClinicasLeer", policy => policy.RequireClaim("permission", "historiasclinicas.leer"));
+    options.AddPolicy("HistoriasClinicasAgregar", policy => policy.RequireClaim("permission", "historiasclinicas.agregar"));
+    options.AddPolicy("HistoriasClinicasActualizar", policy => policy.RequireClaim("permission", "historiasclinicas.actualizar"));
 
     // Políticas para Facturas
-    options.AddPolicy("FacturasLeer", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("FacturasAgregar", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("FacturasActualizar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("FacturasLeer", policy => policy.RequireClaim("permission", "facturas.leer"));
+    options.AddPolicy("FacturasAgregar", policy => policy.RequireClaim("permission", "facturas.agregar"));
+    options.AddPolicy("FacturasActualizar", policy => policy.RequireClaim("permission", "facturas.actualizar"));
 
     // Políticas para Usuarios
-    options.AddPolicy("UsuariosLeer", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("UsuariosAgregar", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("UsuariosActualizar", policy => policy.RequireRole("Administrativo"));
-    options.AddPolicy("UsuariosEliminar", policy => policy.RequireRole("Administrativo"));
+    options.AddPolicy("UsuariosLeer", policy => policy.RequireClaim("permission", "usuarios.leer"));
+    options.AddPolicy("UsuariosAgregar", policy => policy.RequireClaim("permission", "usuarios.agregar"));
+    options.AddPolicy("UsuariosActualizar", policy => policy.RequireClaim("permission", "usuarios.actualizar"));
+    options.AddPolicy("UsuariosEliminar", policy => policy.RequireClaim("permission", "usuarios.eliminar"));
 
     // Fallback: Requerir autenticación para endpoints no especificados
     options.FallbackPolicy = options.DefaultPolicy;

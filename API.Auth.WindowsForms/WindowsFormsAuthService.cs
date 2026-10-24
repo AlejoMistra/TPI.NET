@@ -94,5 +94,58 @@ namespace API.Auth.WindowsForms
                 return false;
             }
         }
+
+        public async Task<string?> GetRoleAsync()
+        {
+            var token = await GetTokenAsync();
+            if (string.IsNullOrEmpty(token))
+                return null;
+
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadJwtToken(token);
+
+                var roleClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == "group" || c.Type == ClaimTypes.Role || c.Type == "role");
+                return roleClaim?.Value;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        public async Task<bool> IsInRoleAsync(string role)
+        {
+            var currentRole = await GetRoleAsync();
+            if (string.IsNullOrEmpty(currentRole))
+                return false;
+
+            return currentRole.Equals(role, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public async Task<int?> GetPersonaIdAsync()
+        {
+            var token = await GetTokenAsync();
+            if (string.IsNullOrEmpty(token))
+                return null;
+
+            try
+            {
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadJwtToken(token);
+
+                var personaClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == "PersonaId");
+                if (personaClaim != null && int.TryParse(personaClaim.Value, out int personaId))
+                {
+                    return personaId;
+                }
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

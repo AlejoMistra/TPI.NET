@@ -70,6 +70,15 @@ namespace WindowsForms.Helpers
                     MessageBoxIcon.Warning);
                 return false;
             }
+            catch (ForbiddenApiException ex)
+            {
+                MessageBox.Show(
+                    ex.Message,
+                    "Acceso Denegado",
+                    MessageBoxButtons.OK,
+                    MessageBoxIcon.Warning);
+                return false;
+            }
             catch (NetworkApiException ex)
             {
                 MessageBox.Show(

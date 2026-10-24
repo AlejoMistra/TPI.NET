@@ -1,4 +1,4 @@
-﻿using DTOs;
+using DTOs;
 using Data;
 using Domain.Model;
 using Microsoft.Extensions.Configuration;
@@ -63,6 +63,20 @@ namespace Application.Services
             // Persona vinculada al usuario (el profesional, para filtrar su agenda)
             if (usuario.PersonaId.HasValue)
                 claims.Add(new Claim("PersonaId", usuario.PersonaId.Value.ToString()));
+
+            // Agregar permisos como claims para API y UI
+            var permisos = usuario.ObtenerTodosLosPermisos();
+            foreach (var permiso in permisos)
+            {
+                claims.Add(new Claim("permission", permiso));
+            }
+
+            // Agregar grupo como claim
+            var grupo = usuario.ObtenerNombreGrupo();
+            if (!string.IsNullOrEmpty(grupo))
+            {
+                claims.Add(new Claim("group", grupo));
+            }
 
 
             var token = new JwtSecurityToken(

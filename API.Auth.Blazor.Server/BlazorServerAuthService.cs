@@ -116,7 +116,7 @@ namespace API.Auth.Blazor.Server
                 var jsonToken = handler.ReadJwtToken(token);
                 
                 var permissionClaims = jsonToken.Claims
-                    .Where(c => c.Type == System.Security.Claims.ClaimTypes.Role)
+                    .Where(c => c.Type == "permission")
                     .Select(c => c.Value);
 
                 return Task.FromResult(permissionClaims.Contains(permission));
@@ -124,6 +124,59 @@ namespace API.Auth.Blazor.Server
             catch
             {
                 return Task.FromResult(false);
+            }
+        }
+
+        public Task<string?> GetRoleAsync()
+        {
+            try
+            {
+                var token = _currentSession?.Token;
+                if (string.IsNullOrEmpty(token))
+                    return Task.FromResult<string?>(null);
+
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadJwtToken(token);
+
+                var roleClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == "group" || c.Type == System.Security.Claims.ClaimTypes.Role || c.Type == "role");
+                return Task.FromResult(roleClaim?.Value);
+            }
+            catch
+            {
+                return Task.FromResult<string?>(null);
+            }
+        }
+
+        public async Task<bool> IsInRoleAsync(string role)
+        {
+            var currentRole = await GetRoleAsync();
+            if (string.IsNullOrEmpty(currentRole))
+                return false;
+
+            return currentRole.Equals(role, StringComparison.OrdinalIgnoreCase);
+        }
+
+        public Task<int?> GetPersonaIdAsync()
+        {
+            try
+            {
+                var token = _currentSession?.Token;
+                if (string.IsNullOrEmpty(token))
+                    return Task.FromResult<int?>(null);
+
+                var handler = new JwtSecurityTokenHandler();
+                var jsonToken = handler.ReadJwtToken(token);
+
+                var personaClaim = jsonToken.Claims.FirstOrDefault(c => c.Type == "PersonaId");
+                if (personaClaim != null && int.TryParse(personaClaim.Value, out int personaId))
+                {
+                    return Task.FromResult<int?>(personaId);
+                }
+                return Task.FromResult<int?>(null);
+            }
+            catch
+            {
+                return Task.FromResult<int?>(null);
             }
         }
     }

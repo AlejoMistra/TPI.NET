@@ -28,7 +28,10 @@ namespace Domain.Model
         public int? PersonaId { get; private set; }
         public Persona? Persona { get; private set; }
 
-        public Usuario(int id, string username, string email, string password, DateTime fechaCreacion, Roles rol, bool activo, int? personaId = null)
+        public int? GrupoPermisoId { get; private set; }
+        public virtual GrupoPermiso? Grupo { get; private set; }
+
+        public Usuario(int id, string username, string email, string password, DateTime fechaCreacion, Roles rol, bool activo, int? personaId = null, int? grupoPermisoId = null)
         {
             SetId(id);
             SetUsername(username);
@@ -38,6 +41,7 @@ namespace Domain.Model
             SetRol(rol);
             SetActivo(activo);
             SetPersonaId(personaId);
+            GrupoPermisoId = grupoPermisoId;
         }
 
         private Usuario() { }
@@ -134,6 +138,43 @@ namespace Domain.Model
             return Convert.ToBase64String(hashBytes);
         }
 
+        public void SetGrupo(GrupoPermiso? grupo)
+        {
+            Grupo = grupo;
+            GrupoPermisoId = grupo?.Id;
+            if (grupo != null)
+            {
+                if (grupo.Nombre.Equals("Administrador", StringComparison.OrdinalIgnoreCase) ||
+                    grupo.Nombre.Equals("Administrativo", StringComparison.OrdinalIgnoreCase))
+                {
+                    Rol = Roles.Administrativo;
+                }
+                else if (grupo.Nombre.Equals("Profesional", StringComparison.OrdinalIgnoreCase))
+                {
+                    Rol = Roles.Profesional;
+                }
+            }
+        }
 
+        public bool TienePermiso(string nombrePermiso)
+        {
+            if (!Activo || Grupo == null || !Grupo.Activo)
+                return false;
+
+            return Grupo.TienePermiso(nombrePermiso);
+        }
+
+        public IEnumerable<string> ObtenerTodosLosPermisos()
+        {
+            if (Grupo == null || !Grupo.Activo)
+                return new List<string>();
+
+            return Grupo.ObtenerNombresPermisos();
+        }
+
+        public string? ObtenerNombreGrupo()
+        {
+            return Grupo?.Nombre ?? Rol.ToString();
+        }
     }
 }

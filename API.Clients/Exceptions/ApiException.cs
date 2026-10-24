@@ -61,6 +61,14 @@ namespace API.Clients.Exceptions
         }
     }
 
+    public class ForbiddenApiException : ApiException
+    {
+        public ForbiddenApiException(string message = "No posee los permisos necesarios para realizar esta acción.", string? title = null, string? detail = null)
+            : base(message, HttpStatusCode.Forbidden, title, detail)
+        {
+        }
+    }
+
     public class NetworkApiException : ApiException
     {
         public NetworkApiException(string message = "No se pudo establecer conexión con el servidor. Verifique si el servicio está activo o compruebe su conexión de red.", Exception? innerException = null)
