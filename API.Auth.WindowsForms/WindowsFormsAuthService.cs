@@ -31,7 +31,7 @@ namespace API.Auth.WindowsForms
         }
 
         public async Task<bool> LoginAsync(string username, string password)
-        {            
+        {
             var request = new LoginRequest
             {
                 Username = username,
@@ -199,6 +199,7 @@ namespace API.Auth.WindowsForms
                 var jsonToken = handler.ReadJwtToken(token);
 
                 var roleClaim = jsonToken.Claims.FirstOrDefault(c =>
+                    c.Type == "group" ||
                     c.Type == ClaimTypes.Role ||
                     c.Type == "role" ||
                     c.Type.EndsWith("/role", StringComparison.OrdinalIgnoreCase));
@@ -209,6 +210,12 @@ namespace API.Auth.WindowsForms
             {
                 return null;
             }
+        }
+
+        public async Task<bool> IsInRoleAsync(string role)
+        {
+            var userRole = await GetRoleAsync();
+            return string.Equals(userRole, role, StringComparison.OrdinalIgnoreCase);
         }
 
         public async Task<int?> GetPersonaIdAsync()
@@ -235,12 +242,6 @@ namespace API.Auth.WindowsForms
             {
                 return null;
             }
-        }
-
-        public async Task<bool> IsInRoleAsync(string role)
-        {
-            var userRole = await GetRoleAsync();
-            return string.Equals(userRole, role, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

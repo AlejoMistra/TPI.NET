@@ -18,6 +18,7 @@ namespace Data
             await SeedPacientesAsync(context, logger);
             await SeedTurnosAsync(context, logger);
             await SeedRegistrosClinicosAsync(context, logger);
+            await SeedPermisosYGruposAsync(context, logger);
             await SeedUsuariosAsync(context, logger);
 
         }
@@ -474,22 +475,172 @@ namespace Data
             logger.LogInformation("RegistrosClinicos: {Count} registros insertados.", totalRegistros);
         }
 
+        private static async Task SeedPermisosYGruposAsync(TPIContext context, ILogger logger)
+        {
+            var permisosDefinidos = new List<(string Categoria, string Nombre, string Descripcion)>
+            {
+                // Especialidades
+                ("especialidades", "leer", "Leer especialidades"),
+                ("especialidades", "agregar", "Agregar especialidades"),
+                ("especialidades", "actualizar", "Actualizar especialidades"),
+                ("especialidades", "eliminar", "Eliminar especialidades"),
+
+                // Profesionales
+                ("profesionales", "leer", "Leer profesionales"),
+                ("profesionales", "agregar", "Agregar profesionales"),
+                ("profesionales", "actualizar", "Actualizar profesionales"),
+                ("profesionales", "eliminar", "Eliminar profesionales"),
+
+                // Pacientes
+                ("pacientes", "leer", "Leer pacientes"),
+                ("pacientes", "agregar", "Agregar pacientes"),
+                ("pacientes", "actualizar", "Actualizar pacientes"),
+                ("pacientes", "eliminar", "Eliminar pacientes"),
+
+                // Turnos
+                ("turnos", "leer", "Leer turnos"),
+                ("turnos", "agregar", "Agregar turnos"),
+                ("turnos", "actualizar", "Actualizar turnos"),
+                ("turnos", "eliminar", "Eliminar turnos"),
+                ("turnos", "atender", "Atender turnos"),
+
+                // Historias Clínicas
+                ("historiasclinicas", "leer", "Leer historias clínicas"),
+                ("historiasclinicas", "agregar", "Agregar historias clínicas"),
+                ("historiasclinicas", "actualizar", "Actualizar historias clínicas"),
+
+                // Facturas
+                ("facturas", "leer", "Leer facturas"),
+                ("facturas", "agregar", "Agregar facturas"),
+                ("facturas", "actualizar", "Actualizar facturas"),
+
+                // Usuarios
+                ("usuarios", "leer", "Leer usuarios"),
+                ("usuarios", "agregar", "Agregar usuarios"),
+                ("usuarios", "actualizar", "Actualizar usuarios"),
+                ("usuarios", "eliminar", "Eliminar usuarios"),
+
+                // Datos Maestros (UI)
+                ("datosmaestros", "leer", "Acceso a datos maestros")
+            };
+
+            foreach (var (categoria, nombre, descripcion) in permisosDefinidos)
+            {
+                if (!await context.Permisos.AnyAsync(p => p.Categoria == categoria && p.Nombre == nombre))
+                {
+                    context.Permisos.Add(new Permiso(0, nombre, descripcion, categoria, true));
+                }
+            }
+            await context.SaveChangesAsync();
+
+            // Seed Grupos
+            var grupoAdmin = await context.GruposPermisos.Include(g => g.Permisos).FirstOrDefaultAsync(g => g.Nombre == "Administrador");
+            if (grupoAdmin == null)
+            {
+                grupoAdmin = new GrupoPermiso(0, "Administrador", "Acceso completo a todas las funcionalidades", DateTime.Now, true);
+                context.GruposPermisos.Add(grupoAdmin);
+                await context.SaveChangesAsync();
+            }
+
+            var grupoProfesional = await context.GruposPermisos.Include(g => g.Permisos).FirstOrDefaultAsync(g => g.Nombre == "Profesional");
+            if (grupoProfesional == null)
+            {
+                grupoProfesional = new GrupoPermiso(0, "Profesional", "Acceso a agenda de turnos, atención e historias clínicas", DateTime.Now, true);
+                context.GruposPermisos.Add(grupoProfesional);
+                await context.SaveChangesAsync();
+            }
+
+            // Asignar permisos a Administrador (Historias Clínicas son exclusivas de Profesional)
+            var todosLosPermisos = await context.Permisos.Where(p => p.Activo).ToListAsync();
+            foreach (var permiso in todosLosPermisos)
+            {
+                if (permiso.Categoria.Equals("historiasclinicas", StringComparison.OrdinalIgnoreCase))
+                {
+                    // El administrativo NO debe tener autorización para ver ni registrar historias clínicas
+                    var permisoExistente = grupoAdmin.Permisos.FirstOrDefault(p => p.Id == permiso.Id);
+                    if (permisoExistente != null)
+                    {
+                        grupoAdmin.RemoverPermiso(permisoExistente);
+                    }
+                }
+                else
+                {
+                    if (!grupoAdmin.Permisos.Any(p => p.Id == permiso.Id))
+                    {
+                        grupoAdmin.AgregarPermiso(permiso);
+                    }
+                }
+            }
+
+            // Asignar permisos a Profesional
+            var categoriasYAccionesProfesional = new HashSet<string>(StringComparer.OrdinalIgnoreCase)
+            {
+                "pacientes.leer",
+                "turnos.leer",
+                "turnos.atender",
+                "historiasclinicas.leer",
+                "historiasclinicas.agregar",
+                "historiasclinicas.actualizar",
+                "especialidades.leer",
+                "profesionales.leer"
+            };
+
+            foreach (var permiso in todosLosPermisos)
+            {
+                if (categoriasYAccionesProfesional.Contains(permiso.ToString()))
+                {
+                    if (!grupoProfesional.Permisos.Any(p => p.Id == permiso.Id))
+                    {
+                        grupoProfesional.AgregarPermiso(permiso);
+                    }
+                }
+                else
+                {
+                    var permisoExistente = grupoProfesional.Permisos.FirstOrDefault(p => p.Id == permiso.Id);
+                    if (permisoExistente != null)
+                    {
+                        grupoProfesional.RemoverPermiso(permisoExistente);
+                    }
+                }
+            }
+
+            await context.SaveChangesAsync();
+            logger.LogInformation("Permisos y Grupos: seed completado.");
+        }
+
         private static async Task SeedUsuariosAsync(TPIContext context, ILogger logger)
         {
             const string adminUsername = "admin";
             const string adminEmail = "admin@tpi.com";
 
-            // Seed de Administrador
-            if (!await context.Usuarios.AnyAsync(u => u.Username == adminUsername || u.Email == adminEmail))
+            var grupoAdmin = await context.GruposPermisos.FirstOrDefaultAsync(g => g.Nombre == "Administrador");
+            var grupoProfesional = await context.GruposPermisos.FirstOrDefaultAsync(g => g.Nombre == "Profesional");
+
+            // Seed o actualización de Administrador
+            var adminExistente = await context.Usuarios.Include(u => u.Grupo).FirstOrDefaultAsync(u => u.Username == adminUsername || u.Email == adminEmail);
+            if (adminExistente == null)
             {
-                var admin = new Usuario(0, adminUsername, adminEmail, "admin123", DateTime.Now, Usuario.Roles.Administrativo, true);
+                var admin = new Usuario(0, adminUsername, adminEmail, "admin123", DateTime.Now, Usuario.Roles.Administrativo, true, grupoPermisoId: grupoAdmin?.Id);
+                if (grupoAdmin != null)
+                {
+                    admin.SetGrupo(grupoAdmin);
+                }
                 context.Usuarios.Add(admin);
                 await context.SaveChangesAsync();
                 logger.LogInformation("Usuarios: usuario '{Username}' insertado.", adminUsername);
             }
             else
             {
-                logger.LogInformation("Usuarios: ya existe un usuario con username '{Username}' o email '{Email}', se omite el seed de admin.", adminUsername, adminEmail);
+                if (adminExistente.GrupoPermisoId == null && grupoAdmin != null)
+                {
+                    adminExistente.SetGrupo(grupoAdmin);
+                    await context.SaveChangesAsync();
+                    logger.LogInformation("Usuarios: grupo asignado a usuario '{Username}'.", adminUsername);
+                }
+                else
+                {
+                    logger.LogInformation("Usuarios: ya existe un usuario con username '{Username}' o email '{Email}', se omite el seed de admin.", adminUsername, adminEmail);
+                }
             }
 
             // Seed de Usuarios para cada Profesional registrado
@@ -509,9 +660,19 @@ namespace Data
                     ? prof.Email
                     : $"{username}@clinica.med.ar";
 
-                if (await context.Usuarios.AnyAsync(u => u.PersonaId == prof.Id || u.Username == username || u.Email == email))
+                var usuarioExistente = await context.Usuarios.Include(u => u.Grupo).FirstOrDefaultAsync(u => u.PersonaId == prof.Id || u.Username == username || u.Email == email);
+                if (usuarioExistente != null)
                 {
-                    logger.LogInformation("Usuarios: ya existe usuario para el profesional Id {ProfId} ('{Username}'), se omite.", prof.Id, username);
+                    if (usuarioExistente.GrupoPermisoId == null && grupoProfesional != null)
+                    {
+                        usuarioExistente.SetGrupo(grupoProfesional);
+                        await context.SaveChangesAsync();
+                        logger.LogInformation("Usuarios: grupo asignado a profesional '{Username}'.", username);
+                    }
+                    else
+                    {
+                        logger.LogInformation("Usuarios: ya existe usuario para el profesional Id {ProfId} ('{Username}'), se omite.", prof.Id, username);
+                    }
                     continue;
                 }
 
@@ -523,7 +684,13 @@ namespace Data
                     fechaCreacion: DateTime.Now,
                     rol: Usuario.Roles.Profesional,
                     activo: prof.Estado == Profesional.EstadoProfesional.Activo,
-                    personaId: prof.Id);
+                    personaId: prof.Id,
+                    grupoPermisoId: grupoProfesional?.Id);
+
+                if (grupoProfesional != null)
+                {
+                    usuarioProf.SetGrupo(grupoProfesional);
+                }
 
                 context.Usuarios.Add(usuarioProf);
                 await context.SaveChangesAsync();

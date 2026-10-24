@@ -16,6 +16,8 @@ namespace Data
         public DbSet<RegistroClinico> RegistrosClinicos { get; set; }
         public DbSet<Factura> Facturas { get; set; }
         public DbSet<DetalleFactura> DetallesFactura { get; set; }
+        public DbSet<Permiso> Permisos { get; set; }
+        public DbSet<GrupoPermiso> GruposPermisos { get; set; }
 
         public TPIContext(DbContextOptions<TPIContext> options) : base(options)
         {
@@ -93,6 +95,12 @@ namespace Data
 
                 entity.HasIndex(e => e.Email)
                     .IsUnique();
+
+                // Relación con GrupoPermiso (opcional)
+                entity.HasOne(e => e.Grupo)
+                    .WithMany()
+                    .HasForeignKey(e => e.GrupoPermisoId)
+                    .OnDelete(DeleteBehavior.SetNull);
 
             });
 
@@ -299,6 +307,74 @@ namespace Data
 
                 entity.Ignore(d => d.Subtotal);
             });
+
+            // Configuración de Permiso
+            modelBuilder.Entity<Permiso>(entity =>
+            {
+                entity.ToTable("Permisos");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Nombre)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Descripcion)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Categoria)
+                    .IsRequired()
+                    .HasMaxLength(30);
+
+                entity.Property(e => e.Activo)
+                    .IsRequired();
+
+                entity.HasIndex(e => new { e.Nombre, e.Categoria })
+                    .IsUnique();
+            });
+
+            // Configuración de GrupoPermiso
+            modelBuilder.Entity<GrupoPermiso>(entity =>
+            {
+                entity.ToTable("GruposPermisos");
+                entity.HasKey(e => e.Id);
+
+                entity.Property(e => e.Id)
+                    .ValueGeneratedOnAdd();
+
+                entity.Property(e => e.Nombre)
+                    .IsRequired()
+                    .HasMaxLength(50);
+
+                entity.Property(e => e.Descripcion)
+                    .IsRequired()
+                    .HasMaxLength(200);
+
+                entity.Property(e => e.Activo)
+                    .IsRequired();
+
+                entity.Property(e => e.FechaCreacion)
+                    .IsRequired();
+
+                entity.HasIndex(e => e.Nombre)
+                    .IsUnique();
+            });
+
+            // Configuración de relación Many-to-Many: GrupoPermiso <-> Permiso
+            modelBuilder.Entity<GrupoPermiso>()
+                .HasMany(g => g.Permisos)
+                .WithMany(p => p.Grupos)
+                .UsingEntity<Dictionary<string, object>>(
+                    "GrupoPermisoPermiso",
+                    j => j.HasOne<Permiso>().WithMany().HasForeignKey("PermisosId"),
+                    j => j.HasOne<GrupoPermiso>().WithMany().HasForeignKey("GruposId"),
+                    j =>
+                    {
+                        j.HasKey("GruposId", "PermisosId");
+                    });
         }
     }
 }

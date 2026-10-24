@@ -232,6 +232,7 @@ namespace API.Auth.Blazor.Server
                 var jsonToken = handler.ReadJwtToken(token);
 
                 var roleClaim = jsonToken.Claims.FirstOrDefault(c =>
+                    c.Type == "group" ||
                     c.Type == System.Security.Claims.ClaimTypes.Role ||
                     c.Type == "role" ||
                     c.Type.EndsWith("/role", StringComparison.OrdinalIgnoreCase));
@@ -242,6 +243,12 @@ namespace API.Auth.Blazor.Server
             {
                 return Task.FromResult<string?>(null);
             }
+        }
+
+        public async Task<bool> IsInRoleAsync(string role)
+        {
+            var currentRole = await GetRoleAsync();
+            return string.Equals(currentRole, role, StringComparison.OrdinalIgnoreCase);
         }
 
         public Task<int?> GetPersonaIdAsync()
@@ -268,12 +275,6 @@ namespace API.Auth.Blazor.Server
             {
                 return Task.FromResult<int?>(null);
             }
-        }
-
-        public async Task<bool> IsInRoleAsync(string role)
-        {
-            var currentRole = await GetRoleAsync();
-            return string.Equals(currentRole, role, StringComparison.OrdinalIgnoreCase);
         }
     }
 }

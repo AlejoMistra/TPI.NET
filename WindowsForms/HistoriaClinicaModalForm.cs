@@ -278,6 +278,18 @@ namespace WindowsForms
 
         private async void HistoriaClinicaModalForm_Load(object? sender, EventArgs e)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("historiasclinicas.leer"))
+            {
+                MessageBox.Show("No tiene autorización para acceder a las historias clínicas.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.DialogResult = DialogResult.Cancel;
+                this.Close();
+                return;
+            }
+
+            bool canAdd = await authService.HasPermissionAsync("historiasclinicas.agregar");
+            nuevoRegistroButton.Visible = canAdd;
+
             bool ok = await UiErrorHandler.ExecuteAsync(async () =>
             {
                 _paciente = await PacienteApiClient.GetAsync(_pacienteId);
@@ -655,6 +667,14 @@ namespace WindowsForms
         private async void NuevoRegistroButton_Click(object? sender, EventArgs e)
         {
             if (_paciente == null) return;
+
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("historiasclinicas.agregar"))
+            {
+                MessageBox.Show("No tiene permisos para agregar registros clínicos.", "Acceso Denegado",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
 
             // Identificar si hay un turno seleccionado en la grilla que esté en estado 'Atendido'
             TurnoPacienteGridRow? turnoPreseleccionado = null;

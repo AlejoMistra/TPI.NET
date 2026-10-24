@@ -30,6 +30,19 @@ namespace WindowsForms
 
             InitializeComponent();
             ConfigurarControles();
+            this.Load += NuevoRegistroClinicoModalForm_Load;
+        }
+
+        private async void NuevoRegistroClinicoModalForm_Load(object? sender, EventArgs e)
+        {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("historiasclinicas.agregar"))
+            {
+                MessageBox.Show("No tiene autorización para registrar notas clínicas.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                this.DialogResult = DialogResult.Cancel;
+                this.Close();
+                return;
+            }
         }
 
         private void ConfigurarControles()
@@ -239,14 +252,30 @@ namespace WindowsForms
             var turnoSeleccionado = turnoOrigenComboBox.SelectedItem as TurnoComboItem;
             int? turnoId = turnoSeleccionado?.TurnoId;
 
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("historiasclinicas.agregar"))
+            {
+                MessageBox.Show("No tiene autorización para agregar registros clínicos.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            int? profesionalLogueadoId = null;
+            if (await authService.IsInRoleAsync("Profesional"))
+            {
+                profesionalLogueadoId = await authService.GetPersonaIdAsync();
+            }
+
             // Determinar ProfesionalId:
-            // TODO: Cuando se implementen roles, asignar el profesional según el usuario logueado y sus permisos.
             // Si hay turno de origen, el backend exige turno.ProfesionalId == profesionalId.
-            // Si es registro general (sin turno), asignamos el profesional activo por defecto hasta contar con módulo de roles.
+            // Si es registro general (sin turno), se utiliza el profesional logueado o el activo por defecto.
             int profesionalId;
             if (turnoId.HasValue && turnoSeleccionado?.ProfesionalId.HasValue == true)
             {
                 profesionalId = turnoSeleccionado.ProfesionalId.Value;
+            }
+            else if (profesionalLogueadoId.HasValue && profesionalLogueadoId.Value > 0)
+            {
+                profesionalId = profesionalLogueadoId.Value;
             }
             else
             {

@@ -33,6 +33,8 @@ namespace Data
         public async Task<Usuario?> GetAsync(int id)
         {
             return await _context.Usuarios
+                .Include(u => u.Grupo)
+                    .ThenInclude(g => g!.Permisos.Where(p => p.Activo))
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Id == id);
         }
@@ -40,6 +42,8 @@ namespace Data
         public async Task<Usuario?> GetByUsernameAsync(string username)
         {
             return await _context.Usuarios
+                .Include(u => u.Grupo)
+                    .ThenInclude(g => g!.Permisos.Where(p => p.Activo))
                 .AsNoTracking()
                 .FirstOrDefaultAsync(u => u.Username == username && u.Activo);
         }

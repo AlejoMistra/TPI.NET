@@ -146,6 +146,15 @@ namespace WindowsForms
 
             turnosDataGridView.Columns.Add(new DataGridViewButtonColumn
             {
+                Name = "atenderColumn",
+                HeaderText = "",
+                Text = "Atender",
+                UseColumnTextForButtonValue = true,
+                AutoSizeMode = DataGridViewAutoSizeColumnMode.DisplayedCells
+            });
+
+            turnosDataGridView.Columns.Add(new DataGridViewButtonColumn
+            {
                 Name = "editarColumn",
                 HeaderText = "",
                 Text = "Editar",
@@ -187,12 +196,18 @@ namespace WindowsForms
             bool canDelete = await authService.HasPermissionAsync("turnos.eliminar");
             bool canAtender = await authService.HasPermissionAsync("turnos.atender");
             bool canFacturar = await authService.HasPermissionAsync("facturas.agregar");
+            bool isProfesional = await authService.IsInRoleAsync("Profesional");
 
             // Botón Nuevo Turno
             nuevoTurnoButton.Visible = canAdd;
             nuevoTurnoButton.Tag = canAdd;
 
             // Columnas de grilla
+            if (turnosDataGridView.Columns.Contains("atenderColumn"))
+            {
+                turnosDataGridView.Columns["atenderColumn"].Visible = canAtender && isProfesional;
+            }
+
             if (turnosDataGridView.Columns.Contains("editarColumn"))
             {
                 turnosDataGridView.Columns["editarColumn"].Visible = canUpdate;
@@ -209,11 +224,12 @@ namespace WindowsForms
             _ausenteMenuItem.Visible = canUpdate;
             _atenderMenuItem.Visible = canAtender;
             _liberarMenuItem.Visible = canDelete;
+            _detalleMenuItem.Visible = true;
             _editarMenuItem.Visible = canUpdate;
             _facturarMenuItem.Visible = canFacturar;
 
-            _sep1.Visible = canUpdate && canAtender;
-            _sep2.Visible = canDelete;
+            _sep1.Visible = canDelete && (canUpdate || canAtender);
+            _sep2.Visible = canDelete || canUpdate || canAtender;
             _sep3.Visible = canFacturar;
         }
 
@@ -619,6 +635,10 @@ namespace WindowsForms
             {
                 MostrarDetalleTurno(rowItem);
             }
+            else if (colName == "atenderColumn")
+            {
+                await EjecutarAtenderAsync(rowItem);
+            }
             else if (colName == "editarColumn")
             {
                 await EjecutarEditarTurnoAsync(rowItem);
@@ -743,6 +763,13 @@ namespace WindowsForms
 
         private async Task EjecutarRegistrarLlegadaAsync(AgendaGridRow rowItem)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("turnos.actualizar"))
+            {
+                MessageBox.Show("No tiene permisos para modificar el estado del turno.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (!string.Equals(rowItem.Estado, "Asignado", StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show($"Solo se puede registrar la llegada para turnos en estado Asignado. Estado actual: '{rowItem.Estado}'.", "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -759,6 +786,13 @@ namespace WindowsForms
 
         private async Task EjecutarRevertirLlegadaAsync(AgendaGridRow rowItem)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("turnos.actualizar"))
+            {
+                MessageBox.Show("No tiene permisos para modificar el estado del turno.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (!string.Equals(rowItem.Estado, "Presente", StringComparison.OrdinalIgnoreCase))
             {
                 MessageBox.Show($"Solo se puede revertir la llegada de un turno en estado Presente. Estado actual: '{rowItem.Estado}'.", "Acción no permitida", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -783,6 +817,13 @@ namespace WindowsForms
 
         private async Task EjecutarMarcarAusenteAsync(AgendaGridRow rowItem)
         {
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("turnos.actualizar"))
+            {
+                MessageBox.Show("No tiene permisos para marcar turnos como ausentes.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
             if (!string.Equals(rowItem.Estado, "Asignado", StringComparison.OrdinalIgnoreCase) &&
                 !string.Equals(rowItem.Estado, "Presente", StringComparison.OrdinalIgnoreCase))
             {
@@ -817,6 +858,16 @@ namespace WindowsForms
             {
                 MessageBox.Show("No tiene permisos para iniciar la atención clínica de turnos.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
+            }
+
+            if (await authService.IsInRoleAsync("Profesional"))
+            {
+                int? personaId = await authService.GetPersonaIdAsync();
+                if (personaId.HasValue && personaId.Value > 0 && rowItem.ProfesionalId != personaId.Value)
+                {
+                    MessageBox.Show("Solo puede atender sus propios turnos asignados.", "Acceso Denegado", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
             }
 
             if (!string.Equals(rowItem.Estado, "Presente", StringComparison.OrdinalIgnoreCase))

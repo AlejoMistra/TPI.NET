@@ -64,6 +64,20 @@ namespace Application.Services
             if (usuario.PersonaId.HasValue)
                 claims.Add(new Claim("PersonaId", usuario.PersonaId.Value.ToString()));
 
+            // Agregar permisos como claims para API y UI
+            var permisos = usuario.ObtenerTodosLosPermisos();
+            foreach (var permiso in permisos)
+            {
+                claims.Add(new Claim("permission", permiso));
+            }
+
+            // Agregar grupo como claim
+            var grupo = usuario.ObtenerNombreGrupo();
+            if (!string.IsNullOrEmpty(grupo))
+            {
+                claims.Add(new Claim("group", grupo));
+            }
+
 
             var token = new JwtSecurityToken(
                 issuer: issuer,

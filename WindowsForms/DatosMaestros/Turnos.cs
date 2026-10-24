@@ -10,9 +10,6 @@ namespace WindowsForms.DatosMaestros
         private List<TurnoGridRow> _allTurnos = new();
         private List<ProfesionalDTO> _profesionales = new();
         private List<EspecialidadDTO> _especialidades = new();
-        private int? _selectedTurnoId = null;
-        private int? _selectedTurnoPacienteId = null;
-        private bool _isUpdatingCombos = false;
         private bool _isUpdatingBusquedaCombos = false;
 
         public Turnos()
@@ -29,9 +26,6 @@ namespace WindowsForms.DatosMaestros
             this.Load += Turnos_Load;
             turnosDataGridView.CellContentClick += TurnosDataGridView_CellContentClick;
             turnosDataGridView.DataBindingComplete += TurnosDataGridView_DataBindingComplete;
-
-            especialidadComboBox.SelectedIndexChanged += EspecialidadComboBox_SelectedIndexChanged;
-            profesionalComboBox.SelectedIndexChanged += ProfesionalComboBox_SelectedIndexChanged;
 
             busquedaEspecialidadComboBox.SelectedIndexChanged += BusquedaEspecialidadComboBox_SelectedIndexChanged;
             busquedaProfesionalComboBox.SelectedIndexChanged += BusquedaProfesionalComboBox_SelectedIndexChanged;
@@ -143,16 +137,8 @@ namespace WindowsForms.DatosMaestros
             // Combo de búsqueda
             busquedaEstadoComboBox.Items.Clear();
             busquedaEstadoComboBox.Items.Add("Todos");
-            busquedaEstadoComboBox.Items.AddRange(estados);
+            busquedaEstadoComboBox.Items.AddRange(new object[] { "Libre", "Asignado", "Presente", "Atendido", "Ausente" });
             busquedaEstadoComboBox.SelectedIndex = 0;
-
-            // Combo de formulario
-            estadoComboBox.Items.Clear();
-            estadoComboBox.Items.AddRange(estados);
-            if (estadoComboBox.Items.Count > 0)
-            {
-                estadoComboBox.SelectedIndex = 0; // Por defecto "Libre"
-            }
         }
 
         // ==========================================
@@ -179,8 +165,6 @@ namespace WindowsForms.DatosMaestros
 
             agregarTurnoButton.Visible = canAdd;
             agregarTurnoButton.Tag = canAdd;
-            guardarTurnoButton.Visible = canAdd || canUpdate;
-            guardarTurnoButton.Tag = canAdd || canUpdate;
 
             if (turnosDataGridView.Columns.Contains("accionesColumn"))
             {
@@ -210,24 +194,6 @@ namespace WindowsForms.DatosMaestros
             busquedaEspecialidadComboBox.DisplayMember = "Nombre";
             busquedaEspecialidadComboBox.ValueMember = "Id";
             _isUpdatingBusquedaCombos = false;
-
-            // Combo de formulario
-            PoblarComboEspecialidadFormulario();
-        }
-
-        private void PoblarComboEspecialidadFormulario()
-        {
-            var listaFormulario = new List<EspecialidadDTO>
-            {
-                new EspecialidadDTO { Id = 0, Nombre = "Seleccionar especialidad" }
-            };
-            listaFormulario.AddRange(_especialidades);
-
-            _isUpdatingCombos = true;
-            especialidadComboBox.DataSource = listaFormulario;
-            especialidadComboBox.DisplayMember = "Nombre";
-            especialidadComboBox.ValueMember = "Id";
-            _isUpdatingCombos = false;
         }
 
         private async Task CargarProfesionalesAsync()
@@ -237,9 +203,6 @@ namespace WindowsForms.DatosMaestros
 
             // Combo de búsqueda
             PoblarComboProfesionalesBusqueda(0);
-
-            // Combo de formulario
-            PoblarComboProfesionalesFormulario(0);
         }
 
         private void PoblarComboProfesionalesBusqueda(int especialidadIdFiltrar)
@@ -263,29 +226,6 @@ namespace WindowsForms.DatosMaestros
             busquedaProfesionalComboBox.DisplayMember = "DisplayName";
             busquedaProfesionalComboBox.ValueMember = "Id";
             _isUpdatingBusquedaCombos = false;
-        }
-
-        private void PoblarComboProfesionalesFormulario(int especialidadIdFiltrar)
-        {
-            var filtrados = especialidadIdFiltrar > 0
-                ? _profesionales.Where(p => p.EspecialidadId == especialidadIdFiltrar).ToList()
-                : _profesionales;
-
-            var listaFormulario = new List<ProfesionalItem>
-            {
-                new ProfesionalItem { Id = 0, DisplayName = "Seleccionar profesional" }
-            };
-            listaFormulario.AddRange(filtrados.Select(p => new ProfesionalItem
-            {
-                Id = p.Id,
-                DisplayName = $"{p.Apellido}, {p.Nombre} (MP: {p.Matricula})"
-            }));
-
-            _isUpdatingCombos = true;
-            profesionalComboBox.DataSource = listaFormulario;
-            profesionalComboBox.DisplayMember = "DisplayName";
-            profesionalComboBox.ValueMember = "Id";
-            _isUpdatingCombos = false;
         }
 
         private async Task CargarTurnosAsync()
@@ -320,7 +260,7 @@ namespace WindowsForms.DatosMaestros
         }
 
         // ==========================================
-        // INTERACCIÓN REACTIVA ESPECIALIDAD <-> PROFESIONAL
+        // INTERACCIÓN REACTIVA ESPECIALIDAD <-> PROFESIONAL (BÚSQUEDA)
         // ==========================================
 
         private void BusquedaEspecialidadComboBox_SelectedIndexChanged(object? sender, EventArgs e)
@@ -363,44 +303,6 @@ namespace WindowsForms.DatosMaestros
             }
 
             AplicarFiltros();
-        }
-
-        private void EspecialidadComboBox_SelectedIndexChanged(object? sender, EventArgs e)
-        {
-            if (_isUpdatingCombos) return;
-
-            var especialidadId = ObtenerComboSelectedId(especialidadComboBox);
-            var currentProfId = ObtenerComboSelectedId(profesionalComboBox);
-
-            PoblarComboProfesionalesFormulario(especialidadId);
-
-            if (currentProfId > 0)
-            {
-                var prof = _profesionales.FirstOrDefault(p => p.Id == currentProfId);
-                if (prof != null && (especialidadId == 0 || prof.EspecialidadId == especialidadId))
-                {
-                    _isUpdatingCombos = true;
-                    profesionalComboBox.SelectedValue = currentProfId;
-                    _isUpdatingCombos = false;
-                }
-            }
-        }
-
-        private void ProfesionalComboBox_SelectedIndexChanged(object? sender, EventArgs e)
-        {
-            if (_isUpdatingCombos) return;
-
-            var profesionalId = ObtenerComboSelectedId(profesionalComboBox);
-            if (profesionalId > 0)
-            {
-                var prof = _profesionales.FirstOrDefault(p => p.Id == profesionalId);
-                if (prof != null && prof.EspecialidadId > 0)
-                {
-                    _isUpdatingCombos = true;
-                    especialidadComboBox.SelectedValue = prof.EspecialidadId;
-                    _isUpdatingCombos = false;
-                }
-            }
         }
 
         private static int ObtenerComboSelectedId(ComboBox comboBox)
@@ -490,11 +392,31 @@ namespace WindowsForms.DatosMaestros
             // Clic en Editar
             if (grid.Columns[e.ColumnIndex].Name == "accionesColumn")
             {
-                CargarTurnoEnFormulario(rowItem);
+                var authService = AuthServiceProvider.Instance;
+                if (!await authService.HasPermissionAsync("turnos.actualizar"))
+                {
+                    MessageBox.Show("No tiene permisos para editar turnos.", "Acceso Denegado",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
+                using var modal = new TurnoModalForm(rowItem.Id, _profesionales, _especialidades);
+                if (modal.ShowDialog(this) == DialogResult.OK)
+                {
+                    await CargarTurnosAsync();
+                }
             }
             // Clic en Eliminar
             else if (grid.Columns[e.ColumnIndex].Name == "eliminarColumn")
             {
+                var authService = AuthServiceProvider.Instance;
+                if (!await authService.HasPermissionAsync("turnos.eliminar"))
+                {
+                    MessageBox.Show("No tiene permisos para eliminar turnos.", "Acceso Denegado",
+                        MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+
                 var confirmResult = MessageBox.Show(
                     $"¿Está seguro de que desea eliminar el turno N° {rowItem.Id} del {rowItem.Fecha} ({rowItem.HoraInicio} - {rowItem.HoraFin})?",
                     "Confirmar eliminación",
@@ -507,129 +429,27 @@ namespace WindowsForms.DatosMaestros
                     {
                         await TurnoApiClient.DeleteAsync(rowItem.Id);
                         MessageBox.Show("Turno eliminado exitosamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-
-                        if (_selectedTurnoId == rowItem.Id)
-                        {
-                            LimpiarFormulario();
-                        }
-
                         await CargarTurnosAsync();
                     }, this, "Error al eliminar turno");
                 }
             }
         }
 
-        private void CargarTurnoEnFormulario(TurnoGridRow row)
+        private async void AgregarTurnoButton_Click(object? sender, EventArgs e)
         {
-            _selectedTurnoId = row.Id;
-            _selectedTurnoPacienteId = row.PacienteId;
-            numeroTurnoTextBox.Text = row.Id.ToString();
-
-            // Restaurar lista completa de profesionales antes de seleccionar
-            PoblarComboProfesionalesFormulario(0);
-
-            profesionalComboBox.SelectedValue = row.ProfesionalId;
-            if (row.EspecialidadId.HasValue && row.EspecialidadId.Value > 0)
+            var authService = AuthServiceProvider.Instance;
+            if (!await authService.HasPermissionAsync("turnos.agregar"))
             {
-                especialidadComboBox.SelectedValue = row.EspecialidadId.Value;
-            }
-
-            fechaTurnoDateTimePicker.Value = row.FechaHoraInicio.Date;
-            horaInicioDateTimePicker.Value = row.FechaHoraInicio;
-            horaFinDateTimePicker.Value = row.FechaHoraFin;
-            estadoComboBox.SelectedItem = row.Estado;
-            guardarTurnoButton.Text = "Actualizar Turno";
-        }
-
-        // ==========================================
-        // GUARDAR / CANCELAR FORMULARIO
-        // ==========================================
-
-        private void AgregarTurnoButton_Click(object? sender, EventArgs e)
-        {
-            LimpiarFormulario();
-            numeroTurnoTextBox.Text = "(Nuevo)";
-            profesionalComboBox.Focus();
-        }
-
-        private async void GuardarTurnoButton_Click(object? sender, EventArgs e)
-        {
-            var profesionalId = (profesionalComboBox.SelectedValue as int?) ?? 0;
-            if (profesionalId <= 0)
-            {
-                MessageBox.Show("Debe seleccionar un profesional.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                profesionalComboBox.Focus();
+                MessageBox.Show("No tiene permisos para agregar turnos.", "Acceso Denegado",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            var fecha = fechaTurnoDateTimePicker.Value.Date;
-            var horaInicio = horaInicioDateTimePicker.Value.TimeOfDay;
-            var horaFin = horaFinDateTimePicker.Value.TimeOfDay;
-
-            if (horaFin <= horaInicio)
+            using var modal = new TurnoModalForm(null, _profesionales, _especialidades);
+            if (modal.ShowDialog(this) == DialogResult.OK)
             {
-                MessageBox.Show("La hora de fin debe ser posterior a la hora de inicio.", "Validación", MessageBoxButtons.OK, MessageBoxIcon.Warning);
-                horaFinDateTimePicker.Focus();
-                return;
+                await CargarTurnosAsync();
             }
-
-            var fechaHoraInicio = fecha.Add(horaInicio);
-            var fechaHoraFin = fecha.Add(horaFin);
-
-            var turnoDto = new TurnoDTO
-            {
-                Id = _selectedTurnoId ?? 0,
-                FechaHoraInicio = fechaHoraInicio,
-                FechaHoraFin = fechaHoraFin,
-                EstadoTurno = estadoComboBox.SelectedItem?.ToString() ?? "Libre",
-                Observaciones = string.Empty,
-                FacturaId = null,
-                ProfesionalId = profesionalId,
-                PacienteId = _selectedTurnoPacienteId
-            };
-
-            await UiErrorHandler.ExecuteAsync(async () =>
-                {
-                    if (_selectedTurnoId == null)
-                    {
-                        await TurnoApiClient.AddAsync(turnoDto);
-                        MessageBox.Show("Turno registrado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-                    else
-                    {
-                        await TurnoApiClient.UpdateAsync(turnoDto);
-                        MessageBox.Show("Turno actualizado correctamente.", "Éxito", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                    }
-
-                    LimpiarFormulario();
-                    await CargarTurnosAsync();
-                }, this, "Error al guardar turno");
-        }
-
-        private void CancelarButton_Click(object? sender, EventArgs e)
-        {
-            LimpiarFormulario();
-        }
-
-        private void LimpiarFormulario()
-        {
-            _selectedTurnoId = null;
-            _selectedTurnoPacienteId = null;
-            numeroTurnoTextBox.Text = string.Empty;
-
-            PoblarComboEspecialidadFormulario();
-            PoblarComboProfesionalesFormulario(0);
-
-            fechaTurnoDateTimePicker.Value = DateTime.Today;
-            horaInicioDateTimePicker.Value = DateTime.Today.AddHours(8);
-            horaFinDateTimePicker.Value = DateTime.Today.AddHours(8).AddMinutes(30);
-
-            if (estadoComboBox.Items.Count > 0)
-            {
-                estadoComboBox.SelectedIndex = 0; // "Libre"
-            }
-
-            guardarTurnoButton.Text = "Guardar Turno";
         }
 
         // ==========================================

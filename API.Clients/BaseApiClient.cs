@@ -287,6 +287,7 @@ namespace API.Clients
                 HttpStatusCode.NotFound => new NotFoundApiException(cleanMessage, title, detail),
                 HttpStatusCode.Conflict => new ConflictApiException(cleanMessage, title, detail),
                 HttpStatusCode.Unauthorized => new UnauthorizedApiException(cleanMessage),
+                HttpStatusCode.Forbidden => new ForbiddenApiException(cleanMessage, title, detail),
                 _ => new ApiException(cleanMessage, response.StatusCode, title, detail, errors)
             };
         }
