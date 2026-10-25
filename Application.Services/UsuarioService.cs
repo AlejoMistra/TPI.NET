@@ -68,6 +68,7 @@ namespace Application.Services
                 rol,
                 true,
                 personaId);
+            usuario.SetGrupo(await ObtenerGrupoDelRolAsync(rol));
 
             await _usuarioRepository.AddAsync(usuario);
 
@@ -100,6 +101,7 @@ namespace Application.Services
             usuario.SetActivo(updateDto.Activo);
             usuario.SetRol(rol);
             usuario.SetPersonaId(personaId);
+            usuario.SetGrupo(await ObtenerGrupoDelRolAsync(rol));
 
             // Solo actualizar contraseña si se proporciona
             if (!string.IsNullOrWhiteSpace(updateDto.Password))
@@ -113,6 +115,19 @@ namespace Application.Services
         public async Task<bool> DeleteAsync(int id)
         {
             return await _usuarioRepository.DeleteAsync(id);
+        }
+
+        // Los permisos salen del grupo: cada rol usa el grupo que crea el seed (el rol Paciente no tiene)
+        private async Task<GrupoPermiso?> ObtenerGrupoDelRolAsync(Usuario.Roles rol)
+        {
+            var nombreGrupo = rol switch
+            {
+                Usuario.Roles.Administrativo => "Administrador",
+                Usuario.Roles.Profesional => "Profesional",
+                _ => null
+            };
+
+            return nombreGrupo != null ? await _usuarioRepository.GetGrupoByNombreAsync(nombreGrupo) : null;
         }
 
         // Rol del usuario; si no se indica, Administrativo

@@ -61,5 +61,12 @@ namespace Data
             await _context.SaveChangesAsync();
             return true;
         }
+
+        // Con seguimiento a propósito: al asignarlo a un usuario, EF lo reconoce como existente y no lo vuelve a insertar
+        public async Task<GrupoPermiso?> GetGrupoByNombreAsync(string nombre)
+        {
+            return await _context.GruposPermisos
+                .FirstOrDefaultAsync(g => g.Nombre == nombre && g.Activo);
+        }
     }
 }
