@@ -17,6 +17,7 @@ namespace Data
             await SeedProfesionalesAsync(context, logger);
             await SeedPacientesAsync(context, logger);
             await SeedTurnosAsync(context, logger);
+            await SeedFacturasAsync(context, logger);
             await SeedRegistrosClinicosAsync(context, logger);
             await SeedPermisosYGruposAsync(context, logger);
             await SeedUsuariosAsync(context, logger);
@@ -28,17 +29,35 @@ namespace Data
         {
             if (await context.Especialidades.AnyAsync())
             {
-                logger.LogInformation("Especialidades: ya existen registros, se omite el seed.");
+                var existentes = await context.Especialidades.ToListAsync();
+                foreach (var esp in existentes)
+                {
+                    if (esp.Precio == 0m)
+                    {
+                        decimal precio = esp.Nombre switch
+                        {
+                            "Cardiología" => 35000m,
+                            "Dermatología" => 28000m,
+                            "Neurología" => 32000m,
+                            "Pediatría" => 25000m,
+                            "Clínica Médica" => 22000m,
+                            _ => 25000m
+                        };
+                        esp.SetPrecio(precio);
+                    }
+                }
+                await context.SaveChangesAsync();
+                logger.LogInformation("Especialidades: ya existen registros, precios verificados/actualizados.");
                 return;
             }
 
             var especialidades = new List<Especialidad>
             {
-                new Especialidad(0, "Cardiología"),
-                new Especialidad(0, "Dermatología"),
-                new Especialidad(0, "Neurología"),
-                new Especialidad(0, "Pediatría"),
-                new Especialidad(0, "Clínica Médica"),
+                new Especialidad(0, "Cardiología", 35000m),
+                new Especialidad(0, "Dermatología", 28000m),
+                new Especialidad(0, "Neurología", 32000m),
+                new Especialidad(0, "Pediatría", 25000m),
+                new Especialidad(0, "Clínica Médica", 22000m),
             };
 
             context.Especialidades.AddRange(especialidades);
@@ -307,12 +326,137 @@ namespace Data
                     facturaId: null,
                     profesionalId: drSuarez.Id,
                     pacienteId: sofia.Id
+                ),
+
+                // Turnos históricos (Mes anterior)
+                new Turno(
+                    id: 0,
+                    fechaHoraInicio: today.AddMonths(-1).AddDays(2).AddHours(10),
+                    fechaHoraFin: today.AddMonths(-1).AddDays(2).AddHours(10).AddMinutes(30),
+                    motivo: "Evaluación cardiológica mensual",
+                    estadoTurno: Turno.EstadosTurno.Atendido,
+                    observaciones: "Paciente con buena evolución general.",
+                    facturaId: null,
+                    profesionalId: draFernandez.Id,
+                    pacienteId: ana.Id
+                ),
+                new Turno(
+                    id: 0,
+                    fechaHoraInicio: today.AddMonths(-1).AddDays(5).AddHours(11),
+                    fechaHoraFin: today.AddMonths(-1).AddDays(5).AddHours(11).AddMinutes(30),
+                    motivo: "Dermatología clínica",
+                    estadoTurno: Turno.EstadosTurno.Atendido,
+                    observaciones: "Control de lunares y manchas.",
+                    facturaId: null,
+                    profesionalId: drRodriguez.Id,
+                    pacienteId: carlos.Id
+                ),
+                new Turno(
+                    id: 0,
+                    fechaHoraInicio: today.AddMonths(-1).AddDays(8).AddHours(16),
+                    fechaHoraFin: today.AddMonths(-1).AddDays(8).AddHours(16).AddMinutes(30),
+                    motivo: "Control pediátrico",
+                    estadoTurno: Turno.EstadosTurno.Ausente,
+                    observaciones: "No asistió.",
+                    facturaId: null,
+                    profesionalId: drSuarez.Id,
+                    pacienteId: diego.Id
+                ),
+                new Turno(
+                    id: 0,
+                    fechaHoraInicio: today.AddMonths(-1).AddDays(12).AddHours(9),
+                    fechaHoraFin: today.AddMonths(-1).AddDays(12).AddHours(9).AddMinutes(30),
+                    motivo: string.Empty,
+                    estadoTurno: Turno.EstadosTurno.Libre,
+                    observaciones: "Slot libre del período anterior.",
+                    facturaId: null,
+                    profesionalId: draFernandez.Id,
+                    pacienteId: null
+                ),
+
+                // Turnos históricos (Hace dos meses)
+                new Turno(
+                    id: 0,
+                    fechaHoraInicio: today.AddMonths(-2).AddDays(3).AddHours(9),
+                    fechaHoraFin: today.AddMonths(-2).AddDays(3).AddHours(9).AddMinutes(30),
+                    motivo: "Chequeo inicial",
+                    estadoTurno: Turno.EstadosTurno.Atendido,
+                    observaciones: "Primer control cardiológico.",
+                    facturaId: null,
+                    profesionalId: draFernandez.Id,
+                    pacienteId: sofia.Id
+                ),
+                new Turno(
+                    id: 0,
+                    fechaHoraInicio: today.AddMonths(-2).AddDays(7).AddHours(15),
+                    fechaHoraFin: today.AddMonths(-2).AddDays(7).AddHours(15).AddMinutes(30),
+                    motivo: "Consulta general",
+                    estadoTurno: Turno.EstadosTurno.Atendido,
+                    observaciones: "Atención completa.",
+                    facturaId: null,
+                    profesionalId: drSuarez.Id,
+                    pacienteId: ana.Id
                 )
             };
 
             context.Turnos.AddRange(turnos);
             await context.SaveChangesAsync();
             logger.LogInformation("Turnos: {Count} registros insertados.", turnos.Count);
+        }
+
+        // Facturas
+        private static async Task SeedFacturasAsync(TPIContext context, ILogger logger)
+        {
+            if (await context.Facturas.AnyAsync())
+            {
+                logger.LogInformation("Facturas: ya existen registros, se omite el seed.");
+                return;
+            }
+
+            var turnosAtendidos = await context.Turnos
+                .Where(t => t.EstadoTurno == Turno.EstadosTurno.Atendido && t.FacturaId == null)
+                .OrderBy(t => t.FechaHoraInicio)
+                .ToListAsync();
+
+            if (!turnosAtendidos.Any())
+            {
+                logger.LogWarning("Facturas: no hay turnos atendidos disponibles para asociar facturas.");
+                return;
+            }
+
+            // Facturar algunos de los turnos atendidos (dejando otros pendientes para ver la columna 'Diferencia')
+            int facturadosCount = 0;
+            // Tomamos los primeros (por ejemplo los más antiguos y algunos recientes)
+            var turnosParaFacturar = turnosAtendidos.Take(Math.Max(1, turnosAtendidos.Count - 2)).ToList();
+
+            foreach (var turno in turnosParaFacturar)
+            {
+                var metodoPago = (facturadosCount % 3 == 0)
+                    ? Factura.MetodosPago.TransferenciaBancaria
+                    : (facturadosCount % 2 == 0 ? Factura.MetodosPago.TarjetaCredito : Factura.MetodosPago.Efectivo);
+
+                var factura = new Factura(turno.Id, metodoPago, turno.FechaHoraInicio.AddMinutes(40));
+
+                decimal precioConsulta = 28000m;
+                if (facturadosCount % 2 == 1)
+                {
+                    factura.AgregarDetalle("Consulta Médica Especializada", 1, precioConsulta);
+                    factura.AgregarDetalle("Estudio complementario diagnóstico", 1, 15000m);
+                }
+                else
+                {
+                    factura.AgregarDetalle("Consulta Médica Especializada", 1, precioConsulta);
+                }
+
+                context.Facturas.Add(factura);
+                await context.SaveChangesAsync();
+
+                turno.AsociarFactura(factura.Id);
+                facturadosCount++;
+            }
+
+            await context.SaveChangesAsync();
+            logger.LogInformation("Facturas: {Count} facturas insertadas y asociadas a turnos.", facturadosCount);
         }
 
         // Registros Clínicos
@@ -521,7 +665,11 @@ namespace Data
                 ("usuarios", "eliminar", "Eliminar usuarios"),
 
                 // Datos Maestros (UI)
-                ("datosmaestros", "leer", "Acceso a datos maestros")
+                ("datosmaestros", "leer", "Acceso a datos maestros"),
+
+                // Reportes
+                ("reportes", "turnos.leer", "Leer reporte de turnos"),
+                ("reportes", "facturacion.leer", "Leer reporte de facturación")
             };
 
             foreach (var (categoria, nombre, descripcion) in permisosDefinidos)
@@ -582,7 +730,8 @@ namespace Data
                 "historiasclinicas.agregar",
                 "historiasclinicas.actualizar",
                 "especialidades.leer",
-                "profesionales.leer"
+                "profesionales.leer",
+                "reportes.turnos.leer"
             };
 
             foreach (var permiso in todosLosPermisos)

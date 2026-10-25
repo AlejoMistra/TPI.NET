@@ -18,7 +18,7 @@ public class EspecialidadRepository : IEspecialidadRepository
     public async Task<IEnumerable<Especialidad>> GetAllAsync()
     {
         var result = new List<Especialidad>();
-        const string query = "SELECT Id, Nombre FROM Especialidades ORDER BY Nombre";
+        const string query = "SELECT Id, Nombre, Precio FROM Especialidades ORDER BY Nombre";
 
         using var connection = new SqlConnection(_connectionString);
         using var command = new SqlCommand(query, connection);
@@ -30,7 +30,8 @@ public class EspecialidadRepository : IEspecialidadRepository
         {
             var id = reader.GetInt32(0);
             var nombre = reader.GetString(1);
-            result.Add(new Especialidad(id, nombre));
+            var precio = !reader.IsDBNull(2) ? reader.GetDecimal(2) : 0m;
+            result.Add(new Especialidad(id, nombre, precio));
         }
 
         return result;
@@ -38,7 +39,7 @@ public class EspecialidadRepository : IEspecialidadRepository
 
     public async Task<Especialidad?> GetByIdAsync(int id)
     {
-        const string query = "SELECT Id, Nombre FROM Especialidades WHERE Id = @Id";
+        const string query = "SELECT Id, Nombre, Precio FROM Especialidades WHERE Id = @Id";
 
         using var connection = new SqlConnection(_connectionString);
         using var command = new SqlCommand(query, connection);
@@ -50,7 +51,8 @@ public class EspecialidadRepository : IEspecialidadRepository
         if (await reader.ReadAsync())
         {
             var nombre = reader.GetString(1);
-            return new Especialidad(id, nombre);
+            var precio = !reader.IsDBNull(2) ? reader.GetDecimal(2) : 0m;
+            return new Especialidad(id, nombre, precio);
         }
 
         return null;
@@ -59,13 +61,14 @@ public class EspecialidadRepository : IEspecialidadRepository
     public async Task AddAsync(Especialidad especialidad)
     {
         const string query = @"
-            INSERT INTO Especialidades (Nombre) 
-            VALUES (@Nombre);
+            INSERT INTO Especialidades (Nombre, Precio) 
+            VALUES (@Nombre, @Precio);
             SELECT CAST(SCOPE_IDENTITY() AS int);";
 
         using var connection = new SqlConnection(_connectionString);
         using var command = new SqlCommand(query, connection);
         command.Parameters.Add("@Nombre", SqlDbType.NVarChar, 100).Value = especialidad.Nombre;
+        command.Parameters.Add("@Precio", SqlDbType.Decimal).Value = especialidad.Precio;
 
         await connection.OpenAsync();
         var newId = (int)(await command.ExecuteScalarAsync())!;
@@ -74,12 +77,13 @@ public class EspecialidadRepository : IEspecialidadRepository
 
     public async Task<Especialidad?> UpdateAsync(Especialidad especialidad)
     {
-        const string query = "UPDATE Especialidades SET Nombre = @Nombre WHERE Id = @Id";
+        const string query = "UPDATE Especialidades SET Nombre = @Nombre, Precio = @Precio WHERE Id = @Id";
 
         using var connection = new SqlConnection(_connectionString);
         using var command = new SqlCommand(query, connection);
         command.Parameters.Add("@Id", SqlDbType.Int).Value = especialidad.Id;
         command.Parameters.Add("@Nombre", SqlDbType.NVarChar, 100).Value = especialidad.Nombre;
+        command.Parameters.Add("@Precio", SqlDbType.Decimal).Value = especialidad.Precio;
 
         await connection.OpenAsync();
         var rowsAffected = await command.ExecuteNonQueryAsync();
