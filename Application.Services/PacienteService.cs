@@ -21,6 +21,18 @@ namespace Application.Services
             return pacientes.Select(MapToDTO).ToList();
         }
 
+        public async Task<IEnumerable<PacienteDTO>> GetByCriteriaAsync(PacienteCriteriaDTO criteriaDTO)
+        {
+            // Mapear DTO a Domain Model
+            var criteria = new PacienteCriteria(criteriaDTO.Texto, criteriaDTO.ObraSocial, criteriaDTO.EspecialidadId, criteriaDTO.ProfesionalId);
+
+            // Llamar al repositorio (ADO.NET)
+            var pacientes = await _pacienteRepository.GetByCriteriaAsync(criteria);
+
+            // Mapear Domain Model a DTO
+            return pacientes.Select(MapToDTO).ToList();
+        }
+
         public async Task<PacienteDTO?> GetByIdAsync(int id)
         {
             if (id <= 0)

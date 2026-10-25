@@ -9,5 +9,6 @@ namespace Application.Services
         Task<PacienteDTO> AddAsync(PacienteDTO dto);
         Task<PacienteDTO?> UpdateAsync(PacienteDTO dto);
         Task<bool> DeleteAsync(int id);
+        Task<IEnumerable<PacienteDTO>> GetByCriteriaAsync(PacienteCriteriaDTO criteriaDTO);
     }
 }
