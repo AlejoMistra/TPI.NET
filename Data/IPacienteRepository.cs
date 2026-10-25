@@ -12,5 +12,6 @@ namespace Data
     Task<bool> EmailExistsAsync(string email, int? excludeId = null);
     Task<bool> DocumentoExistsAsync(string nroDocumento, int? excludeId = null);
     Task<bool> HasTurnosAsync(int pacienteId);
+    Task<IEnumerable<Paciente>> GetByCriteriaAsync(PacienteCriteria criteria);
   }
 }

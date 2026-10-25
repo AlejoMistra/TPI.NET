@@ -18,5 +18,18 @@ namespace API.Clients
 
         public static Task DeleteAsync(int id)
             => SendDeleteAsync($"pacientes/{id}");
+
+        public static Task<IEnumerable<PacienteDTO>> GetByCriteriaAsync(PacienteCriteriaDTO criteria)
+        {
+            var filtros = new List<string> { $"texto={Uri.EscapeDataString(criteria.Texto ?? string.Empty)}" };
+            if (!string.IsNullOrWhiteSpace(criteria.ObraSocial))
+                filtros.Add($"obraSocial={Uri.EscapeDataString(criteria.ObraSocial)}");
+            if (criteria.EspecialidadId > 0)
+                filtros.Add($"especialidadId={criteria.EspecialidadId}");
+            if (criteria.ProfesionalId > 0)
+                filtros.Add($"profesionalId={criteria.ProfesionalId}");
+
+            return SendGetAsync<IEnumerable<PacienteDTO>>($"pacientes/criteria?{string.Join("&", filtros)}");
+        }
     }
 }

@@ -31,6 +31,24 @@ namespace WebAPI
             .WithOpenApi()
             .RequireAuthorization("PacientesLeer");
 
+            // GET: /pacientes/criteria?texto=&obraSocial=&especialidadId=&profesionalId=
+            app.MapGet("/pacientes/criteria", async (string? texto, string? obraSocial, int? especialidadId, int? profesionalId, IPacienteService pacienteService) =>
+            {
+                var criteria = new PacienteCriteriaDTO
+                {
+                    Texto = texto ?? string.Empty,
+                    ObraSocial = obraSocial,
+                    EspecialidadId = especialidadId,
+                    ProfesionalId = profesionalId
+                };
+                var pacientes = await pacienteService.GetByCriteriaAsync(criteria);
+                return Results.Ok(pacientes);
+            })
+            .WithName("GetPacientesByCriteria")
+            .Produces<List<PacienteDTO>>(StatusCodes.Status200OK)
+            .WithOpenApi()
+            .RequireAuthorization("PacientesLeer");
+
             // POST: /pacientes
             app.MapPost("/pacientes", async (PacienteDTO pacienteDto, IPacienteService pacienteService) =>
             {
