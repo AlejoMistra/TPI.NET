@@ -28,6 +28,7 @@ namespace WindowsForms
             busquedaEspecialidadComboBox = new ComboBox();
             busquedaProfesionalLabel = new Label();
             busquedaProfesionalComboBox = new ComboBox();
+            buscarButton = new Button();
             limpiarFiltrosLinkLabel = new LinkLabel();
             pacientesDataGridView = new DataGridView();
             tableLayoutPanel1.SuspendLayout();
@@ -68,7 +69,8 @@ namespace WindowsForms
             // tableLayoutPanel2
             // 
             tableLayoutPanel2.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            tableLayoutPanel2.ColumnCount = 5;
+            tableLayoutPanel2.ColumnCount = 6;
+            tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle());
             tableLayoutPanel2.ColumnStyles.Add(new ColumnStyle());
@@ -82,7 +84,8 @@ namespace WindowsForms
             tableLayoutPanel2.Controls.Add(busquedaEspecialidadComboBox, 2, 1);
             tableLayoutPanel2.Controls.Add(busquedaProfesionalLabel, 3, 0);
             tableLayoutPanel2.Controls.Add(busquedaProfesionalComboBox, 3, 1);
-            tableLayoutPanel2.Controls.Add(limpiarFiltrosLinkLabel, 4, 1);
+            tableLayoutPanel2.Controls.Add(buscarButton, 4, 1);
+            tableLayoutPanel2.Controls.Add(limpiarFiltrosLinkLabel, 5, 1);
             tableLayoutPanel2.Dock = DockStyle.Fill;
             tableLayoutPanel2.Location = new Point(3, 19);
             tableLayoutPanel2.Name = "tableLayoutPanel2";
@@ -108,7 +111,7 @@ namespace WindowsForms
             busquedaPacienteTextBox.PlaceholderText = "Nombre, Apellido o DNI...";
             busquedaPacienteTextBox.Size = new Size(220, 23);
             busquedaPacienteTextBox.TabIndex = 1;
-            busquedaPacienteTextBox.TextChanged += FiltrarDataGridView;
+            busquedaPacienteTextBox.KeyDown += BusquedaPacienteTextBox_KeyDown;
             // 
             // busquedaObraSocialLabel
             // 
@@ -127,7 +130,6 @@ namespace WindowsForms
             busquedaObraSocialComboBox.Name = "busquedaObraSocialComboBox";
             busquedaObraSocialComboBox.Size = new Size(160, 23);
             busquedaObraSocialComboBox.TabIndex = 2;
-            busquedaObraSocialComboBox.SelectedIndexChanged += FiltrarDataGridView;
             // 
             // busquedaEspecialidadLabel
             // 
@@ -148,7 +150,6 @@ namespace WindowsForms
             busquedaEspecialidadComboBox.Size = new Size(175, 23);
             busquedaEspecialidadComboBox.TabIndex = 3;
             busquedaEspecialidadComboBox.SelectedIndexChanged += BusquedaEspecialidadComboBox_SelectedIndexChanged;
-            busquedaEspecialidadComboBox.SelectedValueChanged += FiltrarDataGridView;
             // 
             // busquedaProfesionalLabel
             // 
@@ -169,16 +170,26 @@ namespace WindowsForms
             busquedaProfesionalComboBox.Size = new Size(195, 23);
             busquedaProfesionalComboBox.TabIndex = 4;
             busquedaProfesionalComboBox.SelectedIndexChanged += BusquedaProfesionalComboBox_SelectedIndexChanged;
-            busquedaProfesionalComboBox.SelectedValueChanged += FiltrarDataGridView;
+            // 
+            // buscarButton
+            // 
+            buscarButton.Anchor = AnchorStyles.Left;
+            buscarButton.Location = new Point(777, 18);
+            buscarButton.Name = "buscarButton";
+            buscarButton.Size = new Size(75, 23);
+            buscarButton.TabIndex = 5;
+            buscarButton.Text = "Buscar";
+            buscarButton.UseVisualStyleBackColor = true;
+            buscarButton.Click += BuscarButton_Click;
             // 
             // limpiarFiltrosLinkLabel
             // 
             limpiarFiltrosLinkLabel.Anchor = AnchorStyles.Left;
             limpiarFiltrosLinkLabel.AutoSize = true;
-            limpiarFiltrosLinkLabel.Location = new Point(777, 22);
+            limpiarFiltrosLinkLabel.Location = new Point(858, 22);
             limpiarFiltrosLinkLabel.Name = "limpiarFiltrosLinkLabel";
             limpiarFiltrosLinkLabel.Size = new Size(80, 15);
-            limpiarFiltrosLinkLabel.TabIndex = 5;
+            limpiarFiltrosLinkLabel.TabIndex = 6;
             limpiarFiltrosLinkLabel.TabStop = true;
             limpiarFiltrosLinkLabel.Text = "Limpiar filtros";
             limpiarFiltrosLinkLabel.LinkClicked += LimpiarFiltrosLinkLabel_LinkClicked;
@@ -234,6 +245,7 @@ namespace WindowsForms
         private ComboBox busquedaEspecialidadComboBox = null!;
         private Label busquedaProfesionalLabel = null!;
         private ComboBox busquedaProfesionalComboBox = null!;
+        private Button buscarButton = null!;
         private LinkLabel limpiarFiltrosLinkLabel = null!;
         private DataGridView pacientesDataGridView = null!;
     }
