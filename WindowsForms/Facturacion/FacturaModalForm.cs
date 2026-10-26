@@ -12,6 +12,7 @@ namespace WindowsForms
         private TurnoDTO? _turno;
         private FacturaDTO? _facturaExistente;
         private string _especialidadNombre = "Consulta General";
+        private decimal _especialidadPrecio = 0.00m;
         private bool _modoSoloLectura = false;
 
         private readonly BindingList<DetalleItemRow> _detalles = new();
@@ -161,6 +162,7 @@ namespace WindowsForms
                 var pac = _turno.PacienteId.HasValue ? pacientes.FirstOrDefault(pa => pa.Id == _turno.PacienteId.Value) : null;
 
                 _especialidadNombre = esp?.Nombre ?? "Consulta General";
+                _especialidadPrecio = esp?.Precio ?? 0.00m;
 
                 turnoIdValueLabel.Text = $"#{_turno.Id}";
                 fechaHoraValueLabel.Text = $"{_turno.FechaHoraInicio:dd/MM/yyyy} ({_turno.FechaHoraInicio:HH:mm} - {_turno.FechaHoraFin:HH:mm})";
@@ -176,7 +178,7 @@ namespace WindowsForms
                 }
                 else
                 {
-                    ConfigurarModoEmision();
+                    ConfigurarModoEmision(_especialidadPrecio);
                 }
             }, this, "Error al cargar datos de facturación");
 
@@ -187,14 +189,14 @@ namespace WindowsForms
             }
         }
 
-        private void ConfigurarModoEmision()
+        private void ConfigurarModoEmision(decimal precioUnitario = 0.00m)
         {
             _modoSoloLectura = false;
             this.Text = $"Emitir Factura - Turno N° {_turno!.Id}";
 
             bannerLabel.BackColor = Color.FromArgb(235, 243, 255);
             bannerLabel.ForeColor = Color.FromArgb(0, 102, 204);
-            bannerLabel.Text = "Emisión de Factura; ingrese el Precio Unitario en la grilla y sume otros conceptos si corresponde.";
+            bannerLabel.Text = "Emisión de Factura: verifique los conceptos e importes en la grilla y sume otros conceptos si corresponde.";
 
             nroFacturaValueLabel.Text = "Nueva (Al emitir)";
             fechaEmisionValueLabel.Text = DateTime.Now.ToString("dd/MM/yyyy HH:mm");
@@ -217,19 +219,26 @@ namespace WindowsForms
             {
                 Concepto = $"Consulta Médica - {_especialidadNombre}",
                 Cantidad = 1,
-                PrecioUnitario = 0.00m
+                PrecioUnitario = decimal.Round(precioUnitario, 2)
             });
 
             ActualizarTotal();
 
-            // Posicionar el foco en la celda Precio Unitario de la primera fila precargada
+            // Posicionar el foco en la grilla; si ya viene precio cargado (> 0), enfocar confirmarButton sin forzar edición
             BeginInvoke(new Action(() =>
             {
                 if (detallesDataGridView.Rows.Count > 0)
                 {
                     var precioCell = detallesDataGridView.Rows[0].Cells["precioUnitarioColumn"];
                     detallesDataGridView.CurrentCell = precioCell;
-                    detallesDataGridView.BeginEdit(true);
+                    if (precioUnitario <= 0)
+                    {
+                        detallesDataGridView.BeginEdit(true);
+                    }
+                    else
+                    {
+                        confirmarButton.Focus();
+                    }
                 }
             }));
         }

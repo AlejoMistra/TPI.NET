@@ -9,6 +9,7 @@ using System.Threading.Tasks;
 using System.Windows.Forms;
 using API.Clients;
 using DatosMaestrosUC = WindowsForms.DatosMaestros.DatosMaestros;
+using ReportesUC = WindowsForms.Reportes.Reportes;
 
 namespace WindowsForms
 {
@@ -40,11 +41,16 @@ namespace WindowsForms
             bool canViewAgenda = await authService.HasPermissionAsync("turnos.leer");
             bool canViewPacientes = await authService.HasPermissionAsync("pacientes.leer");
             bool canViewFacturacion = await authService.HasPermissionAsync("facturas.leer");
+            bool canViewReporteTurnos = await authService.HasPermissionAsync("reportes.turnos.leer");
             bool canViewDatosMaestros = await authService.HasPermissionAsync("datosmaestros.leer");
+            bool isAdmin = await authService.IsInRoleAsync("Administrativo");
+            bool canViewReporteFacturacion = await authService.HasPermissionAsync("reportes.facturacion.leer");
+            bool canViewReportes = isAdmin && (canViewReporteTurnos || canViewReporteFacturacion);
 
             agendaDeTurnosToolStripMenuItem.Visible = canViewAgenda;
             pacientesToolStripMenuItem.Visible = canViewPacientes;
             facturacionToolStripMenuItem.Visible = canViewFacturacion;
+            reportesToolStripMenuItem.Visible = canViewReportes;
             datosMaestrosToolStripMenuItem.Visible = canViewDatosMaestros;
 
             // Cargar por defecto la primera opción disponible
@@ -84,6 +90,7 @@ namespace WindowsForms
             pacientesToolStripMenuItem.BackColor = SystemColors.Control;
             facturacionToolStripMenuItem.BackColor = SystemColors.Control;
             datosMaestrosToolStripMenuItem.BackColor = SystemColors.Control;
+            reportesToolStripMenuItem.BackColor = SystemColors.Control;
             agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.ControlLight;
             ShowControl(new AgendaTurnos());
         }
@@ -93,6 +100,7 @@ namespace WindowsForms
             agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.Control;
             facturacionToolStripMenuItem.BackColor = SystemColors.Control;
             datosMaestrosToolStripMenuItem.BackColor = SystemColors.Control;
+            reportesToolStripMenuItem.BackColor = SystemColors.Control;
             pacientesToolStripMenuItem.BackColor = SystemColors.ControlLight;
             ShowControl(new Pacientes());
         }
@@ -101,6 +109,7 @@ namespace WindowsForms
         {
             agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.Control;
             pacientesToolStripMenuItem.BackColor = SystemColors.Control;
+            reportesToolStripMenuItem.BackColor = SystemColors.Control;
             datosMaestrosToolStripMenuItem.BackColor = SystemColors.Control;
             facturacionToolStripMenuItem.BackColor = SystemColors.ControlLight;
             ShowControl(new Facturacion());
@@ -112,8 +121,19 @@ namespace WindowsForms
             agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.Control;
             pacientesToolStripMenuItem.BackColor = SystemColors.Control;
             facturacionToolStripMenuItem.BackColor = SystemColors.Control;
+            reportesToolStripMenuItem.BackColor = SystemColors.Control;
             datosMaestrosToolStripMenuItem.BackColor = SystemColors.ControlLight;
             ShowControl(new DatosMaestrosUC());
+        }
+
+        private void reportesToolStripMenuItem_Click(object sender, EventArgs e)
+        {
+            agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.Control;
+            pacientesToolStripMenuItem.BackColor = SystemColors.Control;
+            facturacionToolStripMenuItem.BackColor = SystemColors.Control;
+            reportesToolStripMenuItem.BackColor = SystemColors.ControlLight;
+            datosMaestrosToolStripMenuItem.BackColor = SystemColors.Control;
+            ShowControl(new ReportesUC());
         }
     }
 }

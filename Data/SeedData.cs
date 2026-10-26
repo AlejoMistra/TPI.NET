@@ -730,8 +730,7 @@ namespace Data
                 "historiasclinicas.agregar",
                 "historiasclinicas.actualizar",
                 "especialidades.leer",
-                "profesionales.leer",
-                "reportes.turnos.leer"
+                "profesionales.leer"
             };
 
             foreach (var permiso in todosLosPermisos)
