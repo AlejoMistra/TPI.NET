@@ -16,35 +16,69 @@
 
 Sistema de gestión para consultorios médicos que permite administrar pacientes, profesionales, especialidades, turnos y su facturación. El sistema centraliza los datos médicos de cada paciente en una Historia Clínica, la cual agrupa todas sus consultas a lo largo del tiempo, mientras que un módulo administrativo paralelo gestiona el cobro y estado de cuenta de las prestaciones realizadas.
 
-### i. Requerimientos funcionales y no funcionales
+### 1. Requerimientos Funcionales
 
-- **Requerimientos Funcionales:**
-  - Autenticación y control de accesos por roles (Administrativo, Profesional, Paciente).
-  - Gestión de datos maestros (Profesionales, Especialidades y Pacientes).
-  - Agenda y gestión de turnos: asignación, registro de llegada (presentismo), atención clínica, cancelación/liberación y registro de ausencias.
-  - Historia clínica digital: adición y consulta cronológica de evoluciones, diagnósticos, alergias y antecedentes médicos vinculados al turno atendido.
-  - Facturación con patrón Maestro/Detalle: generación de facturas con aranceles por especialidad y métodos de pago múltiples.
-  - Reportes gerenciales y estadísticos en escritorio y web (exportación a PDF de comprobantes y métricas de atención).
-- **Requerimientos No Funcionales:**
-  - Persistencia relacional en Microsoft SQL Server con Entity Framework Core 8 y seed de datos iniciales.
-  - Arquitectura multicapa desacoplada: Presentación dual (Windows Forms y Blazor Server), API REST WebAPI, Capa de Servicios de Aplicación, Capa de Acceso a Datos y Modelo de Dominio independiente.
-  - Seguridad mediante uso de tokens JWT para autenticación y autorización de usuarios.
+1. **Autenticación de Usuarios (Login):**
+   - El sistema cuenta con control de acceso restrictivo mediante pantalla de autenticación (`LoginForm` en la aplicación de escritorio Windows Forms y `/login` en la aplicación web Blazor Server).
+   - Solo pueden acceder al sistema aquellos usuarios previamente registrados en la base de datos que se encuentren en estado `Activo`.
+   - Las contraseñas se almacenan protegidas mediante salting criptográfico aleatorio y hashing SHA-256 (`Usuario.PasswordHash` y `Usuario.Salt`). La autenticación se valida en la API REST emitiendo un token seguro JWT para la sesión.
+
+2. **Tipos de Usuario y Autorización (Roles y Permisos):**
+   - El sistema implementa autorización granular basada en roles (RBAC) con tipos de usuario claramente diferenciados en sus capacidades operativas:
+     - **Administrativo:** Responsable de la recepción y administración general. Gestiona los datos maestros (Especialidades, Profesionales, Pacientes), administra la agenda de turnos (creación de turnos, asignación a pacientes, liberación y registro de llegada a sala de espera), emite y anula comprobantes de facturación y accede a los reportes.
+     - **Profesional (Médico):** Accede de forma exclusiva a su agenda personal de turnos asignados. Puede cambiar el estado del turno a `Atendido`, visualizar los antecedentes médicos en la Historia Clínica digital del paciente y redactar diagnósticos, evoluciones y notas clínicas.
+
+3. **6 CRUDs:**
+   1. **CRUD Pacientes:** Gestión integral de pacientes (filiación, tipo y nro. de documento, obra social, contacto y fecha de nacimiento).
+   2. **CRUD Profesionales:** Alta, baja lógica (estado `Activo`/`Inactivo`), edición y consulta de médicos, con asignación de matrícula profesional y especialidad médica.
+   3. **CRUD Especialidades:** Administración de las especialidades médicas del centro de salud y fijación de sus aranceles estándar de consulta.
+   4. **CRUD Turnos:** Creación de espacios de agenda médica, asignación a pacientes, seguimiento de estados del flujo de atención (`Libre`, `Asignado`, `Presente`, `Atendido`, `Ausente`) y liberación/cancelación.
+   5. **CRUD Registros Clínicos (Historia Clínica):** Gestión de entradas clínicas inmutables (diagnósticos, antecedentes, alergias, tratamientos y notas) asociadas a la historia clínica del paciente, vinculadas al turno atendido y al profesional firmante.
+   6. **CRUD Facturación:** Emisión, consulta, detalle y anulación de comprobantes de cobro de consultas médicas.
+
+4. **Búsqueda con Filtros y Patrón Relacional Maestro/Detalle:**
+   - **Búsqueda con Filtros:** Implementada en:
+     - **Agenda de Turnos:** Búsqueda y filtrado dinámico multidimensional por rango de fechas (desde/hasta), profesional seleccionado y estado asistencial del turno (`Libre`, `Asignado`, `Presente`, `Atendido`, `Ausente`).
+     - **Búsqueda de Pacientes:** Búsqueda con criterios múltiples por número de documento, nombre, apellido u obra social (`PacienteCriteria`).
+   - **Patrón Maestro/Detalle:** Implementado en el módulo de **Facturación**:
+     - **Maestro (Cabecera):** Entidad `Factura` que centraliza `TurnoId`, `FechaEmision`, `MontoTotal`, `MetodoPago` y `EstadoFactura`.
+     - **Detalle (Renglones):** Entidad `DetalleFactura` que modela cada prestación facturada con `Concepto`, `Cantidad`, `PrecioUnitario` y cálculo dinámico de `Subtotal`, manteniendo consistencia transaccional y actualización automática del monto total de la cabecera.
+
+5. **Reportes del Sistema (Mínimo 2 Reportes, incluyendo gráficos):**
+   - **Reporte 1: Tablero de Turnos y Métricas de Atención:**
+     - Permite filtrar por rango de fechas (desde/hasta), profesional y especialidad.
+     - Presenta métricas sobre la atención de turnos (total de turnos, tasa de asistencia efectiva y ausentismo).
+     - **Gráfico Estadístico:** Genera un gráfico de torta (Pie Chart) generado con **OxyPlot** a formato vectorial SVG e incrustado directamente en el reporte PDF / visualizado en pantalla mediante WebView2, ilustrando el porcentaje de turnos por cada estado asistencial.
+   - **Reporte 2: Reporte de Facturación y Liquidaciones:**
+     - Permite filtrar por rango de fechas (desde/hasta), profesional y estado de la facturación.
+     - Resumen económico de recaudación por período seleccionado.
+     - Detalla subtotales por profesional, especialidad y método de pago (Efectivo, Tarjetas, Transferencia), generando comprobantes y resúmenes ejecutivos en PDF mediante **QuestPDF**.
+
+---
+
+### 2. Requerimientos Técnicos
+
+1. **Soporte Dual Desktop y Web:**
+   - **Cliente Desktop:** Desarrollado en **Windows Forms** (.NET 8 Windows Desktop), diseñado para la operación administrativa rápida en el mostrador del consultorio (gestión de agenda, asignación ágil y visor de reportes con WebView2).
+   - **Cliente Web:** Desarrollado en **Blazor Server** (.NET 8 con Bootstrap 5), accesible desde navegadores web para profesionales médicos y personal remoto, con diseño responsivo y componentes interactivos.
+
+2. **Acceso a Datos Mixto: ADO.NET y Entity Framework Core:**
+   - **ADO.NET (`Microsoft.Data.SqlClient`):** Se utilizó de forma pura en `Data/EspecialidadRepository.cs`, gestionando explícitamente `SqlConnection`, `SqlCommand`, `SqlDataReader` y consultas parametrizadas seguras para todas las operaciones del catálogo de Especialidades y en consultas específicas de `Data/PacienteRepository.cs`.
+   - **Entity Framework Core 8:** Empleado como ORM principal para el resto del modelo de datos (`TPIContext`), soportando mapeo Code-First, migraciones estructuradas y herencia Table-Per-Type (TPT) en `Personas`/`Pacientes`/`Profesionales`.
+
+3. **Validaciones en UI y en el Modelo de Dominio / Lógica de Negocios:**
+   - **Validaciones en UI (Capa de Presentación):**
+     - En **Windows Forms:** Uso de `ErrorProvider`, validación de campos obligatorios en formularios modales (`TurnoModalForm`, `ProfesionalModalForm`, `FacturaModalForm`), validación de formatos de fecha, documento y montos numéricos, y manejo unificado de excepciones visuales mediante `UiErrorHandler`.
+     - En **Blazor Server:** Formularios tipados `EditForm` con `DataAnnotationsValidator`, validación de formatos de email, requeridos y resumen visual de errores (`ValidationSummary`).
+   - **Validaciones en el Modelo de Dominio / Lógica de Negocio (Capa de Dominio y Servicios):**
+     - **Invariantes en Entidades de Dominio:** En `Turno`, validación estricta de la máquina de estados asistencial (solo se puede asignar si el turno está `Libre` y su fecha no ha pasado; solo se pueden asentar registros clínicos si está `Atendido`; no se puede liberar un turno con factura activa); en `Factura`, verificación de que cantidades y precios unitarios sean estrictamente mayores a cero; en `Usuario`, validación de formato de email y longitud mínima de credenciales; en `Persona`, obligatoriedad de datos filiatorios.
+     - **Servicios de Aplicación:** En `Application.Services`, control de solapamiento de horarios en la agenda médica de los profesionales, unicidad de documento de identidad y matrícula médica durante el alta.
 
 ---
 
 ## c. Capturas de pantalla
 
-### i. Interfaces de escritorio (Windows Forms)
-
-_(Completar con capturas de Login, Agenda de Turnos, Datos Maestros, Pacientes y Facturación)_
-
-### ii. Interfaces web (Blazor Server)
-
-_(Completar con capturas de Autenticación, Vista de Pacientes y Agenda Médica Web)_
-
-### iii. Reportes
-
-_(Completar con capturas de reportes de facturación, métricas de atención y PDF generado)_
+Capturas de pantalla en la carpeta /Docs/images o [Link del Drive](https://drive.google.com/drive/folders/1dPHkfuEo9Vs_vEPU8kJpsTe0QOuyq4If?usp=drive_link)
 
 ---
 
@@ -119,40 +153,6 @@ erDiagram
         decimal_18_2 Precio "NOT NULL, DEFAULT 0.0"
     }
 
-    Permisos {
-        int Id PK "IDENTITY(1,1)"
-        nvarchar_50 Nombre "NOT NULL, UNIQUE (Nombre, Categoria)"
-        nvarchar_30 Categoria "NOT NULL"
-        nvarchar_200 Descripcion "NOT NULL"
-        bit Activo "NOT NULL"
-    }
-
-    GruposPermisos {
-        int Id PK "IDENTITY(1,1)"
-        nvarchar_50 Nombre "NOT NULL, UNIQUE"
-        nvarchar_200 Descripcion "NOT NULL"
-        bit Activo "NOT NULL"
-        datetime2 FechaCreacion "NOT NULL"
-    }
-
-    GrupoPermisoPermiso {
-        int GruposId PK,FK "FK -> GruposPermisos.Id (Cascade)"
-        int PermisosId PK,FK "FK -> Permisos.Id (Cascade)"
-    }
-
-    Turnos {
-        int Id PK "IDENTITY(1,1)"
-        datetime2 FechaHoraInicio "NOT NULL"
-        datetime2 FechaHoraFin "NOT NULL"
-        nvarchar_30 EstadoTurno "NOT NULL"
-        nvarchar_200 Motivo "NULL"
-        nvarchar_200 Observacion "NULL"
-        datetime2 FechaHoraLlegada "NULL"
-        int ProfesionalId FK "NOT NULL -> Profesionales.Id (Restrict)"
-        int PacienteId FK "NULL -> Pacientes.Id (Restrict)"
-        int FacturaId FK "NULL -> Facturas.Id (Restrict)"
-    }
-
     HistoriasClinicas {
         int Id PK "IDENTITY(1,1)"
         int PacienteId FK "NOT NULL, UNIQUE -> Pacientes.Id (Cascade)"
@@ -168,6 +168,40 @@ erDiagram
         int HistoriaClinicaId FK "NOT NULL -> HistoriasClinicas.Id (Cascade)"
         int ProfesionalId FK "NOT NULL -> Profesionales.Id (Restrict)"
         int TurnoId FK "NULL -> Turnos.Id (Restrict)"
+    }
+
+    Permisos {
+        int Id PK "IDENTITY(1,1)"
+        nvarchar_50 Nombre "NOT NULL, UNIQUE (Nombre, Categoria)"
+        nvarchar_30 Categoria "NOT NULL"
+        nvarchar_200 Descripcion "NOT NULL"
+        bit Activo "NOT NULL"
+    }
+
+    Turnos {
+        int Id PK "IDENTITY(1,1)"
+        datetime2 FechaHoraInicio "NOT NULL"
+        datetime2 FechaHoraFin "NOT NULL"
+        nvarchar_30 EstadoTurno "NOT NULL"
+        nvarchar_200 Motivo "NULL"
+        nvarchar_200 Observacion "NULL"
+        datetime2 FechaHoraLlegada "NULL"
+        int ProfesionalId FK "NOT NULL -> Profesionales.Id (Restrict)"
+        int PacienteId FK "NULL -> Pacientes.Id (Restrict)"
+        int FacturaId FK "NULL -> Facturas.Id (Restrict)"
+    }
+
+    GruposPermisos {
+        int Id PK "IDENTITY(1,1)"
+        nvarchar_50 Nombre "NOT NULL, UNIQUE"
+        nvarchar_200 Descripcion "NOT NULL"
+        bit Activo "NOT NULL"
+        datetime2 FechaCreacion "NOT NULL"
+    }
+
+    GrupoPermisoPermiso {
+        int GruposId PK,FK "FK -> GruposPermisos.Id (Cascade)"
+        int PermisosId PK,FK "FK -> Permisos.Id (Cascade)"
     }
 
     Facturas {
@@ -188,25 +222,27 @@ erDiagram
     }
 ```
 
-### Diccionario de Tablas y Restricciones Físicas
+### Diccionario de Tablas
 
-| Tabla                     | Clave Primaria (PK)      | Claves Foráneas (FK)                                                                                                    | Regla de Borrado                                 | Particularidades EF Core                                                                                                              |
-| ------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ | ------------------------------------------------------------------------------------------------------------------------------------- |
-| **`Personas`**            | `Id` (Identity)          | -                                                                                                                       | -                                                | Tabla base para herencia polimórfica TPT.                                                                                             |
-| **`Pacientes`**           | `Id`                     | `Id` $\to$ `Personas.Id`                                                                                                | `CASCADE`                                        | Subtipo TPT. Comparte el mismo ID que su fila en `Personas`.                                                                          |
-| **`Profesionales`**       | `Id`                     | `Id` $\to$ `Personas.Id`, `EspecialidadId` $\to$ `Especialidades.Id`                                                    | `CASCADE` (Persona), `RESTRICT` (Especialidad)   | Subtipo TPT. No permite borrar una especialidad si hay profesionales vinculados.                                                      |
-| **`Usuarios`**            | `Id` (Identity)          | `PersonaId` $\to$ `Personas.Id`, `GrupoPermisoId` $\to$ `GruposPermisos.Id`                                             | `RESTRICT` (Persona), `SET NULL` (Grupo)         | `Username` y `Email` con índice UNIQUE. `PersonaId` con índice único filtrado (`[PersonaId] IS NOT NULL`).                            |
-| **`Especialidades`**      | `Id` (Identity)          | -                                                                                                                       | -                                                | `Precio` tipo `decimal(18,2)` con valor por defecto `0.00`.                                                                           |
-| **`Permisos`**            | `Id` (Identity)          | -                                                                                                                       | -                                                | Restricción de unicidad compuesta sobre `(Nombre, Categoria)`.                                                                        |
-| **`GruposPermisos`**      | `Id` (Identity)          | -                                                                                                                       | -                                                | `Nombre` con índice UNIQUE.                                                                                                           |
-| **`GrupoPermisoPermiso`** | `(GruposId, PermisosId)` | `GruposId` $\to$ `GruposPermisos.Id`, `PermisosId` $\to$ `Permisos.Id`                                                  | `CASCADE` / `CASCADE`                            | Tabla de unión N:M generada automáticamente por EF Core.                                                                              |
-| **`Turnos`**              | `Id` (Identity)          | `ProfesionalId` $\to$ `Profesionales.Id`, `PacienteId` $\to$ `Pacientes.Id`, `FacturaId` $\to$ `Facturas.Id`            | `RESTRICT` en todas las FKs                      | `PacienteId` y `FacturaId` son nulables para turnos libres o no facturados. Columna `Observacion` mapea la propiedad `Observaciones`. |
-| **`HistoriasClinicas`**   | `Id` (Identity)          | `PacienteId` $\to$ `Pacientes.Id`                                                                                       | `CASCADE`                                        | Relación 1:1 con índice único sobre `PacienteId`.                                                                                     |
-| **`RegistrosClinicos`**   | `Id` (Identity)          | `HistoriaClinicaId` $\to$ `HistoriasClinicas.Id`, `ProfesionalId` $\to$ `Profesionales.Id`, `TurnoId` $\to$ `Turnos.Id` | `CASCADE` (HC), `RESTRICT` (Profesional y Turno) | Historial clínico cronológico vinculado al profesional autor.                                                                         |
-| **`Facturas`**            | `Id` (Identity)          | `TurnoId` $\to$ `Turnos.Id`                                                                                             | `RESTRICT`                                       | Comprobante cabecera de atención.                                                                                                     |
-| **`DetallesFactura`**     | `Id` (Identity)          | `FacturaId` $\to$ `Facturas.Id`                                                                                         | `CASCADE`                                        | Renglones del comprobante. `Subtotal` es propiedad calculada en memoria (`[NotMapped]`).                                              |
+| Tabla                     | Clave Primaria (PK)      | Claves Foráneas (FK)                                                                                                    | Regla de Borrado                                 |
+| ------------------------- | ------------------------ | ----------------------------------------------------------------------------------------------------------------------- | ------------------------------------------------ |
+| **`Personas`**            | `Id` (Identity)          | -                                                                                                                       | -                                                |
+| **`Pacientes`**           | `Id`                     | `Id` $\to$ `Personas.Id`                                                                                                | `CASCADE`                                        |
+| **`Profesionales`**       | `Id`                     | `Id` $\to$ `Personas.Id`, `EspecialidadId` $\to$ `Especialidades.Id`                                                    | `CASCADE` (Persona), `RESTRICT` (Especialidad)   |
+| **`Usuarios`**            | `Id` (Identity)          | `PersonaId` $\to$ `Personas.Id`, `GrupoPermisoId` $\to$ `GruposPermisos.Id`                                             | `RESTRICT` (Persona), `SET NULL` (Grupo)         |
+| **`Especialidades`**      | `Id` (Identity)          | -                                                                                                                       | -                                                |
+| **`Permisos`**            | `Id` (Identity)          | -                                                                                                                       | -                                                |
+| **`GruposPermisos`**      | `Id` (Identity)          | -                                                                                                                       | -                                                |
+| **`GrupoPermisoPermiso`** | `(GruposId, PermisosId)` | `GruposId` $\to$ `GruposPermisos.Id`, `PermisosId` $\to$ `Permisos.Id`                                                  | `CASCADE` / `CASCADE`                            |
+| **`Turnos`**              | `Id` (Identity)          | `ProfesionalId` $\to$ `Profesionales.Id`, `PacienteId` $\to$ `Pacientes.Id`, `FacturaId` $\to$ `Facturas.Id`            | `RESTRICT` en todas las FKs                      |
+| **`HistoriasClinicas`**   | `Id` (Identity)          | `PacienteId` $\to$ `Pacientes.Id`                                                                                       | `CASCADE`                                        |
+| **`RegistrosClinicos`**   | `Id` (Identity)          | `HistoriaClinicaId` $\to$ `HistoriasClinicas.Id`, `ProfesionalId` $\to$ `Profesionales.Id`, `TurnoId` $\to$ `Turnos.Id` | `CASCADE` (HC), `RESTRICT` (Profesional y Turno) |
+| **`Facturas`**            | `Id` (Identity)          | `TurnoId` $\to$ `Turnos.Id`                                                                                             | `RESTRICT`                                       |
+| **`DetallesFactura`**     | `Id` (Identity)          | `FacturaId` $\to$ `Facturas.Id`                                                                                         | `CASCADE`                                        |
 
-## e. Modelo de clases
+---
+
+## e. Modelo de Dominio
 
 ```mermaid
 classDiagram
@@ -304,8 +340,6 @@ direction LR
 ---
 
 ## f. Arquitectura implementada
-
-La solución aplica una arquitectura multicapa desacoplada y orientada al dominio:
 
 1. **`Domain.Model` (Capa de Dominio):** Entidades de negocio independientes de infraestructura y frameworks de persistencia.
 2. **`Data` (Capa de Acceso a Datos):** Configuración de persistencia mediante EF Core 8 (`TPIContext`), mapeo Fluent API, repositorios tipados e interfaces de persistencia (`IPacienteRepository`, `ITurnoRepository`, etc.).
