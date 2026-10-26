@@ -42,7 +42,7 @@ namespace WindowsForms
             // menuStrip1
             // 
             menuStrip1.ImageScalingSize = new Size(20, 20);
-            menuStrip1.Items.AddRange(new ToolStripItem[] { agendaDeTurnosToolStripMenuItem, pacientesToolStripMenuItem, facturacionToolStripMenuItem, datosMaestrosToolStripMenuItem, reportesToolStripMenuItem, cerrarSesionToolStripMenuItem });
+            menuStrip1.Items.AddRange(new ToolStripItem[] { agendaDeTurnosToolStripMenuItem, pacientesToolStripMenuItem, facturacionToolStripMenuItem, reportesToolStripMenuItem, datosMaestrosToolStripMenuItem, cerrarSesionToolStripMenuItem });
             menuStrip1.Location = new Point(0, 0);
             menuStrip1.Name = "menuStrip1";
             menuStrip1.Size = new Size(904, 24);
@@ -125,8 +125,8 @@ namespace WindowsForms
         private ToolStripMenuItem agendaDeTurnosToolStripMenuItem;
         private ToolStripMenuItem pacientesToolStripMenuItem;
         private ToolStripMenuItem facturacionToolStripMenuItem;
-        private ToolStripMenuItem datosMaestrosToolStripMenuItem;
         private ToolStripMenuItem reportesToolStripMenuItem;
+        private ToolStripMenuItem datosMaestrosToolStripMenuItem;
         private ToolStripMenuItem cerrarSesionToolStripMenuItem;
         private Panel ContentPanel;
     }

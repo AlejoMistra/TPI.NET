@@ -41,17 +41,17 @@ namespace WindowsForms
             bool canViewAgenda = await authService.HasPermissionAsync("turnos.leer");
             bool canViewPacientes = await authService.HasPermissionAsync("pacientes.leer");
             bool canViewFacturacion = await authService.HasPermissionAsync("facturas.leer");
+            bool canViewReporteTurnos = await authService.HasPermissionAsync("reportes.turnos.leer");
             bool canViewDatosMaestros = await authService.HasPermissionAsync("datosmaestros.leer");
             bool isAdmin = await authService.IsInRoleAsync("Administrativo");
-            bool canViewReporteTurnos = await authService.HasPermissionAsync("reportes.turnos.leer");
             bool canViewReporteFacturacion = await authService.HasPermissionAsync("reportes.facturacion.leer");
             bool canViewReportes = isAdmin && (canViewReporteTurnos || canViewReporteFacturacion);
 
             agendaDeTurnosToolStripMenuItem.Visible = canViewAgenda;
             pacientesToolStripMenuItem.Visible = canViewPacientes;
             facturacionToolStripMenuItem.Visible = canViewFacturacion;
-            datosMaestrosToolStripMenuItem.Visible = canViewDatosMaestros;
             reportesToolStripMenuItem.Visible = canViewReportes;
+            datosMaestrosToolStripMenuItem.Visible = canViewDatosMaestros;
 
             // Cargar por defecto la primera opción disponible
             if (canViewAgenda)
@@ -109,8 +109,8 @@ namespace WindowsForms
         {
             agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.Control;
             pacientesToolStripMenuItem.BackColor = SystemColors.Control;
-            datosMaestrosToolStripMenuItem.BackColor = SystemColors.Control;
             reportesToolStripMenuItem.BackColor = SystemColors.Control;
+            datosMaestrosToolStripMenuItem.BackColor = SystemColors.Control;
             facturacionToolStripMenuItem.BackColor = SystemColors.ControlLight;
             ShowControl(new Facturacion());
 
@@ -131,8 +131,8 @@ namespace WindowsForms
             agendaDeTurnosToolStripMenuItem.BackColor = SystemColors.Control;
             pacientesToolStripMenuItem.BackColor = SystemColors.Control;
             facturacionToolStripMenuItem.BackColor = SystemColors.Control;
-            datosMaestrosToolStripMenuItem.BackColor = SystemColors.Control;
             reportesToolStripMenuItem.BackColor = SystemColors.ControlLight;
+            datosMaestrosToolStripMenuItem.BackColor = SystemColors.Control;
             ShowControl(new ReportesUC());
         }
     }
