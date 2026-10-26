@@ -7,10 +7,8 @@ namespace WindowsForms
 {
     public partial class Pacientes : UserControl
     {
-        private List<PacienteGridRow> _allPacientes = new();
         private List<ProfesionalDTO> _profesionales = new();
         private List<EspecialidadDTO> _especialidades = new();
-        private List<TurnoDTO> _turnos = new();
         private bool _isUpdatingBusquedaCombos = false;
         private int _selectedPacienteRowIndex = -1;
 
@@ -120,22 +118,6 @@ namespace WindowsForms
                 AutoSizeMode = DataGridViewAutoSizeColumnMode.Fill
             });
 
-            pacientesDataGridView.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "ultimoTurnoColumn",
-                HeaderText = "Última Atención",
-                DataPropertyName = nameof(PacienteGridRow.UltimoTurnoTexto),
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells
-            });
-
-            pacientesDataGridView.Columns.Add(new DataGridViewTextBoxColumn
-            {
-                Name = "proximoTurnoColumn",
-                HeaderText = "Próximo Turno",
-                DataPropertyName = nameof(PacienteGridRow.ProximoTurnoTexto),
-                AutoSizeMode = DataGridViewAutoSizeColumnMode.AllCells
-            });
-
             pacientesDataGridView.Columns.Add(new DataGridViewButtonColumn
             {
                 Name = "editarColumn",
@@ -178,7 +160,7 @@ namespace WindowsForms
                 await ConfigurePermissionsAsync();
                 await CargarEspecialidadesAsync();
                 await CargarProfesionalesAsync();
-                await CargarDatosPacientesYTurnosAsync();
+                await CargarDatosInicialesAsync();
 
                 LimpiarSeleccionPacientes();
                 if (this.IsHandleCreated)
@@ -257,65 +239,35 @@ namespace WindowsForms
             _isUpdatingBusquedaCombos = false;
         }
 
-        private async Task CargarDatosPacientesYTurnosAsync()
+        private async Task CargarDatosInicialesAsync()
         {
-            var pacientesTask = PacienteApiClient.GetAllAsync();
-            var turnosTask = TurnoApiClient.GetAllAsync();
-
-            await Task.WhenAll(pacientesTask, turnosTask);
-
-            var pacientes = (await pacientesTask).OrderBy(p => p.Apellido).ThenBy(p => p.Nombre).ToList();
-            _turnos = (await turnosTask).Where(t => t.PacienteId.HasValue).ToList();
+            var pacientes = (await PacienteApiClient.GetAllAsync())
+                .OrderBy(p => p.Apellido)
+                .ThenBy(p => p.Nombre)
+                .ToList();
 
             PoblarComboObrasSociales(pacientes);
+            MostrarPacientesEnGrilla(pacientes);
+        }
 
-            var profPorId = _profesionales.ToDictionary(pr => pr.Id, pr => pr);
-
-            _allPacientes = pacientes.Select(p =>
+        private void MostrarPacientesEnGrilla(IEnumerable<PacienteDTO> pacientes)
+        {
+            var rows = pacientes.Select(p => new PacienteGridRow
             {
-                var turnosDelPaciente = _turnos.Where(t => t.PacienteId == p.Id).ToList();
-
-                var profesionalIds = turnosDelPaciente.Select(t => t.ProfesionalId).Distinct().ToHashSet();
-                var especialidadIds = profesionalIds
-                    .Where(id => profPorId.ContainsKey(id))
-                    .Select(id => profPorId[id].EspecialidadId)
-                    .Distinct()
-                    .ToHashSet();
-
-                var ultimoAtendido = turnosDelPaciente
-                    .Where(t => string.Equals(t.EstadoTurno, "Atendido", StringComparison.OrdinalIgnoreCase))
-                    .OrderByDescending(t => t.FechaHoraInicio)
-                    .FirstOrDefault();
-
-                var proximoAsignado = turnosDelPaciente
-                    .Where(t =>
-                        string.Equals(t.EstadoTurno, "Asignado", StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(t.EstadoTurno, "Presente", StringComparison.OrdinalIgnoreCase))
-                    .OrderBy(t => t.FechaHoraInicio >= DateTime.Today ? 0 : 1)
-                    .ThenBy(t => t.FechaHoraInicio)
-                    .FirstOrDefault();
-
-                return new PacienteGridRow
-                {
-                    Id = p.Id,
-                    Apellido = p.Apellido,
-                    Nombre = p.Nombre,
-                    TipoDocumento = string.IsNullOrWhiteSpace(p.TipoDocumento) ? "DNI" : p.TipoDocumento,
-                    NroDocumento = p.NroDocumento,
-                    FechaNacimiento = p.FechaNacimiento,
-                    FechaNacimientoTexto = HistoriaClinicaModalForm.FormatearFechaNacimientoYEdad(p.FechaNacimiento),
-                    ObraSocialTexto = string.IsNullOrWhiteSpace(p.ObraSocial) ? "Particular" : p.ObraSocial.Trim(),
-                    TelefonoTexto = string.IsNullOrWhiteSpace(p.Telefono) ? "—" : p.Telefono.Trim(),
-                    EmailTexto = string.IsNullOrWhiteSpace(p.Email) ? "—" : p.Email.Trim(),
-                    UltimoTurnoTexto = ultimoAtendido != null ? $"{ultimoAtendido.FechaHoraInicio:dd/MM/yyyy}" : "—",
-                    ProximoTurnoTexto = proximoAsignado != null ? $"{proximoAsignado.FechaHoraInicio:dd/MM/yyyy HH:mm} ({proximoAsignado.EstadoTurno})" : "—",
-                    TieneProximoTurno = proximoAsignado != null,
-                    ProfesionalIdsAtencion = profesionalIds,
-                    EspecialidadIdsAtencion = especialidadIds
-                };
+                Id = p.Id,
+                Apellido = p.Apellido,
+                Nombre = p.Nombre,
+                TipoDocumento = string.IsNullOrWhiteSpace(p.TipoDocumento) ? "DNI" : p.TipoDocumento,
+                NroDocumento = p.NroDocumento,
+                FechaNacimiento = p.FechaNacimiento,
+                FechaNacimientoTexto = HistoriaClinicaModalForm.FormatearFechaNacimientoYEdad(p.FechaNacimiento),
+                ObraSocialTexto = string.IsNullOrWhiteSpace(p.ObraSocial) ? "Particular" : p.ObraSocial.Trim(),
+                TelefonoTexto = string.IsNullOrWhiteSpace(p.Telefono) ? "—" : p.Telefono.Trim(),
+                EmailTexto = string.IsNullOrWhiteSpace(p.Email) ? "—" : p.Email.Trim()
             }).ToList();
 
-            AplicarFiltros();
+            pacientesDataGridView.DataSource = rows;
+            LimpiarSeleccionPacientes();
         }
 
         private void PoblarComboObrasSociales(List<PacienteDTO> pacientes)
@@ -393,43 +345,44 @@ namespace WindowsForms
             return 0;
         }
 
-        private void AplicarFiltros()
+        private async Task EjecutarBusquedaAsync()
         {
             if (_isUpdatingBusquedaCombos) return;
 
-            string textoBusqueda = busquedaPacienteTextBox.Text.Trim().ToLowerInvariant();
-            string obraSocialFiltro = busquedaObraSocialComboBox.SelectedItem?.ToString() ?? "Todas";
-            int especialidadId = ObtenerComboSelectedId(busquedaEspecialidadComboBox);
-            int profesionalId = ObtenerComboSelectedId(busquedaProfesionalComboBox);
-
-            var filtrados = _allPacientes.AsEnumerable();
-
-            if (!string.IsNullOrWhiteSpace(textoBusqueda))
+            await UiErrorHandler.ExecuteAsync(async () =>
             {
-                filtrados = filtrados.Where(p =>
-                    p.Nombre.ToLowerInvariant().Contains(textoBusqueda) ||
-                    p.Apellido.ToLowerInvariant().Contains(textoBusqueda) ||
-                    p.NroDocumento.ToLowerInvariant().Contains(textoBusqueda) ||
-                    $"{p.Apellido}, {p.Nombre}".ToLowerInvariant().Contains(textoBusqueda) ||
-                    $"{p.Nombre} {p.Apellido}".ToLowerInvariant().Contains(textoBusqueda));
-            }
+                string textoBusqueda = busquedaPacienteTextBox.Text.Trim();
+                string obraSocialFiltro = busquedaObraSocialComboBox.SelectedItem?.ToString() ?? "Todas";
+                int especialidadId = ObtenerComboSelectedId(busquedaEspecialidadComboBox);
+                int profesionalId = ObtenerComboSelectedId(busquedaProfesionalComboBox);
 
-            if (!string.Equals(obraSocialFiltro, "Todas", StringComparison.OrdinalIgnoreCase))
-            {
-                filtrados = filtrados.Where(p => string.Equals(p.ObraSocialTexto, obraSocialFiltro, StringComparison.OrdinalIgnoreCase));
-            }
+                var criteria = new PacienteCriteriaDTO
+                {
+                    Texto = textoBusqueda,
+                    ObraSocial = string.Equals(obraSocialFiltro, "Todas", StringComparison.OrdinalIgnoreCase)
+                        ? null
+                        : obraSocialFiltro,
+                    EspecialidadId = especialidadId > 0 ? especialidadId : null,
+                    ProfesionalId = profesionalId > 0 ? profesionalId : null
+                };
 
-            if (profesionalId > 0)
-            {
-                filtrados = filtrados.Where(p => p.ProfesionalIdsAtencion.Contains(profesionalId));
-            }
-            else if (especialidadId > 0)
-            {
-                filtrados = filtrados.Where(p => p.EspecialidadIdsAtencion.Contains(especialidadId));
-            }
+                var pacientes = await PacienteApiClient.GetByCriteriaAsync(criteria);
+                MostrarPacientesEnGrilla(pacientes);
+            }, this, "Error al buscar pacientes");
+        }
 
-            pacientesDataGridView.DataSource = filtrados.ToList();
-            LimpiarSeleccionPacientes();
+        private async void BuscarButton_Click(object? sender, EventArgs e)
+        {
+            await EjecutarBusquedaAsync();
+        }
+
+        private async void BusquedaPacienteTextBox_KeyDown(object? sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.Enter)
+            {
+                e.SuppressKeyPress = true;
+                await EjecutarBusquedaAsync();
+            }
         }
 
         private void LimpiarSeleccionPacientes()
@@ -439,12 +392,7 @@ namespace WindowsForms
             _selectedPacienteRowIndex = -1;
         }
 
-        private void FiltrarDataGridView(object? sender, EventArgs e)
-        {
-            AplicarFiltros();
-        }
-
-        private void LimpiarFiltrosLinkLabel_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
+        private async void LimpiarFiltrosLinkLabel_LinkClicked(object? sender, LinkLabelLinkClickedEventArgs e)
         {
             _isUpdatingBusquedaCombos = true;
             if (busquedaObraSocialComboBox.Items.Count > 0) busquedaObraSocialComboBox.SelectedIndex = 0;
@@ -454,7 +402,7 @@ namespace WindowsForms
             _isUpdatingBusquedaCombos = false;
 
             busquedaPacienteTextBox.Text = string.Empty;
-            AplicarFiltros();
+            await EjecutarBusquedaAsync();
         }
 
         // ==========================================
@@ -595,7 +543,7 @@ namespace WindowsForms
             {
                 await UiErrorHandler.ExecuteAsync(async () =>
                 {
-                    await CargarDatosPacientesYTurnosAsync();
+                    await EjecutarBusquedaAsync();
                 }, this, "Error al actualizar los datos en la grilla de pacientes");
             }
         }
@@ -637,11 +585,6 @@ namespace WindowsForms
             public string ObraSocialTexto { get; set; } = string.Empty;
             public string TelefonoTexto { get; set; } = string.Empty;
             public string EmailTexto { get; set; } = string.Empty;
-            public string UltimoTurnoTexto { get; set; } = string.Empty;
-            public string ProximoTurnoTexto { get; set; } = string.Empty;
-            public bool TieneProximoTurno { get; set; }
-            public HashSet<int> ProfesionalIdsAtencion { get; set; } = new();
-            public HashSet<int> EspecialidadIdsAtencion { get; set; } = new();
         }
     }
 }
