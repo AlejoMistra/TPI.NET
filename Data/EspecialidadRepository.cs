@@ -114,4 +114,23 @@ public class EspecialidadRepository : IEspecialidadRepository
             return false;
         }
     }
+
+    public async Task<bool> ExistsByNameAsync(string nombre, int? excludeId = null)
+    {
+        var query = excludeId.HasValue
+            ? "SELECT COUNT(1) FROM Especialidades WHERE LOWER(Nombre) = LOWER(@Nombre) AND Id != @ExcludeId"
+            : "SELECT COUNT(1) FROM Especialidades WHERE LOWER(Nombre) = LOWER(@Nombre)";
+
+        using var connection = new SqlConnection(_connectionString);
+        using var command = new SqlCommand(query, connection);
+        command.Parameters.Add("@Nombre", SqlDbType.NVarChar, 100).Value = nombre.Trim();
+        if (excludeId.HasValue)
+        {
+            command.Parameters.Add("@ExcludeId", SqlDbType.Int).Value = excludeId.Value;
+        }
+
+        await connection.OpenAsync();
+        var count = (int)(await command.ExecuteScalarAsync() ?? 0);
+        return count > 0;
+    }
 }
