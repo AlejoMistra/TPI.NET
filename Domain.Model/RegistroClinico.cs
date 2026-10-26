@@ -14,11 +14,11 @@ namespace Domain.Model
         // Para EF Core (materialización sin constructor público)
         private RegistroClinico() { Descripcion = string.Empty; }
 
-        public RegistroClinico(TipoRegistroClinico tipo, string descripcion, Profesional profesional, HistoriaClinica historiaClinica, Turno? turnoOrigen = null)
+        public RegistroClinico(TipoRegistroClinico tipo, string descripcion, Profesional profesional, HistoriaClinica historiaClinica, Turno? turnoOrigen = null, DateTime? fecha = null)
         {
             Tipo = tipo;
             Descripcion = descripcion;
-            Fecha = DateTime.UtcNow;
+            Fecha = fecha ?? DateTime.UtcNow;
 
             ProfesionalId = profesional.Id;
             HistoriaClinicaId = historiaClinica.Id;

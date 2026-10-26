@@ -28,9 +28,9 @@ namespace Domain.Model
         /// Agrega un registro clínico a la historia. El turno origen es opcional;
         /// cuando se provee, permite trazabilidad del evento clínico que originó el registro.
         public RegistroClinico AgregarRegistro(TipoRegistroClinico tipo, string descripcion,
-            Profesional profesional, Turno? turnoOrigen = null)
+            Profesional profesional, Turno? turnoOrigen = null, DateTime? fecha = null)
         {
-            var registro = new RegistroClinico(tipo, descripcion, profesional, this, turnoOrigen);
+            var registro = new RegistroClinico(tipo, descripcion, profesional, this, turnoOrigen, fecha);
             _registrosClinicos.Add(registro);
             return registro;
         }

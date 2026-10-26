@@ -150,14 +150,14 @@ namespace Domain.Model
         /// Registra un RegistroClinico en la historia del paciente a partir de este turno.
         /// Valida que el turno está en estado Atendido, sino InvalidOperationExeption
         public RegistroClinico Registrar(TipoRegistroClinico tipo, string descripcion,
-            Profesional profesional, HistoriaClinica historiaClinica)
+            Profesional profesional, HistoriaClinica historiaClinica, DateTime? fecha = null)
         {
             if (EstadoTurno != EstadosTurno.Atendido)
                 throw new InvalidOperationException(
                     $"Solo se pueden registrar datos clínicos en turnos con estado Atendido. " +
                     $"Estado actual: {EstadoTurno}.");
 
-            return historiaClinica.AgregarRegistro(tipo, descripcion, profesional, this);
+            return historiaClinica.AgregarRegistro(tipo, descripcion, profesional, this, fecha ?? FechaHoraInicio);
         }
 
         /// <summary>
