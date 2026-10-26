@@ -201,6 +201,12 @@ namespace API.Clients
             await ExecuteRequestAsync(client => client.DeleteAsync(endpoint));
         }
 
+        protected static async Task<byte[]> SendDownloadAsync(string endpoint)
+        {
+            var response = await ExecuteRequestAsync(client => client.GetAsync(endpoint));
+            return await response.Content.ReadAsByteArrayAsync();
+        }
+
         // ==========================================
         // PROCESAMIENTO CENTRALIZADO DE ERRORES HTTP
         // ==========================================

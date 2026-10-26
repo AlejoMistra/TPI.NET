@@ -24,14 +24,15 @@ namespace Application.Services
                 throw new ArgumentException("El nombre de la especialidad no puede estar vacío.");
             }
             
-            var especialidad = new Especialidad(0, especialidadDto.Nombre);
+            var especialidad = new Especialidad(0, especialidadDto.Nombre, especialidadDto.Precio);
 
             await _especialidadRepository.AddAsync(especialidad);
             
             return new EspecialidadDTO
             {
                 Id = especialidad.Id,
-                Nombre = especialidad.Nombre
+                Nombre = especialidad.Nombre,
+                Precio = especialidad.Precio
             };
         }
 
@@ -41,7 +42,8 @@ namespace Application.Services
             return especialidades.Select(e => new EspecialidadDTO
             {
                 Id = e.Id,
-                Nombre = e.Nombre
+                Nombre = e.Nombre,
+                Precio = e.Precio
             }).ToList();
         }
 
@@ -62,7 +64,8 @@ namespace Application.Services
             return new EspecialidadDTO
             {
                 Id = especialidad.Id,
-                Nombre = especialidad.Nombre
+                Nombre = especialidad.Nombre,
+                Precio = especialidad.Precio
             };
         }
 
@@ -78,7 +81,7 @@ namespace Application.Services
                 throw new ArgumentException("El nombre de la especialidad no puede estar vacío.", nameof(especialidadDto));
             }
 
-            var especialidad = new Especialidad(especialidadDto.Id, especialidadDto.Nombre);
+            var especialidad = new Especialidad(especialidadDto.Id, especialidadDto.Nombre, especialidadDto.Precio);
             var updatedEspecialidad = await _especialidadRepository.UpdateAsync(especialidad);
             
             if (updatedEspecialidad == null)
@@ -89,7 +92,8 @@ namespace Application.Services
             return new EspecialidadDTO
             {
                 Id = updatedEspecialidad.Id,
-                Nombre = updatedEspecialidad.Nombre
+                Nombre = updatedEspecialidad.Nombre,
+                Precio = updatedEspecialidad.Precio
             };
         }
 

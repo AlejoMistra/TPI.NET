@@ -207,6 +207,10 @@ namespace Data
                 entity.Property(e => e.Nombre)
                     .IsRequired()
                     .HasMaxLength(100);
+                entity.Property(e => e.Precio)
+                    .HasColumnType("decimal(18,2)")
+                    .HasDefaultValue(0m)
+                    .IsRequired();
             });
 
             modelBuilder.Entity<Turno>(entity =>

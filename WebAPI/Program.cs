@@ -10,6 +10,7 @@ using WebAPI;
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
+QuestPDF.Settings.License = QuestPDF.Infrastructure.LicenseType.Community;
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
 builder.Services.AddEndpointsApiExplorer();
@@ -70,6 +71,10 @@ builder.Services.AddScoped<IFacturaService, FacturaService>();
 builder.Services.AddScoped<IUsuarioRepository, UsuarioRepository>();
 builder.Services.AddScoped<UsuarioService>();
 builder.Services.AddScoped<AuthService>();
+builder.Services.AddScoped<IReporteRepository, ReporteRepository>();
+builder.Services.AddScoped<IReporteDatosService, ReporteDatosService>();
+builder.Services.AddScoped<IReportePdfService, ReportePdfService>();
+builder.Services.AddScoped<IReporteService, ReporteService>();
 
 // Autenticacion JWT: los valores salen de la misma seccion que usa AuthService,
 // asi el token que se emite y el que se valida no pueden desincronizarse.
@@ -139,6 +144,10 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("UsuariosActualizar", policy => policy.RequireClaim("permission", "usuarios.actualizar"));
     options.AddPolicy("UsuariosEliminar", policy => policy.RequireClaim("permission", "usuarios.eliminar"));
 
+    // Políticas para Reportes
+    options.AddPolicy("ReportesTurnosLeer", policy => policy.RequireClaim("permission", "reportes.turnos.leer"));
+    options.AddPolicy("ReportesFacturacionLeer", policy => policy.RequireClaim("permission", "reportes.facturacion.leer"));
+
     // Fallback: Requerir autenticación para endpoints no especificados
     options.FallbackPolicy = options.DefaultPolicy;
 });
@@ -195,5 +204,6 @@ app.MapTurnoEndpoints();
 app.MapHistoriaClinicaEndpoints();
 app.MapPacienteEndpoints();
 app.MapFacturaEndpoints();
+app.MapReporteEndpoints();
 
 await app.RunAsync();
