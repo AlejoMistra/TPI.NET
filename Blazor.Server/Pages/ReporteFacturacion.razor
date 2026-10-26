@@ -1,0 +1,192 @@
+@page "/reportes/facturacion"
+@using DTOs
+@using API.Clients
+@inject IJSRuntime JSRuntime
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>Reporte de Facturación</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h3>Reporte de Facturación</h3>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @errorMessage
+                    <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                </div>
+            }
+
+            @if (canRead)
+            {
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-md-2">
+                        <label class="form-label">Desde</label>
+                        <input type="date" class="form-control" @bind="desde" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Hasta</label>
+                        <input type="date" class="form-control" @bind="hasta" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Profesional</label>
+                        <select class="form-select" @bind="profesionalId">
+                            <option value="0">Todos</option>
+                            @if (profesionales != null)
+                            {
+                                @foreach (var profesional in profesionales)
+                                {
+                                    <option value="@profesional.Id">@profesional.Apellido, @profesional.Nombre</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Estado</label>
+                        <select class="form-select" @bind="estado">
+                            <option value="@EstadoFacturacion.Todos">Todos</option>
+                            <option value="@EstadoFacturacion.Facturado">Facturado</option>
+                            <option value="@EstadoFacturacion.Pendiente">Pendiente</option>
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <button class="btn btn-primary me-1" @onclick="Generar" disabled="@generando">Generar</button>
+                        <button class="btn btn-outline-secondary" @onclick="Descargar" disabled="@generando">Descargar PDF</button>
+                    </div>
+                </div>
+
+                @if (generando)
+                {
+                    <div class="d-flex justify-content-center mb-2">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Generando...</span>
+                        </div>
+                    </div>
+                }
+
+                <iframe id="visorReporteFacturacion" class="w-100 border" style="height: 75vh;" title="Reporte de Facturación"></iframe>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<ProfesionalDTO>? profesionales;
+    private DateOnly desde = new DateOnly(DateTime.Today.Year, 1, 1);
+    private DateOnly hasta = new DateOnly(DateTime.Today.Year, 12, 31);
+    private int profesionalId;
+    private EstadoFacturacion estado = EstadoFacturacion.Todos;
+    private bool generando = false;
+    private string errorMessage = string.Empty;
+
+    // Permisos de autorización
+    private bool canRead = false;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Verificar autenticación antes de cargar datos
+            var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            if (!isAuthenticated)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            canRead = await AuthService.HasPermissionAsync("reportes.facturacion.leer");
+
+            if (canRead)
+            {
+                await LoadFiltros();
+                StateHasChanged();
+                await Generar();
+            }
+            else
+            {
+                errorMessage = "No tiene permisos para ver el reporte de facturación.";
+            }
+
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task LoadFiltros()
+    {
+        try
+        {
+            profesionales = (await ProfesionalApiClient.GetAllAsync())?.ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los filtros: {ex.Message}";
+        }
+    }
+
+    private ReporteFacturacionFiltro Filtro() => new ReporteFacturacionFiltro(
+        desde,
+        hasta,
+        profesionalId > 0 ? profesionalId : null,
+        estado);
+
+    private bool ValidarFechas()
+    {
+        if (desde > hasta)
+        {
+            errorMessage = "La fecha Desde no puede ser posterior a la fecha Hasta.";
+            return false;
+        }
+        return true;
+    }
+
+    private async Task Generar()
+    {
+        if (!ValidarFechas())
+            return;
+
+        try
+        {
+            generando = true;
+            errorMessage = string.Empty;
+            StateHasChanged();
+
+            var pdf = await ReporteApiClient.GetFacturacionPdfAsync(Filtro());
+            await JSRuntime.InvokeVoidAsync("reportes.mostrarPdf", "visorReporteFacturacion", pdf);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al generar el reporte: {ex.Message}";
+        }
+        finally
+        {
+            generando = false;
+        }
+    }
+
+    private async Task Descargar()
+    {
+        if (!ValidarFechas())
+            return;
+
+        try
+        {
+            generando = true;
+            errorMessage = string.Empty;
+
+            var pdf = await ReporteApiClient.GetFacturacionPdfAsync(Filtro());
+            await JSRuntime.InvokeVoidAsync("reportes.descargarPdf", $"facturacion_{desde:yyyy-MM-dd}_{hasta:yyyy-MM-dd}.pdf", pdf);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al descargar el reporte: {ex.Message}";
+        }
+        finally
+        {
+            generando = false;
+        }
+    }
+}

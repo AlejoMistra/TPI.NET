@@ -1,0 +1,209 @@
+@page "/reportes/turnos"
+@using DTOs
+@using API.Clients
+@inject IJSRuntime JSRuntime
+@inject IAuthService AuthService
+@inject NavigationManager Navigation
+
+<PageTitle>Tablero de Turnos</PageTitle>
+
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <h3>Tablero de Turnos</h3>
+
+            @if (!string.IsNullOrEmpty(errorMessage))
+            {
+                <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                    @errorMessage
+                    <button type="button" class="btn-close" @onclick="() => errorMessage = string.Empty"></button>
+                </div>
+            }
+
+            @if (canRead)
+            {
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-md-2">
+                        <label class="form-label">Desde</label>
+                        <input type="date" class="form-control" @bind="desde" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Hasta</label>
+                        <input type="date" class="form-control" @bind="hasta" />
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Especialidad</label>
+                        <select class="form-select" @bind="especialidadId" @bind:after="() => profesionalId = 0" disabled="@profesionalLogueadoId.HasValue">
+                            <option value="0">Todas</option>
+                            @if (especialidades != null)
+                            {
+                                @foreach (var especialidad in especialidades)
+                                {
+                                    <option value="@especialidad.Id">@especialidad.Nombre</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Profesional</label>
+                        <select class="form-select" @bind="profesionalId" disabled="@profesionalLogueadoId.HasValue">
+                            <option value="0">Todos</option>
+                            @foreach (var profesional in ProfesionalesFiltrados)
+                            {
+                                <option value="@profesional.Id">@profesional.Apellido, @profesional.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary me-1" @onclick="Generar" disabled="@generando">Generar</button>
+                        <button class="btn btn-outline-secondary" @onclick="Descargar" disabled="@generando">Descargar PDF</button>
+                    </div>
+                </div>
+
+                @if (generando)
+                {
+                    <div class="d-flex justify-content-center mb-2">
+                        <div class="spinner-border" role="status">
+                            <span class="visually-hidden">Generando...</span>
+                        </div>
+                    </div>
+                }
+
+                <iframe id="visorReporteTurnos" class="w-100 border" style="height: 75vh;" title="Tablero de Turnos"></iframe>
+            }
+        </div>
+    </div>
+</div>
+
+@code {
+    private List<EspecialidadDTO>? especialidades;
+    private List<ProfesionalDTO>? profesionales;
+    private DateOnly desde = new DateOnly(DateTime.Today.Year, 1, 1);
+    private DateOnly hasta = new DateOnly(DateTime.Today.Year, 12, 31);
+    private int especialidadId;
+    private int profesionalId;
+    private int? profesionalLogueadoId;
+    private bool generando = false;
+    private string errorMessage = string.Empty;
+
+    // Permisos de autorización
+    private bool canRead = false;
+
+    // El combo de profesionales se acota a la especialidad elegida
+    private IEnumerable<ProfesionalDTO> ProfesionalesFiltrados =>
+        (profesionales ?? new()).Where(p => especialidadId == 0 || p.EspecialidadId == especialidadId);
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            // Verificar autenticación antes de cargar datos
+            var isAuthenticated = await AuthService.IsAuthenticatedAsync();
+            if (!isAuthenticated)
+            {
+                Navigation.NavigateTo("/login");
+                return;
+            }
+
+            canRead = await AuthService.HasPermissionAsync("reportes.turnos.leer");
+
+            if (canRead)
+            {
+                await LoadFiltros();
+                StateHasChanged();
+                await Generar();
+            }
+            else
+            {
+                errorMessage = "No tiene permisos para ver el tablero de turnos.";
+            }
+
+            StateHasChanged();
+        }
+        await base.OnAfterRenderAsync(firstRender);
+    }
+
+    private async Task LoadFiltros()
+    {
+        try
+        {
+            especialidades = (await EspecialidadApiClient.GetAllAsync())?.ToList();
+            profesionales = (await ProfesionalApiClient.GetAllAsync())?.ToList();
+
+            // Un Profesional solo ve su propio tablero (la API también lo restringe)
+            profesionalLogueadoId = await AuthService.GetPersonaIdAsync();
+            if (profesionalLogueadoId.HasValue)
+            {
+                profesionalId = profesionalLogueadoId.Value;
+                especialidadId = profesionales?.FirstOrDefault(p => p.Id == profesionalId)?.EspecialidadId ?? 0;
+            }
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los filtros: {ex.Message}";
+        }
+    }
+
+    private ReporteTurnosFiltro Filtro() => new ReporteTurnosFiltro(
+        desde,
+        hasta,
+        profesionalId > 0 ? profesionalId : null,
+        especialidadId > 0 ? especialidadId : null);
+
+    private bool ValidarFechas()
+    {
+        if (desde > hasta)
+        {
+            errorMessage = "La fecha Desde no puede ser posterior a la fecha Hasta.";
+            return false;
+        }
+        return true;
+    }
+
+    private async Task Generar()
+    {
+        if (!ValidarFechas())
+            return;
+
+        try
+        {
+            generando = true;
+            errorMessage = string.Empty;
+            StateHasChanged();
+
+            var pdf = await ReporteApiClient.GetTurnosPdfAsync(Filtro());
+            await JSRuntime.InvokeVoidAsync("reportes.mostrarPdf", "visorReporteTurnos", pdf);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al generar el reporte: {ex.Message}";
+        }
+        finally
+        {
+            generando = false;
+        }
+    }
+
+    private async Task Descargar()
+    {
+        if (!ValidarFechas())
+            return;
+
+        try
+        {
+            generando = true;
+            errorMessage = string.Empty;
+
+            var pdf = await ReporteApiClient.GetTurnosPdfAsync(Filtro());
+            await JSRuntime.InvokeVoidAsync("reportes.descargarPdf", $"turnos_{desde:yyyy-MM-dd}_{hasta:yyyy-MM-dd}.pdf", pdf);
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al descargar el reporte: {ex.Message}";
+        }
+        finally
+        {
+            generando = false;
+        }
+    }
+}

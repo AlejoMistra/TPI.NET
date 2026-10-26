@@ -74,6 +74,22 @@
                 </NavLink>
             </div>
         }
+        @if (canReadReporteTurnos)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="reportes/turnos">
+                    <span class="oi oi-people" aria-hidden="true"></span> Tablero de Turnos
+                </NavLink>
+            </div>
+        }
+        @if (canReadReporteFacturacion)
+        {
+            <div class="nav-item px-3">
+                <NavLink class="nav-link" href="reportes/facturacion">
+                    <span class="oi oi-people" aria-hidden="true"></span> Reporte de Facturación
+                </NavLink>
+            </div>
+        }
     </nav>
 </div>
 
@@ -86,6 +102,8 @@
     private bool canReadProfesionales = false;
     private bool canReadEspecialidades = false;
     private bool canReadUsuarios = false;
+    private bool canReadReporteTurnos = false;
+    private bool canReadReporteFacturacion = false;
 
     private string? NavMenuCssClass => collapseNavMenu ? "collapse" : null;
 
@@ -109,6 +127,8 @@
             canReadProfesionales = await AuthService.HasPermissionAsync("datosmaestros.leer");
             canReadEspecialidades = await AuthService.HasPermissionAsync("datosmaestros.leer");
             canReadUsuarios = await AuthService.HasPermissionAsync("usuarios.leer");
+            canReadReporteTurnos = await AuthService.HasPermissionAsync("reportes.turnos.leer");
+            canReadReporteFacturacion = await AuthService.HasPermissionAsync("reportes.facturacion.leer");
         }
         else
         {
@@ -119,6 +139,8 @@
             canReadProfesionales = false;
             canReadEspecialidades = false;
             canReadUsuarios = false;
+            canReadReporteTurnos = false;
+            canReadReporteFacturacion = false;
         }
         StateHasChanged(); // Forzar re-render
     }
