@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using Data;
 using DTOs;
 using Domain.Model;
@@ -21,21 +17,23 @@ namespace Application.Services
 
         public async Task<ProfesionalDTO> AddAsync(ProfesionalDTO profesionalDto)
         {
-            if (string.IsNullOrWhiteSpace(profesionalDto.Nombre))
-                throw new ArgumentException("El nombre es requerido", nameof(profesionalDto.Nombre));
-
-            if (string.IsNullOrWhiteSpace(profesionalDto.Apellido))
-                throw new ArgumentException("El apellido es requerido", nameof(profesionalDto.Apellido));
-
-            if (string.IsNullOrWhiteSpace(profesionalDto.Matricula))
-                throw new ArgumentException("La matrícula es requerida", nameof(profesionalDto.Matricula));
+            ArgumentNullException.ThrowIfNull(profesionalDto);
 
             if (profesionalDto.EspecialidadId <= 0)
-                throw new ArgumentException("Debe seleccionar una especialidad válida", nameof(profesionalDto.EspecialidadId));
+                throw new ArgumentException("Debe seleccionar una especialidad válida con un ID mayor a cero.", nameof(profesionalDto.EspecialidadId));
 
             var especialidadExists = await _especialidadRepository.GetByIdAsync(profesionalDto.EspecialidadId);
             if (especialidadExists == null)
-                throw new ArgumentException($"La especialidad con ID {profesionalDto.EspecialidadId} no existe", nameof(profesionalDto.EspecialidadId));
+                throw new ArgumentException($"La especialidad con ID {profesionalDto.EspecialidadId} no existe.", nameof(profesionalDto.EspecialidadId));
+
+            if (!string.IsNullOrWhiteSpace(profesionalDto.Matricula) && await _profesionalRepository.MatriculaExistsAsync(profesionalDto.Matricula))
+                throw new ArgumentException("Ya existe un profesional registrado con la matrícula ingresada.", nameof(profesionalDto.Matricula));
+
+            if (!string.IsNullOrWhiteSpace(profesionalDto.NroDocumento) && await _profesionalRepository.DocumentoExistsAsync(profesionalDto.NroDocumento))
+                throw new ArgumentException("Ya existe un profesional registrado con el número de documento ingresado.", nameof(profesionalDto.NroDocumento));
+
+            if (!string.IsNullOrWhiteSpace(profesionalDto.Email) && await _profesionalRepository.EmailExistsAsync(profesionalDto.Email))
+                throw new ArgumentException("Ya existe un profesional registrado con el correo electrónico ingresado.", nameof(profesionalDto.Email));
 
             var estado = ParseEstado(profesionalDto.Estado);
 
@@ -65,7 +63,7 @@ namespace Application.Services
         public async Task<ProfesionalDTO?> GetByIdAsync(int id)
         {
             if (id <= 0)
-                throw new ArgumentException("El ID debe ser mayor a 0", nameof(id));
+                throw new ArgumentException("El ID debe ser mayor a 0.", nameof(id));
 
             var profesional = await _profesionalRepository.GetByIdAsync(id);
 
@@ -77,28 +75,29 @@ namespace Application.Services
 
         public async Task<ProfesionalDTO?> UpdateAsync(ProfesionalDTO profesionalDto)
         {
+            ArgumentNullException.ThrowIfNull(profesionalDto);
+
             if (profesionalDto.Id <= 0)
-                throw new ArgumentException("El ID debe ser mayor a 0", nameof(profesionalDto.Id));
-
-            if (string.IsNullOrWhiteSpace(profesionalDto.Nombre))
-                throw new ArgumentException("El nombre es requerido", nameof(profesionalDto.Nombre));
-
-            if (string.IsNullOrWhiteSpace(profesionalDto.Apellido))
-                throw new ArgumentException("El apellido es requerido", nameof(profesionalDto.Apellido));
-
-            if (string.IsNullOrWhiteSpace(profesionalDto.Matricula))
-                throw new ArgumentException("La matrícula es requerida", nameof(profesionalDto.Matricula));
+                throw new ArgumentException("El ID debe ser mayor a 0.", nameof(profesionalDto.Id));
 
             if (profesionalDto.EspecialidadId <= 0)
-                throw new ArgumentException("Debe seleccionar una especialidad válida", nameof(profesionalDto.EspecialidadId));
+                throw new ArgumentException("Debe seleccionar una especialidad válida con un ID mayor a cero.", nameof(profesionalDto.EspecialidadId));
 
             var especialidadExists = await _especialidadRepository.GetByIdAsync(profesionalDto.EspecialidadId);
             if (especialidadExists == null)
-                throw new ArgumentException($"La especialidad con ID {profesionalDto.EspecialidadId} no existe", nameof(profesionalDto.EspecialidadId));
+                throw new ArgumentException($"La especialidad con ID {profesionalDto.EspecialidadId} no existe.", nameof(profesionalDto.EspecialidadId));
+
+            if (!string.IsNullOrWhiteSpace(profesionalDto.Matricula) && await _profesionalRepository.MatriculaExistsAsync(profesionalDto.Matricula, profesionalDto.Id))
+                throw new ArgumentException("Ya existe otro profesional registrado con la matrícula ingresada.", nameof(profesionalDto.Matricula));
+
+            if (!string.IsNullOrWhiteSpace(profesionalDto.NroDocumento) && await _profesionalRepository.DocumentoExistsAsync(profesionalDto.NroDocumento, profesionalDto.Id))
+                throw new ArgumentException("Ya existe otro profesional registrado con el número de documento ingresado.", nameof(profesionalDto.NroDocumento));
+
+            if (!string.IsNullOrWhiteSpace(profesionalDto.Email) && await _profesionalRepository.EmailExistsAsync(profesionalDto.Email, profesionalDto.Id))
+                throw new ArgumentException("Ya existe otro profesional registrado con el correo electrónico ingresado.", nameof(profesionalDto.Email));
 
             var estado = ParseEstado(profesionalDto.Estado);
 
-            // Construir un objeto portador con el Id correcto para que el repositorio lo encuentre
             var profesional = new Profesional(
                 profesionalDto.Nombre,
                 profesionalDto.Apellido,
@@ -110,7 +109,7 @@ namespace Application.Services
                 profesionalDto.Email,
                 estado
             );
-            profesional.SetId(profesionalDto.Id); // FIX: asignar Id antes de llamar al repositorio
+            profesional.SetId(profesionalDto.Id);
 
             var updatedProfesional = await _profesionalRepository.UpdateAsync(profesional);
 
@@ -123,7 +122,13 @@ namespace Application.Services
         public async Task<bool> DeleteAsync(int id)
         {
             if (id <= 0)
-                throw new ArgumentException("El ID debe ser mayor a 0", nameof(id));
+                throw new ArgumentException("El ID debe ser mayor a 0.", nameof(id));
+
+            if (await _profesionalRepository.HasTurnosAsync(id))
+                throw new InvalidOperationException("No se puede eliminar el profesional porque tiene turnos asociados.");
+
+            if (await _profesionalRepository.HasRegistrosClinicosAsync(id))
+                throw new InvalidOperationException("No se puede eliminar el profesional porque tiene registros clínicos asociados.");
 
             return await _profesionalRepository.DeleteAsync(id);
         }
@@ -147,7 +152,7 @@ namespace Application.Services
             if (Enum.TryParse<Profesional.EstadoProfesional>(estado, ignoreCase: true, out var result))
                 return result;
 
-            return Profesional.EstadoProfesional.Activo; // Default seguro
+            return Profesional.EstadoProfesional.Activo;
         }
     }
 }

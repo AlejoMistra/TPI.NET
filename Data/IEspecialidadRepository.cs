@@ -1,4 +1,4 @@
-﻿using Domain.Model;
+using Domain.Model;
 
 namespace Data
 {
@@ -9,5 +9,6 @@ namespace Data
         Task AddAsync(Especialidad especialidad);
         Task<Especialidad?> UpdateAsync(Especialidad especialidad);
         Task<bool> DeleteAsync(int id);
+        Task<bool> ExistsByNameAsync(string nombre, int? excludeId = null);
     }
 }
