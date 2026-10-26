@@ -191,6 +191,7 @@
     private string obraSocialTexto = string.Empty;
     private string profesionalTexto = string.Empty;
     private string especialidadNombre = string.Empty;
+    private decimal especialidadPrecio;
 
     public enum FormMode
     {
@@ -205,7 +206,7 @@
         ClearValidationErrors();
         await LoadDatosTurno();
         currentFactura = new FacturaDTO { TurnoId = turno.Id, MetodoPago = "Efectivo" };
-        currentFactura.Detalles.Add(new DetalleFacturaDTO { Concepto = $"Consulta Médica - {especialidadNombre}", Cantidad = 1, PrecioUnitario = 0.00m });
+        currentFactura.Detalles.Add(new DetalleFacturaDTO { Concepto = $"Consulta Médica - {especialidadNombre}", Cantidad = 1, PrecioUnitario = decimal.Round(especialidadPrecio, 2) });
         nuevoDetalle = new DetalleFacturaDTO { Cantidad = 1 };
         showModal = true;
         StateHasChanged();
@@ -410,9 +411,12 @@
         {
             var paciente = currentTurno.PacienteId.HasValue ? await PacienteApiClient.GetAsync(currentTurno.PacienteId.Value) : null;
             var profesional = await ProfesionalApiClient.GetAsync(currentTurno.ProfesionalId);
-            var especialidad = await EspecialidadApiClient.GetAsync(profesional.EspecialidadId);
+            var especialidades = await EspecialidadApiClient.GetAllAsync();
+            var especialidad = especialidades.FirstOrDefault(e => e.Id == profesional.EspecialidadId);
 
-            especialidadNombre = especialidad?.Nombre ?? string.Empty;
+            // Arancel de la especialidad para precargar la consulta (como en Escritorio)
+            especialidadNombre = especialidad?.Nombre ?? "Consulta General";
+            especialidadPrecio = especialidad?.Precio ?? 0.00m;
             turnoTexto = $"#{currentTurno.Id} - {currentTurno.FechaHoraInicio:dd/MM/yyyy} ({currentTurno.FechaHoraInicio:HH:mm} - {currentTurno.FechaHoraFin:HH:mm}) - {currentTurno.EstadoTurno}";
             pacienteTexto = paciente != null ? $"{paciente.Apellido}, {paciente.Nombre} (DNI: {paciente.NroDocumento})" : "— Sin Paciente —";
             obraSocialTexto = paciente != null && !string.IsNullOrWhiteSpace(paciente.ObraSocial) ? paciente.ObraSocial : "Particular / Sin Obra Social";
