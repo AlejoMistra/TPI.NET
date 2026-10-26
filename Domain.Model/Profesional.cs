@@ -8,7 +8,7 @@ namespace Domain.Model
             Inactivo
         }
 
-        public string Matricula { get; private set; } = string.Empty;
+        public string Matricula { get; private set; }
 
         public int EspecialidadId { get; private set; }
 
@@ -16,8 +16,8 @@ namespace Domain.Model
 
         public EstadoProfesional Estado { get; private set; }
 
-        // Constructor para EF Core
-        private Profesional() : base()
+        // Constructor para EF
+        private Profesional() : base(string.Empty, string.Empty, string.Empty, string.Empty)
         {
             Matricula = string.Empty;
             Estado = EstadoProfesional.Activo;
@@ -35,28 +35,18 @@ namespace Domain.Model
             EstadoProfesional estado = EstadoProfesional.Activo)
             : base(nombre, apellido, tipoDocumento, nroDocumento, telefono, email)
         {
-            SetMatricula(matricula);
-            SetEspecialidadId(especialidadId);
-            SetEstado(estado);
+            Matricula = matricula;
+            EspecialidadId = especialidadId;
+            Estado = estado;
         }
 
         public void SetMatricula(string matricula)
         {
-            if (string.IsNullOrWhiteSpace(matricula))
-                throw new ArgumentException("La matrícula del profesional es obligatoria.", nameof(matricula));
-
-            var trimmed = matricula.Trim();
-            if (trimmed.Length > 50)
-                throw new ArgumentException("La matrícula no puede superar los 50 caracteres.", nameof(matricula));
-
-            Matricula = trimmed;
+            Matricula = matricula;
         }
 
         public void SetEspecialidadId(int especialidadId)
         {
-            if (especialidadId <= 0)
-                throw new ArgumentException("Debe seleccionar una especialidad válida con un ID mayor a cero.", nameof(especialidadId));
-
             EspecialidadId = especialidadId;
 
             // Solo invalidar si hay inconsistencia
@@ -68,7 +58,8 @@ namespace Domain.Model
 
         public void SetEspecialidad(Especialidad especialidad)
         {
-            ArgumentNullException.ThrowIfNull(especialidad);
+            if (especialidad == null)
+                throw new ArgumentNullException(nameof(especialidad));
 
             Especialidad = especialidad;
             EspecialidadId = especialidad.Id; // Asegurar consistencia
@@ -76,9 +67,6 @@ namespace Domain.Model
 
         public void SetEstado(EstadoProfesional estado)
         {
-            if (!Enum.IsDefined(typeof(EstadoProfesional), estado))
-                throw new ArgumentException("El estado del profesional no es válido.", nameof(estado));
-
             Estado = estado;
         }
     }

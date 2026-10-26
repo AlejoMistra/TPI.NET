@@ -1,4 +1,4 @@
-using Domain.Model;
+ using Domain.Model;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data
@@ -44,8 +44,6 @@ namespace Data
 
             existing.SetNombre(profesional.Nombre);
             existing.SetApellido(profesional.Apellido);
-            existing.SetTipoDocumento(profesional.TipoDocumento);
-            existing.SetNroDocumento(profesional.NroDocumento);
             existing.SetMatricula(profesional.Matricula);
             existing.SetEspecialidadId(profesional.EspecialidadId);
             existing.SetTelefono(profesional.Telefono);
@@ -72,44 +70,10 @@ namespace Data
             await _context.SaveChangesAsync();
             return true;
         }
-
         public async Task<bool> ExistsWithEspecialidadAsync(int especialidadId)
         {
             return await _context.Profesionales
                 .AnyAsync(p => p.EspecialidadId == especialidadId);
-        }
-
-        public async Task<bool> MatriculaExistsAsync(string matricula, int? excludeId = null)
-        {
-            var mat = matricula.Trim();
-            return await _context.Profesionales
-                .AnyAsync(p => p.Matricula == mat && (excludeId == null || p.Id != excludeId));
-        }
-
-        public async Task<bool> DocumentoExistsAsync(string nroDocumento, int? excludeId = null)
-        {
-            var doc = nroDocumento.Trim();
-            return await _context.Profesionales
-                .AnyAsync(p => p.NroDocumento == doc && (excludeId == null || p.Id != excludeId));
-        }
-
-        public async Task<bool> EmailExistsAsync(string email, int? excludeId = null)
-        {
-            var em = email.Trim();
-            return await _context.Profesionales
-                .AnyAsync(p => p.Email == em && (excludeId == null || p.Id != excludeId));
-        }
-
-        public async Task<bool> HasTurnosAsync(int profesionalId)
-        {
-            return await _context.Turnos
-                .AnyAsync(t => t.ProfesionalId == profesionalId);
-        }
-
-        public async Task<bool> HasRegistrosClinicosAsync(int profesionalId)
-        {
-            return await _context.RegistrosClinicos
-                .AnyAsync(r => r.ProfesionalId == profesionalId);
         }
     }
 }

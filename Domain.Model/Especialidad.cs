@@ -1,12 +1,18 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.Threading.Tasks;
+
 namespace Domain.Model
 {
     public class Especialidad
     {
         public int Id { get; private set; }
-        public string Nombre { get; private set; } = string.Empty;
+        public string Nombre { get; private set; }
         public decimal Precio { get; private set; }
 
-        // Constructor privado para EF Core
+        // Constructor privado para EF
         private Especialidad()
         {
             Nombre = string.Empty;
@@ -15,29 +21,19 @@ namespace Domain.Model
 
         public Especialidad(int id, string nombre, decimal precio = 0m)
         {
-            SetId(id);
-            SetNombre(nombre);
-            SetPrecio(precio);
+            Id = id;
+            Nombre = nombre;
+            Precio = precio;
         }
 
         public void SetId(int id)
         {
-            if (id < 0)
-                throw new ArgumentException("El Id no puede ser menor que 0.", nameof(id));
-
             Id = id;
         }
 
         public void SetNombre(string nombre)
         {
-            if (string.IsNullOrWhiteSpace(nombre))
-                throw new ArgumentException("El nombre de la especialidad es obligatorio.", nameof(nombre));
-
-            var trimmed = nombre.Trim();
-            if (trimmed.Length > 100)
-                throw new ArgumentException("El nombre de la especialidad no puede superar los 100 caracteres.", nameof(nombre));
-
-            Nombre = trimmed;
+            Nombre = nombre;
         }
 
         public void SetPrecio(decimal precio)
