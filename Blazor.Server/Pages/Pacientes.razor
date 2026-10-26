@@ -38,6 +38,56 @@
                 </div>
             }
 
+            @if (canRead)
+            {
+                <div class="row g-2 align-items-end mb-3">
+                    <div class="col-md-3">
+                        <label class="form-label">Buscar</label>
+                        <input type="text" class="form-control" placeholder="Nombre, apellido o DNI"
+                               @bind="textoBusqueda" @bind:event="oninput" @onkeydown="OnTextoKeyDown" />
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Obra Social</label>
+                        @* @key: si cambian las opciones, el select se recrea y muestra el valor elegido *@
+                        <select class="form-select" @bind="obraSocialFiltro" @key="string.Join('|', obrasSociales)">
+                            <option value="Todas">Todas</option>
+                            <option value="Particular">Particular</option>
+                            @foreach (var obraSocial in obrasSociales)
+                            {
+                                <option value="@obraSocial">@obraSocial</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label class="form-label">Especialidad</label>
+                        <select class="form-select" @bind="especialidadFiltro" @bind:after="OnEspecialidadChanged">
+                            <option value="0">Todas las especialidades</option>
+                            @if (especialidades != null)
+                            {
+                                @foreach (var especialidad in especialidades)
+                                {
+                                    <option value="@especialidad.Id">@especialidad.Nombre</option>
+                                }
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label">Profesional</label>
+                        <select class="form-select" @bind="profesionalFiltro" @bind:after="OnProfesionalChanged" @key="especialidadFiltro">
+                            <option value="0">Todos los profesionales</option>
+                            @foreach (var profesional in ProfesionalesFiltrados)
+                            {
+                                <option value="@profesional.Id">@profesional.Apellido, @profesional.Nombre</option>
+                            }
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-outline-primary me-1" @onclick="Buscar">Buscar</button>
+                        <button class="btn btn-link" @onclick="LimpiarFiltros">Limpiar filtros</button>
+                    </div>
+                </div>
+            }
+
             @if (loading)
             {
                 <div class="d-flex justify-content-center">
@@ -112,7 +162,16 @@
 
 @code {
     private List<PacienteDTO>? pacientes;
+    private List<EspecialidadDTO>? especialidades;
+    private List<ProfesionalDTO>? profesionales;
+    private List<string> obrasSociales = new();
     private bool loading = true;
+
+    // Filtros de búsqueda (los mismos de la pantalla Pacientes de Escritorio)
+    private string textoBusqueda = string.Empty;
+    private string obraSocialFiltro = "Todas";
+    private int especialidadFiltro;
+    private int profesionalFiltro;
     private string errorMessage = string.Empty;
     private string successMessage = string.Empty;
     private PacienteModal pacienteModal = null!;
@@ -142,6 +201,7 @@
             // Solo cargar datos si tiene permiso de lectura
             if (canRead)
             {
+                await LoadFiltros();
                 await LoadPacientes();
             }
             else
@@ -163,12 +223,42 @@
         canReadHistoria = await AuthService.HasPermissionAsync("historiasclinicas.leer");
     }
 
+    private async Task LoadFiltros()
+    {
+        try
+        {
+            especialidades = (await EspecialidadApiClient.GetAllAsync())?.OrderBy(e => e.Nombre).ToList();
+            profesionales = (await ProfesionalApiClient.GetAllAsync())?.OrderBy(p => p.Apellido).ThenBy(p => p.Nombre).ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al cargar los filtros: {ex.Message}";
+        }
+    }
+
     private async Task LoadPacientes()
     {
         try
         {
             loading = true;
-            pacientes = (await PacienteApiClient.GetAllAsync())?.ToList();
+
+            // Las obras sociales del filtro salen de todos los pacientes, como en Escritorio
+            var todos = await PacienteApiClient.GetAllAsync();
+            obrasSociales = todos
+                .Select(p => p.ObraSocial?.Trim() ?? string.Empty)
+                .Where(os => !string.IsNullOrWhiteSpace(os) && !string.Equals(os, "Particular", StringComparison.OrdinalIgnoreCase))
+                .Distinct(StringComparer.OrdinalIgnoreCase)
+                .OrderBy(os => os)
+                .ToList();
+
+            // Si la obra social elegida ya no existe, vuelve a "Todas" (como en Escritorio)
+            if (obraSocialFiltro != "Todas" && obraSocialFiltro != "Particular" &&
+                !obrasSociales.Contains(obraSocialFiltro, StringComparer.OrdinalIgnoreCase))
+            {
+                obraSocialFiltro = "Todas";
+            }
+
+            pacientes = (await PacienteApiClient.GetByCriteriaAsync(Criterio()))?.ToList();
             successMessage = string.Empty; // Clear success message when reloading
         }
         catch (Exception ex)
@@ -179,6 +269,73 @@
         {
             loading = false;
         }
+    }
+
+    // Búsqueda por criterio (ADO.NET en la API)
+    private async Task Buscar()
+    {
+        try
+        {
+            loading = true;
+            errorMessage = string.Empty;
+            pacientes = (await PacienteApiClient.GetByCriteriaAsync(Criterio()))?.ToList();
+        }
+        catch (Exception ex)
+        {
+            errorMessage = $"Error al buscar pacientes: {ex.Message}";
+        }
+        finally
+        {
+            loading = false;
+        }
+    }
+
+    private PacienteCriteriaDTO Criterio() => new PacienteCriteriaDTO
+    {
+        Texto = textoBusqueda.Trim(),
+        ObraSocial = obraSocialFiltro == "Todas" ? null : obraSocialFiltro,
+        EspecialidadId = especialidadFiltro > 0 ? especialidadFiltro : null,
+        ProfesionalId = profesionalFiltro > 0 ? profesionalFiltro : null
+    };
+
+    private IEnumerable<ProfesionalDTO> ProfesionalesFiltrados =>
+        (profesionales ?? new()).Where(p => especialidadFiltro == 0 || p.EspecialidadId == especialidadFiltro);
+
+    // Al cambiar la especialidad se acota el combo de profesionales (se mantiene el elegido si pertenece)
+    private void OnEspecialidadChanged()
+    {
+        var profesional = profesionales?.FirstOrDefault(p => p.Id == profesionalFiltro);
+        if (profesional != null && especialidadFiltro > 0 && profesional.EspecialidadId != especialidadFiltro)
+        {
+            profesionalFiltro = 0;
+        }
+    }
+
+    // Al elegir un profesional, la especialidad pasa a ser la suya
+    private void OnProfesionalChanged()
+    {
+        var profesional = profesionales?.FirstOrDefault(p => p.Id == profesionalFiltro);
+        if (profesional != null)
+        {
+            especialidadFiltro = profesional.EspecialidadId;
+        }
+    }
+
+    private async Task OnTextoKeyDown(KeyboardEventArgs e)
+    {
+        if (e.Key == "Enter")
+        {
+            await Buscar();
+        }
+    }
+
+    private async Task LimpiarFiltros()
+    {
+        textoBusqueda = string.Empty;
+        obraSocialFiltro = "Todas";
+        especialidadFiltro = 0;
+        profesionalFiltro = 0;
+        await Buscar();
     }
 
     private string FormatearFechaNacimientoYEdad(DateTime fechaNacimiento)
