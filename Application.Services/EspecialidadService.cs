@@ -19,15 +19,17 @@ namespace Application.Services
 
         public async Task<EspecialidadDTO> AddAsync(EspecialidadDTO especialidadDto)
         {
-            if (string.IsNullOrWhiteSpace(especialidadDto.Nombre))
-            {
-                throw new ArgumentException("El nombre de la especialidad no puede estar vacío.");
-            }
-            
+            ArgumentNullException.ThrowIfNull(especialidadDto);
+
             var especialidad = new Especialidad(0, especialidadDto.Nombre, especialidadDto.Precio);
 
+            if (await _especialidadRepository.ExistsByNameAsync(especialidad.Nombre))
+            {
+                throw new ArgumentException($"Ya existe una especialidad con el nombre '{especialidad.Nombre}'.", nameof(especialidadDto.Nombre));
+            }
+
             await _especialidadRepository.AddAsync(especialidad);
-            
+
             return new EspecialidadDTO
             {
                 Id = especialidad.Id,
@@ -51,7 +53,7 @@ namespace Application.Services
         {
             if (id <= 0)
             {
-                throw new ArgumentException("El ID debe ser un número positivo.");
+                throw new ArgumentException("El ID debe ser un número positivo.", nameof(id));
             }
 
             var especialidad = await _especialidadRepository.GetByIdAsync(id);
@@ -60,7 +62,7 @@ namespace Application.Services
             {
                 return null;
             }
-            
+
             return new EspecialidadDTO
             {
                 Id = especialidad.Id,
@@ -71,24 +73,27 @@ namespace Application.Services
 
         public async Task<EspecialidadDTO?> UpdateAsync(EspecialidadDTO especialidadDto)
         {
+            ArgumentNullException.ThrowIfNull(especialidadDto);
+
             if (especialidadDto.Id <= 0)
             {
-                throw new ArgumentException("El ID debe ser un número positivo.");
-            }
-            
-            if (string.IsNullOrWhiteSpace(especialidadDto.Nombre))
-            {
-                throw new ArgumentException("El nombre de la especialidad no puede estar vacío.", nameof(especialidadDto));
+                throw new ArgumentException("El ID debe ser un número positivo.", nameof(especialidadDto.Id));
             }
 
             var especialidad = new Especialidad(especialidadDto.Id, especialidadDto.Nombre, especialidadDto.Precio);
+
+            if (await _especialidadRepository.ExistsByNameAsync(especialidad.Nombre, especialidad.Id))
+            {
+                throw new ArgumentException($"Ya existe otra especialidad con el nombre '{especialidad.Nombre}'.", nameof(especialidadDto.Nombre));
+            }
+
             var updatedEspecialidad = await _especialidadRepository.UpdateAsync(especialidad);
-            
+
             if (updatedEspecialidad == null)
             {
                 return null;
             }
-            
+
             return new EspecialidadDTO
             {
                 Id = updatedEspecialidad.Id,
@@ -104,7 +109,7 @@ namespace Application.Services
                 throw new ArgumentException("El ID debe ser un número positivo.", nameof(id));
             }
 
-            // Business rule: cannot delete an especialidad that has associated profesionales.
+            // Regla de negocio: no se puede eliminar una especialidad con profesionales asociados
             bool tieneProfesionales = await _profesionalRepository.ExistsWithEspecialidadAsync(id);
             if (tieneProfesionales)
             {
