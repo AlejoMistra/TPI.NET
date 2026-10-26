@@ -144,9 +144,13 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("UsuariosActualizar", policy => policy.RequireClaim("permission", "usuarios.actualizar"));
     options.AddPolicy("UsuariosEliminar", policy => policy.RequireClaim("permission", "usuarios.eliminar"));
 
-    // Políticas para Reportes
-    options.AddPolicy("ReportesTurnosLeer", policy => policy.RequireClaim("permission", "reportes.turnos.leer"));
-    options.AddPolicy("ReportesFacturacionLeer", policy => policy.RequireClaim("permission", "reportes.facturacion.leer"));
+    // Políticas para Reportes (exclusivas para rol Administrativo)
+    options.AddPolicy("ReportesTurnosLeer", policy =>
+        policy.RequireRole("Administrativo")
+              .RequireClaim("permission", "reportes.turnos.leer"));
+    options.AddPolicy("ReportesFacturacionLeer", policy =>
+        policy.RequireRole("Administrativo")
+              .RequireClaim("permission", "reportes.facturacion.leer"));
 
     // Fallback: Requerir autenticación para endpoints no especificados
     options.FallbackPolicy = options.DefaultPolicy;
